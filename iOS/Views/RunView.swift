@@ -113,7 +113,7 @@ struct RunView: View {
         }
     }
 
-    private var startTitle: String {
+    private var startTitle: LocalizedStringKey {
         switch session.state {
         case .idle: return "Старт"
         case .running: return "Пауза"
