@@ -81,3 +81,9 @@ xcodebuild test -project InnerPace.xcodeproj -scheme SharedLogicTests -destinati
 - `Watch/` приложение для часов: тренировка HealthKit, маршрут, экраны.
 - `Design/` исходник иконки и скрипт её рендера.
 - `Tests/` тесты логики регулятора, фильтра и настроек.
+
+## Лицензия
+
+Код распространяется по лицензии MIT, см. файл `LICENSE`. Исходники:
+https://github.com/Romkhaz/InnerPace. Политика конфиденциальности и страница
+поддержки публикуются из папки `docs/` через GitHub Pages.

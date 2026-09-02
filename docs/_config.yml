@@ -1,0 +1,6 @@
+title: InnerPace
+description: Heart-rate driven running metronome for iPhone and Apple Watch
+theme: jekyll-theme-minimal
+lang: ru
+exclude:
+  - appstore.md
