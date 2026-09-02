@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		035589084B11E2CB469CFFDD /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FAA78E3FC087F45A57C0993 /* HistoryView.swift */; };
+		0683633D54CC2948D956CD3D /* ZoneBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E82056788F69268F67BE66 /* ZoneBar.swift */; };
 		09B5228D5B94F968D373BD9F /* RegulatorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048CE161612AE5CDE43A51F8 /* RegulatorSettings.swift */; };
 		0C60CAD1065A16176486C40D /* HeartRateSmoother.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5165E6F2813F4194DE11FFBA /* HeartRateSmoother.swift */; };
 		0D88BA2A20C7B805D4BE6DDF /* RunSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 209259BDC7466920A286886A /* RunSession.swift */; };
@@ -19,6 +20,7 @@
 		40583B757C36EFCB8B0C8A3F /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D750CCDAB16028AE707EF4FF /* InfoPlist.xcstrings */; };
 		4291E747E184EDC6D085ECE4 /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D07F8FDCBAE34404EBEE09C8 /* Formatting.swift */; };
 		43B7D60B893CC119A59AC4E6 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF700CD0D1E003336FDD846 /* SettingsStore.swift */; };
+		45F2DC2471F6169F507DF511 /* ZoneBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E82056788F69268F67BE66 /* ZoneBar.swift */; };
 		47E14FAEA5BB15CB20706E74 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3A82599C1BBFEE48BD1669 /* SetupView.swift */; };
 		4A88C0BD41BFEE6EC461E58D /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
 		5091DE77F44183518474077E /* RunFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC1341BA00535751DB5A6A4 /* RunFormatting.swift */; };
@@ -43,6 +45,8 @@
 		8E373B39970C724DAA8FEC50 /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D07F8FDCBAE34404EBEE09C8 /* Formatting.swift */; };
 		910C9C05C6CBBCE968AE7DAF /* InnerPaceWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = EE648A299A5D52E2D27AAB1E /* InnerPaceWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		94D7764D9C8CDE68AE603B59 /* InnerPaceWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CE2437603846860437854C /* InnerPaceWatchApp.swift */; };
+		983064E1F2150C5DF0290480 /* ZoneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */; };
+		A3426938B37F76E48EA834AE /* ZoneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */; };
 		A6153A01F68F5C3A3453E673 /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
 		A67EA45B66191E26A11E1F12 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1347CAA91A28880C0E033DC /* ContentView.swift */; };
 		A6FEE7DE81B3563CAA551D65 /* CadenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A0675CC2979F5014427916 /* CadenceController.swift */; };
@@ -101,6 +105,7 @@
 		28EB70B33AB441474D5DA114 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3230AFEF2FEB7A93D6F3CDA4 /* RunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
 		3C3A82599C1BBFEE48BD1669 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneStyle.swift; sourceTree = "<group>"; };
 		4FF82682B8521B4251015BBA /* RegulatorSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegulatorSettingsTests.swift; sourceTree = "<group>"; };
 		5165E6F2813F4194DE11FFBA /* HeartRateSmoother.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateSmoother.swift; sourceTree = "<group>"; };
 		541E89296DFD853707E387B9 /* HeartRegulatorWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeartRegulatorWatch.entitlements; sourceTree = "<group>"; };
@@ -123,6 +128,7 @@
 		AE9757C77EAE89B7E8208864 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B09AD8AA9A479809C95F398A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B35CA200ABE0595C3ECC4602 /* HeartRateSmootherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateSmootherTests.swift; sourceTree = "<group>"; };
+		B3E82056788F69268F67BE66 /* ZoneBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneBar.swift; sourceTree = "<group>"; };
 		B50837DB0BB65557BDBBC4AB /* WatchWorkoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWorkoutManager.swift; sourceTree = "<group>"; };
 		B6CE2437603846860437854C /* InnerPaceWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerPaceWatchApp.swift; sourceTree = "<group>"; };
 		CA361D0D0E55C804D0E39ED1 /* InnerPaceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerPaceApp.swift; sourceTree = "<group>"; };
@@ -158,6 +164,15 @@
 				6B697B2F9D7DA392940B8DFB /* Metronome.swift */,
 			);
 			path = SharedAudio;
+			sourceTree = "<group>";
+		};
+		2FBD69DD5F589F83DA0F48D4 /* SharedUI */ = {
+			isa = PBXGroup;
+			children = (
+				B3E82056788F69268F67BE66 /* ZoneBar.swift */,
+				3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */,
+			);
+			path = SharedUI;
 			sourceTree = "<group>";
 		};
 		49EA547D79BEC81B7831BF0B /* Tests */ = {
@@ -233,6 +248,7 @@
 				C4C1EF57AD2802DCE22BF8E6 /* iOS */,
 				E8D5766C537C45F11FBD390D /* Shared */,
 				2CD67421493EBDA490132FC5 /* SharedAudio */,
+				2FBD69DD5F589F83DA0F48D4 /* SharedUI */,
 				49EA547D79BEC81B7831BF0B /* Tests */,
 				9AA1FD863257EBDA316E4291 /* Watch */,
 				4C9C9C6C7E5E43E0F3EF0592 /* Products */,
@@ -424,6 +440,8 @@
 				DFB306077FF6D30C5A63447B /* RunView.swift in Sources */,
 				757175BD64FF13F9FE3D5F70 /* SettingsStore.swift in Sources */,
 				CE7D75DAF0EE4DB1EF1C56A1 /* SettingsView.swift in Sources */,
+				45F2DC2471F6169F507DF511 /* ZoneBar.swift in Sources */,
+				983064E1F2150C5DF0290480 /* ZoneStyle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -448,6 +466,8 @@
 				7A4A9274A5A0B5E2CBDB6F88 /* WatchRootView.swift in Sources */,
 				80170A137179926E67EE5F69 /* WatchRunModel.swift in Sources */,
 				18D989D72E8F140E4D947CFE /* WatchWorkoutManager.swift in Sources */,
+				0683633D54CC2948D956CD3D /* ZoneBar.swift in Sources */,
+				A3426938B37F76E48EA834AE /* ZoneStyle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

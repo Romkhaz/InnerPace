@@ -630,6 +630,16 @@
         }
       }
     },
+    "дистанция": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "distance"
+          }
+        }
+      }
+    },
     "км": {
       "localizations": {
         "en": {

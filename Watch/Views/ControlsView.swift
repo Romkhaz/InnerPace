@@ -5,35 +5,19 @@ struct ControlsView: View {
     @Environment(WatchRunModel.self) private var model
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 16) {
-                VStack {
-                    Button {
-                        Task { await model.end() }
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.title2)
-                            .frame(width: 56, height: 56)
-                    }
-                    .tint(.red)
-                    Text("Стоп")
-                        .font(.caption2)
+        VStack(spacing: 10) {
+            HStack(spacing: 18) {
+                roundButton(icon: "xmark", title: "Стоп", color: ZoneStyle.stopRed) {
+                    Task { await model.end() }
                 }
-                VStack {
-                    Button {
-                        Task { await model.togglePause() }
-                    } label: {
-                        Image(systemName: model.phase == .paused ? "play.fill" : "pause.fill")
-                            .font(.title2)
-                            .frame(width: 56, height: 56)
-                    }
-                    .tint(.yellow)
-                    Text(model.phase == .paused ? "Дальше" : "Пауза")
-                        .font(.caption2)
+                roundButton(
+                    icon: model.phase == .paused ? "play.fill" : "pause.fill",
+                    title: model.phase == .paused ? "Дальше" : "Пауза",
+                    color: ZoneStyle.startBlue
+                ) {
+                    Task { await model.togglePause() }
                 }
             }
-            .buttonStyle(.borderedProminent)
-
             if let decision = model.lastDecision {
                 Text(decision)
                     .font(.caption2)
@@ -46,6 +30,23 @@ struct ControlsView: View {
                     .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
             }
+        }
+    }
+
+    private func roundButton(icon: String, title: LocalizedStringKey, color: Color,
+                             action: @escaping () -> Void) -> some View {
+        VStack(spacing: 4) {
+            Button(action: action) {
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 58, height: 58)
+                    .background(color, in: Circle())
+            }
+            .buttonStyle(.plain)
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
     }
 }

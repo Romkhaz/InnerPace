@@ -70,6 +70,11 @@ final class Metronome {
     /// а он требует Bluetooth-наушников. Система сама покажет выбор наушников.
     func start() async throws {
         guard !isRunning else { return }
+#if targetEnvironment(simulator)
+        // В симуляторе часов нет Bluetooth-наушников, режим длительного звука недоступен.
+        isRunning = true
+        return
+#else
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playback, mode: .default, policy: .longFormAudio, options: [])
         let activated = try await session.activate(options: [])
@@ -77,6 +82,7 @@ final class Metronome {
         try rebuildGraph()
         try engine.start()
         isRunning = true
+#endif
     }
 #else
     func start() throws {

@@ -86,10 +86,7 @@ struct RunView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .background(
-            LinearGradient(
-                colors: [Color(red: 0.07, green: 0.42, blue: 0.48), Color(red: 0.10, green: 0.33, blue: 0.72)],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            ),
+            ZoneStyle.cadenceGradient,
             in: RoundedRectangle(cornerRadius: 26)
         )
     }
@@ -100,7 +97,7 @@ struct RunView: View {
         VStack(spacing: 6) {
             Image(systemName: "heart.fill")
                 .font(.system(size: 26))
-                .foregroundStyle(zoneAccent(zone))
+                .foregroundStyle(ZoneStyle.accent(zone))
             Text(value)
                 .font(.system(size: 48, weight: .bold, design: .rounded).monospacedDigit())
                 .foregroundStyle(.white)
@@ -113,8 +110,8 @@ struct RunView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(zoneGradient(zone), in: RoundedRectangle(cornerRadius: 24))
-        .animation(.easeInOut(duration: 0.4), value: zoneIndex(zone))
+        .background(ZoneStyle.gradient(zone), in: RoundedRectangle(cornerRadius: 24))
+        .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(zone))
     }
 
     // MARK: - Зона и время
@@ -124,7 +121,7 @@ struct RunView: View {
             ZoneBar(
                 heartRate: session.smoothedHeartRate ?? session.heartRate.map(Double.init),
                 settings: session.settings,
-                accent: zoneAccent(session.zone)
+                accent: ZoneStyle.accent(session.zone)
             )
             Text(formatElapsed(session.elapsed))
                 .font(.system(size: 30, weight: .semibold, design: .rounded).monospacedDigit())
@@ -133,8 +130,8 @@ struct RunView: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 10)
-        .background(zoneGradient(session.zone), in: RoundedRectangle(cornerRadius: 24))
-        .animation(.easeInOut(duration: 0.4), value: zoneIndex(session.zone))
+        .background(ZoneStyle.gradient(session.zone), in: RoundedRectangle(cornerRadius: 24))
+        .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(session.zone))
     }
 
     // MARK: - Кнопки
@@ -144,7 +141,7 @@ struct RunView: View {
             RoundButton(
                 icon: session.state == .running ? "pause.fill" : "play.fill",
                 title: startTitle,
-                color: Color(red: 0.0, green: 0.48, blue: 1.0),
+                color: ZoneStyle.startBlue,
                 enabled: true
             ) {
                 session.toggleStartPause()
@@ -152,7 +149,7 @@ struct RunView: View {
             RoundButton(
                 icon: "stop.fill",
                 title: "Стоп",
-                color: Color(red: 0.93, green: 0.23, blue: 0.27),
+                color: ZoneStyle.stopRed,
                 enabled: session.state != .idle
             ) {
                 session.stop()
@@ -195,41 +192,6 @@ struct RunView: View {
         }
         .buttonStyle(.plain)
     }
-
-    // MARK: - Цвета зон
-
-    private func zoneIndex(_ zone: HeartRateZone) -> Int {
-        switch zone {
-        case .unknown: return 0
-        case .below: return 1
-        case .inside: return 2
-        case .above: return 3
-        }
-    }
-
-    private func zoneAccent(_ zone: HeartRateZone) -> Color {
-        switch zone {
-        case .unknown: return Color.white.opacity(0.6)
-        case .below: return Color(red: 0.35, green: 0.65, blue: 1.0)
-        case .inside: return Color(red: 0.35, green: 0.85, blue: 0.45)
-        case .above: return Color(red: 1.0, green: 0.3, blue: 0.3)
-        }
-    }
-
-    private func zoneGradient(_ zone: HeartRateZone) -> LinearGradient {
-        let colors: [Color]
-        switch zone {
-        case .unknown:
-            colors = [Color(white: 0.18), Color(white: 0.12)]
-        case .below:
-            colors = [Color(red: 0.10, green: 0.28, blue: 0.55), Color(red: 0.06, green: 0.16, blue: 0.36)]
-        case .inside:
-            colors = [Color(red: 0.08, green: 0.42, blue: 0.22), Color(red: 0.04, green: 0.26, blue: 0.16)]
-        case .above:
-            colors = [Color(red: 0.55, green: 0.12, blue: 0.16), Color(red: 0.32, green: 0.07, blue: 0.12)]
-        }
-        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
 }
 
 /// Круглая кнопка с подписью под ней.
@@ -255,57 +217,5 @@ private struct RoundButton: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
-    }
-}
-
-/// Шкала зоны пульса: зона подсвечена, бегун отмечает текущий пульс.
-struct ZoneBar: View {
-    let heartRate: Double?
-    let settings: RegulatorSettings
-    var accent: Color = .green
-
-    private var lower: Double { Double(settings.heartRateMin) - 20 }
-    private var upper: Double { Double(settings.heartRateMax) + 20 }
-
-    var body: some View {
-        VStack(spacing: 6) {
-            GeometryReader { geo in
-                let width = geo.size.width
-                let zoneStart = width * fraction(Double(settings.heartRateMin))
-                let zoneEnd = width * fraction(Double(settings.heartRateMax))
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(Color.white.opacity(0.15))
-                        .frame(height: 10)
-                    Capsule()
-                        .fill(accent.opacity(0.9))
-                        .frame(width: max(0, zoneEnd - zoneStart), height: 10)
-                        .offset(x: zoneStart)
-                    if let heartRate {
-                        Image(systemName: "figure.run")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(.black)
-                            .frame(width: 30, height: 30)
-                            .background(accent, in: Circle())
-                            .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 2))
-                            .offset(x: width * fraction(heartRate) - 15)
-                            .animation(.easeInOut(duration: 0.6), value: heartRate)
-                    }
-                }
-                .frame(height: 30)
-            }
-            .frame(height: 30)
-            HStack {
-                Text("\(settings.heartRateMin)")
-                Spacer()
-                Text("\(settings.heartRateMax)")
-            }
-            .font(.caption.monospacedDigit())
-            .foregroundStyle(.white.opacity(0.75))
-        }
-    }
-
-    private func fraction(_ value: Double) -> Double {
-        min(1, max(0, (value - lower) / (upper - lower)))
     }
 }

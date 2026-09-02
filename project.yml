@@ -27,6 +27,7 @@ targets:
           - "Services/Metronome.swift"
       - path: Shared
       - path: SharedAudio
+      - path: SharedUI
     dependencies:
       - target: InnerPaceWatch
     info:
@@ -60,6 +61,7 @@ targets:
       - path: Watch
       - path: Shared
       - path: SharedAudio
+      - path: SharedUI
     info:
       path: Watch/Info.plist
       properties:
