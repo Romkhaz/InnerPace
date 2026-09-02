@@ -87,3 +87,24 @@ xcodebuild test -project InnerPace.xcodeproj -scheme SharedLogicTests -destinati
 Код распространяется по лицензии MIT, см. файл `LICENSE`. Исходники:
 https://github.com/Romkhaz/InnerPace. Политика конфиденциальности и страница
 поддержки публикуются из папки `docs/` через GitHub Pages.
+
+## Версии и откат
+
+Каждое состояние, к которому может понадобиться вернуться, помечено тегом
+и выпуском на GitHub: https://github.com/Romkhaz/InnerPace/releases.
+К выпуску приложен собранный бандл для iPhone вместе с приложением для часов,
+подписанный сертификатом разработчика.
+
+Откатить исходники к выпуску:
+
+```bash
+git checkout v1.0.0-rc1
+```
+
+Вернуться на актуальную ветку:
+
+```bash
+git checkout main
+```
+
+Собрать откаченное состояние: `xcodegen generate`, затем открыть проект в Xcode.
