@@ -96,6 +96,7 @@ struct RunView: View {
                 session.toggleStartPause()
             } label: {
                 Label(startTitle, systemImage: startIcon)
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -108,6 +109,7 @@ struct RunView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
+            .tint(.red)
             .controlSize(.large)
             .disabled(session.state == .idle)
         }
