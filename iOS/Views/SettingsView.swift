@@ -3,25 +3,33 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(RunSession.self) private var session
     @State private var previewing = false
+    @State private var interval: Int = 5
+    @State private var smoothing: Int = 10
 
     var body: some View {
         @Bindable var store = session.settingsStore
+        let settings = store.settings
         Form {
             Section("Каденс, шагов в минуту") {
-                Stepper("Нижняя граница: \(store.settings.cadenceMin)", value: $store.settings.cadenceMin, in: 120...220)
-                Stepper("Верхняя граница: \(store.settings.cadenceMax)", value: $store.settings.cadenceMax, in: 120...220)
+                AdjustRow(title: "Нижняя граница", value: $store.settings.cadenceMin,
+                          range: 100...(settings.cadenceMax - 1))
+                AdjustRow(title: "Верхняя граница", value: $store.settings.cadenceMax,
+                          range: (settings.cadenceMin + 1)...240)
             }
             Section("Зона пульса") {
-                Stepper("Нижняя граница: \(store.settings.heartRateMin)", value: $store.settings.heartRateMin, in: 60...210)
-                Stepper("Целевой пульс: \(store.settings.heartRateMax)", value: $store.settings.heartRateMax, in: 60...210)
-                Stepper("Полоса удержания: \(store.settings.holdBand)", value: $store.settings.holdBand, in: 0...15)
+                AdjustRow(title: "Нижняя граница", value: $store.settings.heartRateMin,
+                          range: 40...(settings.heartRateMax - 1))
+                AdjustRow(title: "Целевой пульс", value: $store.settings.heartRateMax,
+                          range: (settings.heartRateMin + 1)...220)
+                AdjustRow(title: "Полоса удержания", value: $store.settings.holdBand,
+                          range: 0...15)
                 Text("Регулятор ведёт пульс к целевому значению. В полосе удержания под целью каденс не меняется.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Скорость подстройки") {
-                Stepper("Интервал: \(Int(store.settings.adjustInterval)) с", value: $store.settings.adjustInterval, in: 2...30, step: 1)
-                Stepper("Макс. шаг: \(store.settings.maxStep) уд/мин", value: $store.settings.maxStep, in: 1...10)
-                Stepper("Сглаживание пульса: \(Int(store.settings.smoothingSeconds)) с", value: $store.settings.smoothingSeconds, in: 0...30, step: 1)
+                AdjustRow(title: "Интервал", value: $interval, range: 2...30, unit: "с")
+                AdjustRow(title: "Макс. шаг", value: $store.settings.maxStep, range: 1...10, unit: "уд/мин")
+                AdjustRow(title: "Сглаживание пульса", value: $smoothing, range: 0...30, unit: "с")
             }
             Section("Звук") {
                 Toggle("Щелчок на каждый второй шаг", isOn: $store.settings.halfTimeClick)
@@ -40,12 +48,18 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Настройки")
+        .onAppear {
+            interval = Int(settings.adjustInterval)
+            smoothing = Int(settings.smoothingSeconds)
+        }
+        .onChange(of: interval) { _, new in
+            store.settings.adjustInterval = TimeInterval(new)
+        }
+        .onChange(of: smoothing) { _, new in
+            store.settings.smoothingSeconds = Double(new)
+        }
         .onChange(of: previewing) { _, on in
             session.previewClick(on)
-        }
-        .onChange(of: store.settings) { _, new in
-            let fixed = new.normalized()
-            if fixed != new { store.settings = fixed }
         }
         .onDisappear {
             if previewing {

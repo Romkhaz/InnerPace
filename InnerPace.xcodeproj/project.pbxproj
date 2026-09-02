@@ -22,6 +22,7 @@
 		4A88C0BD41BFEE6EC461E58D /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
 		5091DE77F44183518474077E /* RunFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC1341BA00535751DB5A6A4 /* RunFormatting.swift */; };
 		5A81D81DC4BC4BED34C70701 /* RegulatorEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5916193FA3CD86DE025A0B7A /* RegulatorEngine.swift */; };
+		5B0AD2A789DB7CF5E7A6799A /* AdjustRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155B28C13753C67E4E36FCA0 /* AdjustRow.swift */; };
 		5EEB108EA5FBDEB7C11C06E0 /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
 		5F7CA04D991BAFE9EE2C517B /* RegulatorEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5916193FA3CD86DE025A0B7A /* RegulatorEngine.swift */; };
 		6258E1C0AC032695C08FA6CB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 133117C3CB947E58447C297B /* PrivacyInfo.xcprivacy */; };
@@ -91,6 +92,7 @@
 		048CE161612AE5CDE43A51F8 /* RegulatorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegulatorSettings.swift; sourceTree = "<group>"; };
 		09F29616F610EFD62D7B0C59 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		133117C3CB947E58447C297B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		155B28C13753C67E4E36FCA0 /* AdjustRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdjustRow.swift; sourceTree = "<group>"; };
 		1ADC33E9121A6A602F2114FC /* InnerPace.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = InnerPace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		209259BDC7466920A286886A /* RunSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunSession.swift; sourceTree = "<group>"; };
 		21DF7299595502283E1B651D /* HeartRegulator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeartRegulator.entitlements; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 		2B6D8645231FF4189A665669 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				155B28C13753C67E4E36FCA0 /* AdjustRow.swift */,
 				A1347CAA91A28880C0E033DC /* ContentView.swift */,
 				3230AFEF2FEB7A93D6F3CDA4 /* RunView.swift */,
 				28EB70B33AB441474D5DA114 /* SettingsView.swift */,
@@ -397,6 +400,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B0AD2A789DB7CF5E7A6799A /* AdjustRow.swift in Sources */,
 				EDD9D1EB08F7588CA28BD3A4 /* CadenceController.swift in Sources */,
 				A67EA45B66191E26A11E1F12 /* ContentView.swift in Sources */,
 				8E373B39970C724DAA8FEC50 /* Formatting.swift in Sources */,
