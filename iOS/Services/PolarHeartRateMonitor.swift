@@ -17,12 +17,12 @@ final class PolarHeartRateMonitor: NSObject {
 
         var label: String {
             switch self {
-            case .unavailable: return "Bluetooth недоступен"
-            case .poweredOff: return "Bluetooth выключен"
-            case .unauthorized: return "Нет доступа к Bluetooth"
-            case .idle: return "Не подключён"
-            case .scanning: return "Поиск пульсометра…"
-            case .connecting(let name): return "Подключение: \(name)"
+            case .unavailable: return String(localized: "Bluetooth недоступен")
+            case .poweredOff: return String(localized: "Bluetooth выключен")
+            case .unauthorized: return String(localized: "Нет доступа к Bluetooth")
+            case .idle: return String(localized: "Не подключён")
+            case .scanning: return String(localized: "Поиск пульсометра…")
+            case .connecting(let name): return String(localized: "Подключение: \(name)")
             case .connected(let name): return name
             }
         }
@@ -97,7 +97,7 @@ final class PolarHeartRateMonitor: NSObject {
         central.stopScan()
         peripheral = candidate
         candidate.delegate = self
-        state = .connecting(candidate.name ?? "Пульсометр")
+        state = .connecting(candidate.name ?? String(localized: "Пульсометр"))
         central.connect(candidate, options: nil)
     }
 
@@ -139,7 +139,7 @@ extension PolarHeartRateMonitor: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: savedIdentifierKey)
-        state = .connected(peripheral.name ?? "Пульсометр")
+        state = .connected(peripheral.name ?? String(localized: "Пульсометр"))
         peripheral.discoverServices([heartRateService, batteryService])
     }
 
@@ -155,7 +155,7 @@ extension PolarHeartRateMonitor: CBCentralManagerDelegate {
             return
         }
         // Система сама подключит датчик, как только он снова появится в эфире.
-        state = .connecting(peripheral.name ?? "Пульсометр")
+        state = .connecting(peripheral.name ?? String(localized: "Пульсометр"))
         central.connect(peripheral, options: nil)
     }
 }

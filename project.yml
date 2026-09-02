@@ -2,6 +2,7 @@ name: InnerPace
 options:
   bundleIdPrefix: com.romankhazeev
   createIntermediateGroups: true
+  developmentLanguage: ru
   deploymentTarget:
     iOS: "17.0"
     watchOS: "10.0"
@@ -14,6 +15,8 @@ settings:
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
     ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
 targets:
   InnerPace:
     type: application

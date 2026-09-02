@@ -88,13 +88,13 @@ struct AdvancedSettingsView: View {
                     CrownNumberField(title: "Удержание", value: $store.settings.holdBand,
                                      range: 0...15, field: .holdBand, focused: $focused)
                     CrownNumberField(title: "Интервал", value: $interval,
-                                     range: 2...30, field: .interval, focused: $focused, unit: "с")
+                                     range: 2...30, field: .interval, focused: $focused, unit: String(localized: "с"))
                 }
                 HStack(spacing: 6) {
                     CrownNumberField(title: "Шаг", value: $store.settings.maxStep,
                                      range: 1...10, field: .maxStep, focused: $focused)
                     CrownNumberField(title: "Сглажив.", value: $smoothing,
-                                     range: 0...30, field: .smoothing, focused: $focused, unit: "с")
+                                     range: 0...30, field: .smoothing, focused: $focused, unit: String(localized: "с"))
                 }
                 Toggle("Каждый второй шаг", isOn: $store.settings.halfTimeClick)
                     .font(.caption)

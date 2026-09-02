@@ -3,7 +3,7 @@ import SwiftUI
 /// Плитка с числом. Нажатие выбирает её, дальше значение меняется колёсиком
 /// Digital Crown. Повторное нажатие снимает выделение.
 struct CrownNumberField<Field: Hashable>: View {
-    let title: String
+    let title: LocalizedStringKey
     @Binding var value: Int
     let range: ClosedRange<Int>
     let field: Field

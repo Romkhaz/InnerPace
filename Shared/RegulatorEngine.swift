@@ -73,8 +73,8 @@ extension RegulatorEngine.Adjustment {
     var logLine: String? {
         let hr = Int(heartRate.rounded())
         switch action {
-        case .speedUp(let delta): return "Пульс \(hr) → каденс \(cadence) (+\(delta))"
-        case .slowDown(let delta): return "Пульс \(hr) → каденс \(cadence) (−\(delta))"
+        case .speedUp(let delta): return String(localized: "Пульс \(hr) → каденс \(cadence) (+\(delta))")
+        case .slowDown(let delta): return String(localized: "Пульс \(hr) → каденс \(cadence) (−\(delta))")
         case .hold: return nil
         }
     }

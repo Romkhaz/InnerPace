@@ -43,7 +43,7 @@ struct RunView: View {
             VStack(alignment: .leading) {
                 Text(session.polar.state.label)
                 if let battery = session.polar.batteryLevel, session.polar.state.isConnected {
-                    Text("Батарея \(battery)%").font(.caption).foregroundStyle(.secondary)
+                    (Text("Батарея") + Text(verbatim: " \(battery)%")).font(.caption).foregroundStyle(.secondary)
                 }
             }
             Spacer()

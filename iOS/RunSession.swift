@@ -80,7 +80,7 @@ final class RunSession {
         guard startMetronome() else { return }
         segmentStart = Date()
         state = .running
-        log("Старт. Каденс \(cadence)")
+        log(String(localized: "Старт. Каденс \(cadence)"))
     }
 
     func pause() {
@@ -89,7 +89,7 @@ final class RunSession {
         if let segmentStart { accumulated += Date().timeIntervalSince(segmentStart) }
         segmentStart = nil
         state = .paused
-        log("Пауза")
+        log(String(localized: "Пауза"))
     }
 
     func resume() {
@@ -98,7 +98,7 @@ final class RunSession {
         segmentStart = Date()
         engine.markResumed(at: Date())
         state = .running
-        log("Продолжаем")
+        log(String(localized: "Продолжаем"))
     }
 
     func stop() {
@@ -108,7 +108,7 @@ final class RunSession {
         segmentStart = nil
         elapsed = accumulated
         state = .idle
-        log("Стоп. Итого \(formatElapsed(elapsed))")
+        log(String(localized: "Стоп. Итого \(formatElapsed(elapsed))"))
     }
 
     func toggleStartPause() {
@@ -136,7 +136,7 @@ final class RunSession {
             lastError = nil
             return true
         } catch {
-            lastError = "Не удалось запустить звук: \(error.localizedDescription)"
+            lastError = String(localized: "Не удалось запустить звук: \(error.localizedDescription)")
             return false
         }
     }

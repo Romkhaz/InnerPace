@@ -1,0 +1,36 @@
+{
+  "sourceLanguage" : "ru",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } }
+      }
+    },
+    "CFBundleName" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } }
+      }
+    },
+    "NSBluetoothAlwaysUsageDescription" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Нужен для подключения к пульсометру Polar H10." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Needed to connect to the Polar H10 heart-rate sensor." } }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Приложение на часах читает пульс, дистанцию и темп во время тренировки." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The watch app reads heart rate, distance and pace during a workout." } }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Приложение на часах сохраняет тренировку в Здоровье." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The watch app saves the workout to Health." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -7,7 +7,7 @@ enum MetronomeError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noHeadphones: return "Подключите Bluetooth-наушники к часам"
+        case .noHeadphones: return String(localized: "Подключите Bluetooth-наушники к часам")
         }
     }
 }
@@ -106,7 +106,7 @@ final class Metronome {
         guard sampleRate > 0,
               let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1) else {
             throw NSError(domain: "Metronome", code: 1,
-                          userInfo: [NSLocalizedDescriptionKey: "Не удалось создать аудиоформат"])
+                          userInfo: [NSLocalizedDescriptionKey: String(localized: "Не удалось создать аудиоформат")])
         }
         let click = Metronome.makeClick(sampleRate: sampleRate)
         let state = RenderState()

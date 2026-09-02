@@ -3,7 +3,7 @@ import Foundation
 /// Дистанция в километрах с двумя знаками, разделитель по локали.
 func formatDistance(_ meters: Double) -> String {
     let km = meters / 1000
-    return km.formatted(.number.precision(.fractionLength(2))) + " км"
+    return km.formatted(.number.precision(.fractionLength(2))) + " " + String(localized: "км")
 }
 
 /// Темп «мин:сек» на километр. Слишком медленный или неизвестный темп показываем прочерком.

@@ -120,7 +120,7 @@ final class WatchRunModel {
         let finalElapsed = workout.elapsed
         let finalDistance = workout.distanceMeters
         await workout.end()
-        summary = "\(formatDistance(finalDistance)) за \(formatElapsed(finalElapsed))"
+        summary = String(localized: "\(formatDistance(finalDistance)) за \(formatElapsed(finalElapsed))")
         elapsed = finalElapsed
         phase = .setup
     }

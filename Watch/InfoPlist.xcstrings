@@ -1,0 +1,36 @@
+{
+  "sourceLanguage" : "ru",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } }
+      }
+    },
+    "CFBundleName" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Приложение читает пульс, дистанцию и темп во время тренировки." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The app reads heart rate, distance and pace during a workout." } }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Приложение сохраняет пробежку в Здоровье." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The app saves your run to Health." } }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "localizations" : {
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Нужно для дистанции, темпа и маршрута пробежки." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Needed for distance, pace and the route of your run." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
