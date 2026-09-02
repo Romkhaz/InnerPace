@@ -19,16 +19,16 @@ struct RunView: View {
                     Text(error).foregroundStyle(.red).font(.footnote)
                 }
             }
-            Section("Журнал") {
-                if session.events.isEmpty {
-                    Text("Пока пусто").foregroundStyle(.secondary)
-                }
-                ForEach(session.events) { event in
-                    HStack(alignment: .firstTextBaseline) {
-                        Text(event.time, style: .time)
-                            .font(.caption.monospacedDigit())
+            Section {
+                NavigationLink {
+                    HistoryView()
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("История")
+                        Text(session.events.first?.text ?? String(localized: "Пока пусто"))
+                            .font(.footnote)
                             .foregroundStyle(.secondary)
-                        Text(event.text)
+                            .lineLimit(1)
                     }
                 }
             }

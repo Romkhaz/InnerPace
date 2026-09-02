@@ -1,0 +1,111 @@
+import Charts
+import SwiftUI
+
+/// История пробежки: график пульса и каденса по времени и полный журнал решений.
+struct HistoryView: View {
+    @Environment(RunSession.self) private var session
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        List {
+            Section("График") {
+                if session.samples.count < 2 {
+                    Text("Нет данных за пробежку")
+                        .foregroundStyle(.secondary)
+                } else {
+                    chart
+                        .frame(height: 260)
+                        .padding(.vertical, 8)
+                }
+            }
+            Section("Журнал") {
+                if session.events.isEmpty {
+                    Text("Пока пусто").foregroundStyle(.secondary)
+                }
+                ForEach(session.events) { event in
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(event.time, style: .time)
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                        Text(event.text)
+                    }
+                }
+            }
+        }
+        .navigationTitle("История")
+    }
+
+    // Пара цветов проверена на различимость при дальтонизме и контраст к фону
+    // отдельно для светлой и тёмной темы.
+    private var heartRateColor: Color {
+        colorScheme == .dark ? Color(red: 0.937, green: 0.361, blue: 0.400) : Color(red: 0.906, green: 0.227, blue: 0.275)
+    }
+
+    private var cadenceColor: Color {
+        colorScheme == .dark ? Color(red: 0.310, green: 0.576, blue: 0.933) : Color(red: 0.114, green: 0.435, blue: 0.878)
+    }
+
+    private var chart: some View {
+        let samples = session.samples
+        let start = samples.first?.time ?? Date()
+        let settings = session.settings
+        let heartRateName = String(localized: "Пульс")
+        let cadenceName = String(localized: "Каденс")
+        let minutes: (Date) -> Double = { $0.timeIntervalSince(start) / 60 }
+
+        let heartRates = samples.compactMap(\.smoothedHeartRate)
+        let low = min(Double(settings.heartRateMin) - 15, heartRates.min() ?? .infinity, Double(settings.cadenceMin) - 5)
+        let high = max(Double(settings.heartRateMax) + 15, heartRates.max() ?? -.infinity, Double(settings.cadenceMax) + 5)
+
+        return Chart {
+            RectangleMark(
+                yStart: .value("Целевая зона", Double(settings.heartRateMin)),
+                yEnd: .value("Целевая зона", Double(settings.heartRateMax))
+            )
+            .foregroundStyle(Color.green.opacity(0.12))
+
+            ForEach(samples) { sample in
+                if let hr = sample.smoothedHeartRate {
+                    LineMark(
+                        x: .value("Время, мин", minutes(sample.time)),
+                        y: .value("в минуту", hr),
+                        series: .value("Ряд", heartRateName)
+                    )
+                    .foregroundStyle(by: .value("Ряд", heartRateName))
+                    .interpolationMethod(.monotone)
+                    .lineStyle(StrokeStyle(lineWidth: 2))
+                }
+                LineMark(
+                    x: .value("Время, мин", minutes(sample.time)),
+                    y: .value("в минуту", Double(sample.cadence)),
+                    series: .value("Ряд", cadenceName)
+                )
+                .foregroundStyle(by: .value("Ряд", cadenceName))
+                .interpolationMethod(.stepEnd)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+            }
+        }
+        .chartForegroundStyleScale([heartRateName: heartRateColor, cadenceName: cadenceColor])
+        .chartYScale(domain: low...high)
+        .chartXAxisLabel("Время, мин")
+        .chartYAxisLabel("в минуту")
+        .chartLegend(position: .top, alignment: .leading)
+        .chartXAxis {
+            AxisMarks(values: .automatic(desiredCount: 5)) { value in
+                AxisGridLine().foregroundStyle(.secondary.opacity(0.2))
+                AxisValueLabel {
+                    if let minutes = value.as(Double.self) {
+                        let total = Int((minutes * 60).rounded())
+                        Text(verbatim: String(format: "%d:%02d", total / 60, total % 60))
+                    }
+                }
+            }
+        }
+        .chartYAxis {
+            AxisMarks(position: .leading, values: .automatic(desiredCount: 5)) { _ in
+                AxisGridLine().foregroundStyle(.secondary.opacity(0.2))
+                AxisValueLabel()
+            }
+        }
+    }
+}

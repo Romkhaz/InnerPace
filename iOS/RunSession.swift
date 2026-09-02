@@ -20,6 +20,15 @@ final class RunSession {
         let text: String
     }
 
+    /// Точка для графика: раз в секунду во время бега.
+    struct Sample: Identifiable {
+        let id = UUID()
+        let time: Date
+        let heartRate: Int?
+        let smoothedHeartRate: Double?
+        let cadence: Int
+    }
+
     let settingsStore: SettingsStore
     let polar = PolarHeartRateMonitor()
     let metronome = Metronome()
@@ -30,10 +39,17 @@ final class RunSession {
     private(set) var heartRateSource: HeartRateSource = .none
     private(set) var elapsed: TimeInterval = 0
     private(set) var events: [Event] = []
+    private(set) var samples: [Sample] = []
     private(set) var lastError: String?
+
+    /// Не больше четырёх часов по секунде.
+    private let maxSamples = 4 * 3600
 
     private var engine: RegulatorEngine
     private var ticker: Timer?
+#if DEBUG
+    private var demo: DemoHeartRateSource?
+#endif
     private var segmentStart: Date?
     private var accumulated: TimeInterval = 0
 
@@ -49,6 +65,17 @@ final class RunSession {
         }
         polar.connect()
         startTicker()
+#if DEBUG
+        if DemoHeartRateSource.isRequested {
+            let demo = DemoHeartRateSource()
+            demo.cadence = { [weak self] in self?.cadence ?? 180 }
+            demo.onHeartRate = { [weak self] bpm, time in
+                self?.ingest(bpm: bpm, at: time)
+            }
+            demo.start()
+            self.demo = demo
+        }
+#endif
     }
 
     var settings: RegulatorSettings { settingsStore.settings }
@@ -76,6 +103,7 @@ final class RunSession {
         accumulated = 0
         elapsed = 0
         events.removeAll()
+        samples.removeAll()
         metronome.bpm = Double(cadence)
         guard startMetronome() else { return }
         segmentStart = Date()
@@ -165,12 +193,16 @@ final class RunSession {
         }
         guard state == .running else { return }
         if let segmentStart { elapsed = accumulated + now.timeIntervalSince(segmentStart) }
-        guard let adjustment = engine.tick(at: now) else { return }
-        cadence = adjustment.cadence
-        metronome.bpm = Double(cadence)
-        if let line = adjustment.logLine {
-            log(line)
+        if let adjustment = engine.tick(at: now) {
+            cadence = adjustment.cadence
+            metronome.bpm = Double(cadence)
+            if let line = adjustment.logLine {
+                log(line)
+            }
         }
+        samples.append(Sample(time: now, heartRate: heartRateSource == .polar ? heartRate : nil,
+                              smoothedHeartRate: smoothedHeartRate, cadence: cadence))
+        if samples.count > maxSamples { samples.removeFirst(samples.count - maxSamples) }
     }
 
     private func syncSettings() {

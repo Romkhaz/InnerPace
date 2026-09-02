@@ -60,6 +60,26 @@
         }
       }
     },
+    "Время, мин": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time, min"
+          }
+        }
+      }
+    },
+    "График": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chart"
+          }
+        }
+      }
+    },
     "Громкость": {
       "localizations": {
         "en": {
@@ -146,6 +166,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Interval"
+          }
+        }
+      }
+    },
+    "История": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History"
+          }
+        }
+      }
+    },
+    "Каденс": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cadence"
           }
         }
       }
@@ -246,6 +286,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Could not create audio format"
+          }
+        }
+      }
+    },
+    "Нет данных за пробежку": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No data for this run yet"
           }
         }
       }
@@ -366,6 +416,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Resumed"
+          }
+        }
+      }
+    },
+    "Пульс": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart rate"
           }
         }
       }
@@ -520,6 +580,16 @@
         }
       }
     },
+    "Целевая зона": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target zone"
+          }
+        }
+      }
+    },
     "Целевой пульс": {
       "localizations": {
         "en": {
@@ -546,6 +616,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Click on every other step"
+          }
+        }
+      }
+    },
+    "в минуту": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "per minute"
           }
         }
       }
