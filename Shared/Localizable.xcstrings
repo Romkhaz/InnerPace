@@ -1,18 +1,44 @@
 {
   "sourceLanguage": "ru",
   "strings": {
-    "%1$@ за %2$@": {
+    "%": {
+      "shouldTranslate": false
+    },
+    "%@ /км": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ in %2$@"
+            "value": "%@ /km"
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "shouldTranslate": false
+    },
+    "%@ м/удар": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ m/beat"
           }
         }
       }
     },
     "%lld": {
       "shouldTranslate": false
+    },
+    "BPM": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BPM"
+          }
+        }
+      }
     },
     "Bluetooth выключен": {
       "localizations": {
@@ -34,10 +60,46 @@
         }
       }
     },
+    "GPS: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPS: %@"
+          }
+        }
+      }
+    },
     "InnerPace": {
       "shouldTranslate": false
     },
+    "·": {
+      "shouldTranslate": false
+    },
     "· %lld": {
+      "shouldTranslate": false
+    },
+    "· пауза": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· paused"
+          }
+        }
+      }
+    },
+    "· разминка %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· warm-up %@"
+          }
+        }
+      }
+    },
+    "×%@": {
       "shouldTranslate": false
     },
     "Батарея": {
@@ -50,12 +112,42 @@
         }
       }
     },
-    "Верхняя граница": {
+    "В зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт. Выше цели ритм падает быстрее, чем рос.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Upper bound"
+            "value": "In the approach zone the beat rises by one per interval and holds in the hold band. Above the target it drops faster than it rose."
+          }
+        }
+      }
+    },
+    "Верт. колебания": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vertical oscillation"
+          }
+        }
+      }
+    },
+    "Верхняя граница считается автоматически: %lld BPM, это плюс %lld %%.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The upper bound is derived automatically: %lld BPM, that is plus %lld %%."
+          }
+        }
+      }
+    },
+    "Время": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
           }
         }
       }
@@ -70,12 +162,22 @@
         }
       }
     },
-    "График": {
+    "Готово": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chart"
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "График последней пробежки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chart of the last run"
           }
         }
       }
@@ -96,6 +198,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Resume"
+          }
+        }
+      }
+    },
+    "Дистанция": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distance"
+          }
+        }
+      }
+    },
+    "Дополнительно": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advanced"
           }
         }
       }
@@ -130,6 +252,36 @@
         }
       }
     },
+    "Запас": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Span"
+          }
+        }
+      }
+    },
+    "Запас используется, когда меняете нижнюю границу на главном экране настроек.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The span is applied when you change the lower bound on the main settings screen."
+          }
+        }
+      }
+    },
+    "Запас над нижней границей": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Span above the lower bound"
+          }
+        }
+      }
+    },
     "Запуск…": {
       "localizations": {
         "en": {
@@ -150,12 +302,12 @@
         }
       }
     },
-    "Зона пульса": {
+    "Зона подхода": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Heart-rate zone"
+            "value": "Approach zone"
           }
         }
       }
@@ -180,52 +332,22 @@
         }
       }
     },
-    "Каденс": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cadence"
-          }
-        }
-      }
-    },
-    "Каденс до": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cadence to"
-          }
-        }
-      }
-    },
-    "Каденс от": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cadence from"
-          }
-        }
-      }
-    },
-    "Каденс, шагов в минуту": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cadence, steps per minute"
-          }
-        }
-      }
-    },
     "Каждый второй шаг": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Every other step"
+          }
+        }
+      }
+    },
+    "Контакт с землёй": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ground contact"
           }
         }
       }
@@ -240,12 +362,32 @@
         }
       }
     },
-    "Нажмите на число и крутите колёсико. Ещё нажатие снимает выделение": {
+    "Маршрут: %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tap a number and turn the crown. Tap again to deselect"
+            "value": "Route: %@"
+          }
+        }
+      }
+    },
+    "Маршрут: GPS не дал ни одной точки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route: GPS produced no points"
+          }
+        }
+      }
+    },
+    "На разминке ритм держится на середине диапазона и не разгоняется.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "During warm-up the beat stays at the middle of the range and does not speed up."
           }
         }
       }
@@ -310,12 +452,12 @@
         }
       }
     },
-    "Нижняя граница": {
+    "Нижняя граница зоны": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lower bound"
+            "value": "Zone lower bound"
           }
         }
       }
@@ -370,6 +512,16 @@
         }
       }
     },
+    "Подход": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approach"
+          }
+        }
+      }
+    },
     "Поиск пульсометра…": {
       "localizations": {
         "en": {
@@ -396,6 +548,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hold band"
+          }
+        }
+      }
+    },
+    "Последняя": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last run"
           }
         }
       }
@@ -430,22 +592,22 @@
         }
       }
     },
-    "Пульс %1$lld → каденс %2$lld (+%3$lld)": {
+    "Пульс %lld → ритм %lld (+%lld)": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "HR %1$lld → cadence %2$lld (+%3$lld)"
+            "value": "HR %1$lld → beat %2$lld (+%3$lld)"
           }
         }
       }
     },
-    "Пульс %1$lld → каденс %2$lld (−%3$lld)": {
+    "Пульс %lld → ритм %lld (−%lld)": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "HR %1$lld → cadence %2$lld (−%3$lld)"
+            "value": "HR %1$lld → beat %2$lld (−%3$lld)"
           }
         }
       }
@@ -480,12 +642,82 @@
         }
       }
     },
-    "Регулятор ведёт пульс к целевому значению. В полосе удержания под целью каденс не меняется.": {
+    "Разминка": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The regulator steers heart rate toward the target. Inside the hold band below the target, cadence stays put."
+            "value": "Warm-up"
+          }
+        }
+      }
+    },
+    "Регулятор ведёт пульс к этой цели. Рост ритма замедляется с %lld и останавливается с %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The regulator steers heart rate toward this target. The beat slows its rise from %1$lld and stops rising at %2$lld."
+          }
+        }
+      }
+    },
+    "Ритм": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beat"
+          }
+        }
+      }
+    },
+    "Ритм до": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beat to"
+          }
+        }
+      }
+    },
+    "Ритм до %lld · пульс от %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beat to %1$lld · HR from %2$lld"
+          }
+        }
+      }
+    },
+    "Ритм от": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beat from"
+          }
+        }
+      }
+    },
+    "Ритм, ударов в минуту": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beat, beats per minute"
+          }
+        }
+      }
+    },
+    "Ряд": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series"
           }
         }
       }
@@ -510,12 +742,12 @@
         }
       }
     },
-    "Скорость подстройки": {
+    "Сохранение: %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Adjustment speed"
+            "value": "Saving: %@"
           }
         }
       }
@@ -530,6 +762,66 @@
         }
       }
     },
+    "Спуск": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descent"
+          }
+        }
+      }
+    },
+    "Спуск быстрее подъёма": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descent faster than ascent"
+          }
+        }
+      }
+    },
+    "Средний каденс": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Average cadence"
+          }
+        }
+      }
+    },
+    "Средний пульс": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Average heart rate"
+          }
+        }
+      }
+    },
+    "Средний ритм": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Average beat"
+          }
+        }
+      }
+    },
+    "Средний темп": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Average pace"
+          }
+        }
+      }
+    },
     "Старт": {
       "localizations": {
         "en": {
@@ -540,12 +832,12 @@
         }
       }
     },
-    "Старт. Каденс %lld": {
+    "Старт. Ритм %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Start. Cadence %lld"
+            "value": "Start. Beat %lld"
           }
         }
       }
@@ -566,6 +858,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stop. Total %@"
+          }
+        }
+      }
+    },
+    "Темп подстройки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adjustment pace"
+          }
+        }
+      }
+    },
+    "Тренировка на паузе: новые границы применятся при продолжении.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout paused: new bounds apply when you resume."
+          }
+        }
+      }
+    },
+    "Тренировки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workouts"
           }
         }
       }
@@ -620,12 +942,32 @@
         }
       }
     },
+    "Эффективность": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Efficiency"
+          }
+        }
+      }
+    },
     "в минуту": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "per minute"
+          }
+        }
+      }
+    },
+    "время": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "time"
           }
         }
       }
@@ -650,6 +992,26 @@
         }
       }
     },
+    "м/удар": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "m/beat"
+          }
+        }
+      }
+    },
+    "мин": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "min"
+          }
+        }
+      }
+    },
     "мин/км": {
       "localizations": {
         "en": {
@@ -660,12 +1022,22 @@
         }
       }
     },
-    "пауза": {
+    "мс": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "paused"
+            "value": "ms"
+          }
+        }
+      }
+    },
+    "мс контакт": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ms contact"
           }
         }
       }
@@ -700,12 +1072,62 @@
         }
       }
     },
+    "см": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cm"
+          }
+        }
+      }
+    },
+    "см колеб.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cm osc."
+          }
+        }
+      }
+    },
+    "средний темп": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "avg pace"
+          }
+        }
+      }
+    },
+    "темп, мин/км": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pace, min/km"
+          }
+        }
+      }
+    },
     "уд/мин": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "spm"
+          }
+        }
+      }
+    },
+    "шаг": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "steps"
           }
         }
       }
@@ -720,15 +1142,8 @@
         }
       }
     },
-    "шагов в минуту": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "steps per minute"
-          }
-        }
-      }
+    "♥ %lld": {
+      "shouldTranslate": false
     }
   },
   "version": "1.0"

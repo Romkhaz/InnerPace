@@ -1,14 +1,29 @@
 import Charts
 import SwiftUI
 
-/// История пробежки: график пульса и каденса по времени и полный журнал решений.
+/// История: сохранённые тренировки, график текущей пробежки и журнал решений.
 struct HistoryView: View {
     @Environment(RunSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         List {
-            Section("График") {
+            Section("Тренировки") {
+                if session.store.workouts.isEmpty {
+                    Text("Пока пусто").foregroundStyle(.secondary)
+                }
+                ForEach(session.store.workouts) { workout in
+                    NavigationLink {
+                        ReportView(summary: workout)
+                    } label: {
+                        workoutRow(workout)
+                    }
+                }
+                .onDelete { offsets in
+                    for index in offsets { session.store.remove(session.store.workouts[index]) }
+                }
+            }
+            Section("График последней пробежки") {
                 if session.samples.count < 2 {
                     Text("Нет данных за пробежку")
                         .foregroundStyle(.secondary)
@@ -35,6 +50,31 @@ struct HistoryView: View {
         .navigationTitle("История")
     }
 
+    private func workoutRow(_ workout: WorkoutSummary) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack {
+                Text(workout.date, format: .dateTime.day().month().hour().minute())
+                    .font(.headline)
+                Spacer()
+                Image(systemName: workout.source == .watch ? "applewatch" : "iphone")
+                    .foregroundStyle(.secondary)
+            }
+            HStack(spacing: 10) {
+                Text(formatDistance(workout.distanceMeters))
+                Text(formatElapsed(workout.duration))
+                Text("\(formatPace(workout.averagePaceSecondsPerKm)) /км")
+                if let hr = workout.averageHeartRate {
+                    Text("♥ \(Int(hr.rounded()))")
+                }
+                Text("\(formatEfficiency(workout.efficiencyMetersPerBeat)) м/удар")
+            }
+            .font(.caption.monospacedDigit())
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+        }
+    }
+
     // Пара цветов проверена на различимость при дальтонизме и контраст к фону
     // отдельно для светлой и тёмной темы.
     private var heartRateColor: Color {
@@ -50,7 +90,7 @@ struct HistoryView: View {
         let start = samples.first?.time ?? Date()
         let settings = session.settings
         let heartRateName = String(localized: "Пульс")
-        let cadenceName = String(localized: "Каденс")
+        let cadenceName = String(localized: "Ритм")
         let minutes: (Date) -> Double = { $0.timeIntervalSince(start) / 60 }
 
         let heartRates = samples.compactMap(\.smoothedHeartRate)

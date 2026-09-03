@@ -28,6 +28,7 @@ targets:
       - path: Shared
       - path: SharedAudio
       - path: SharedUI
+      - path: SharedSensors
     dependencies:
       - target: InnerPaceWatch
     info:
@@ -40,6 +41,7 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIBackgroundModes: [audio, bluetooth-central]
         NSBluetoothAlwaysUsageDescription: Нужен для подключения к пульсометру Polar H10.
+        NSMotionUsageDescription: Шагомер нужен для фактического каденса и дистанции.
         NSHealthShareUsageDescription: Приложение на часах читает пульс, дистанцию и темп во время тренировки.
         NSHealthUpdateUsageDescription: Приложение на часах сохраняет тренировку в Здоровье.
         ITSAppUsesNonExemptEncryption: false
@@ -62,6 +64,7 @@ targets:
       - path: Shared
       - path: SharedAudio
       - path: SharedUI
+      - path: SharedSensors
     info:
       path: Watch/Info.plist
       properties:
@@ -77,6 +80,7 @@ targets:
         NSHealthShareUsageDescription: Приложение читает пульс, дистанцию и темп во время тренировки.
         NSHealthUpdateUsageDescription: Приложение сохраняет пробежку в Здоровье.
         NSLocationWhenInUseUsageDescription: Нужно для дистанции, темпа и маршрута пробежки.
+        NSMotionUsageDescription: Шагомер нужен для фактического каденса.
     entitlements:
       path: Watch/InnerPaceWatch.entitlements
       properties:

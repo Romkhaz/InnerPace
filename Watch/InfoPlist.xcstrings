@@ -2,33 +2,100 @@
   "sourceLanguage" : "ru",
   "strings" : {
     "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "InnerPace"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "InnerPace"
+          }
+        }
       }
     },
     "CFBundleName" : {
+      "comment" : "Bundle name",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "InnerPace"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "InnerPace"
+          }
+        }
       }
     },
     "NSHealthShareUsageDescription" : {
+      "comment" : "Privacy - Health Share Usage Description",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Приложение читает пульс, дистанцию и темп во время тренировки." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The app reads heart rate, distance and pace during a workout." } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app reads heart rate, distance and pace during a workout."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение читает пульс, дистанцию и темп во время тренировки."
+          }
+        }
       }
     },
     "NSHealthUpdateUsageDescription" : {
+      "comment" : "Privacy - Health Update Usage Description",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Приложение сохраняет пробежку в Здоровье." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The app saves your run to Health." } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app saves your run to Health."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение сохраняет пробежку в Здоровье."
+          }
+        }
       }
     },
     "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location When In Use Usage Description",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Нужно для дистанции, темпа и маршрута пробежки." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Needed for distance, pace and the route of your run." } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needed for distance, pace and the route of your run."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужно для дистанции, темпа и маршрута пробежки."
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription" : {
+      "comment" : "Privacy - Motion Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Шагомер нужен для фактического каденса."
+          }
+        }
       }
     }
   },

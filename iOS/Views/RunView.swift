@@ -35,6 +35,16 @@ struct RunView: View {
         }
         .background(Color.black.ignoresSafeArea())
         .preferredColorScheme(.dark)
+        .sheet(item: Binding(
+            get: { session.report },
+            set: { session.report = $0 }
+        )) { summary in
+            NavigationStack {
+                ReportView(summary: summary) {
+                    session.report = nil
+                }
+            }
+        }
     }
 
     // MARK: - Датчик
@@ -79,9 +89,23 @@ struct RunView: View {
                 .foregroundStyle(.white)
                 .contentTransition(.numericText())
                 .animation(.snappy, value: session.cadence)
-            Text("шагов в минуту")
-                .font(.headline)
-                .foregroundStyle(.white.opacity(0.85))
+            HStack(spacing: 6) {
+                Text("BPM")
+                    .font(.headline)
+                    .foregroundStyle(.white.opacity(0.85))
+                Text("·").foregroundStyle(.white.opacity(0.5))
+                Text("шаг")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.7))
+                Text(session.actualCadence.map(String.init) ?? "—")
+                    .font(.headline.monospacedDigit())
+                    .foregroundStyle(.white)
+                if session.warmupRemaining > 0 {
+                    Text("· разминка \(formatElapsed(session.warmupRemaining))")
+                        .font(.subheadline)
+                        .foregroundStyle(.yellow)
+                }
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -123,15 +147,34 @@ struct RunView: View {
                 settings: session.settings,
                 accent: ZoneStyle.accent(session.zone)
             )
-            Text(formatElapsed(session.elapsed))
-                .font(.system(size: 30, weight: .semibold, design: .rounded).monospacedDigit())
-                .foregroundStyle(.white)
+            HStack {
+                metric(formatEfficiency(session.recentEfficiency), "м/удар")
+                Spacer()
+                metric(formatDistance(session.distanceMeters), "дистанция")
+                Spacer()
+                metric(formatPace(session.paceSecondsPerKm), "мин/км")
+                Spacer()
+                metric(formatElapsed(session.elapsed), "время")
+            }
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 10)
         .background(ZoneStyle.gradient(session.zone), in: RoundedRectangle(cornerRadius: 24))
         .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(session.zone))
+    }
+
+    private func metric(_ value: String, _ caption: LocalizedStringKey) -> some View {
+        VStack(spacing: 0) {
+            Text(value)
+                .font(.system(size: 22, weight: .semibold, design: .rounded).monospacedDigit())
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(caption)
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.7))
+        }
     }
 
     // MARK: - Кнопки

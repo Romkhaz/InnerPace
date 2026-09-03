@@ -2,33 +2,100 @@
   "sourceLanguage" : "ru",
   "strings" : {
     "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "InnerPace"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "InnerPace"
+          }
+        }
       }
     },
     "CFBundleName" : {
+      "comment" : "Bundle name",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "InnerPace" } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "InnerPace"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "InnerPace"
+          }
+        }
       }
     },
     "NSBluetoothAlwaysUsageDescription" : {
+      "comment" : "Privacy - Bluetooth Always Usage Description",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Нужен для подключения к пульсометру Polar H10." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Needed to connect to the Polar H10 heart-rate sensor." } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needed to connect to the Polar H10 heart-rate sensor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужен для подключения к пульсометру Polar H10."
+          }
+        }
       }
     },
     "NSHealthShareUsageDescription" : {
+      "comment" : "Privacy - Health Share Usage Description",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Приложение на часах читает пульс, дистанцию и темп во время тренировки." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The watch app reads heart rate, distance and pace during a workout." } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The watch app reads heart rate, distance and pace during a workout."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение на часах читает пульс, дистанцию и темп во время тренировки."
+          }
+        }
       }
     },
     "NSHealthUpdateUsageDescription" : {
+      "comment" : "Privacy - Health Update Usage Description",
       "localizations" : {
-        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Приложение на часах сохраняет тренировку в Здоровье." } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "The watch app saves the workout to Health." } }
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The watch app saves the workout to Health."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение на часах сохраняет тренировку в Здоровье."
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription" : {
+      "comment" : "Privacy - Motion Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Шагомер нужен для фактического каденса и дистанции."
+          }
+        }
       }
     }
   },

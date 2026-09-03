@@ -1,24 +1,27 @@
 import XCTest
 
 final class CadenceControllerTests: XCTestCase {
-    private var settings: RegulatorSettings {
+    /// Настройки без зоны подхода и с симметричным шагом, чтобы проверять базовую пропорцию.
+    private var plain: RegulatorSettings {
         var s = RegulatorSettings.default
         s.cadenceMin = 180
         s.cadenceMax = 200
         s.heartRateMin = 130
         s.heartRateMax = 150
         s.holdBand = 3
+        s.approachPercent = 0
+        s.slowdownFactor = 1
         s.maxStep = 4
         return s
     }
 
     func testStartsAtLowerCadence() {
-        let controller = CadenceController(settings: settings)
+        let controller = CadenceController(settings: plain)
         XCTAssertEqual(controller.cadence, 180)
     }
 
     func testLowHeartRateSpeedsUpWithMaxStep() {
-        var controller = CadenceController(settings: settings)
+        var controller = CadenceController(settings: plain)
         XCTAssertEqual(controller.adjust(forHeartRate: 130), .speedUp(4))
         XCTAssertEqual(controller.cadence, 184)
         XCTAssertEqual(controller.adjust(forHeartRate: 120), .speedUp(4))
@@ -26,20 +29,20 @@ final class CadenceControllerTests: XCTestCase {
     }
 
     func testStepShrinksNearTarget() {
-        var controller = CadenceController(settings: settings)
+        var controller = CadenceController(settings: plain)
         XCTAssertEqual(controller.adjust(forHeartRate: 140), .speedUp(2))
         XCTAssertEqual(controller.adjust(forHeartRate: 145), .speedUp(1))
     }
 
     func testHoldBandBelowTarget() {
-        var controller = CadenceController(settings: settings)
+        var controller = CadenceController(settings: plain)
         XCTAssertEqual(controller.adjust(forHeartRate: 148), .hold)
         XCTAssertEqual(controller.adjust(forHeartRate: 150), .hold)
         XCTAssertEqual(controller.cadence, 180)
     }
 
     func testHighHeartRateSlowsDown() {
-        var controller = CadenceController(settings: settings)
+        var controller = CadenceController(settings: plain)
         _ = controller.adjust(forHeartRate: 120)
         _ = controller.adjust(forHeartRate: 120)
         XCTAssertEqual(controller.cadence, 188)
@@ -50,7 +53,7 @@ final class CadenceControllerTests: XCTestCase {
     }
 
     func testClampsToRange() {
-        var controller = CadenceController(settings: settings)
+        var controller = CadenceController(settings: plain)
         for _ in 0..<10 { _ = controller.adjust(forHeartRate: 100) }
         XCTAssertEqual(controller.cadence, 200)
         XCTAssertEqual(controller.adjust(forHeartRate: 100), .hold)
@@ -60,27 +63,48 @@ final class CadenceControllerTests: XCTestCase {
     }
 
     func testSettingsChangeClampsCadence() {
-        var controller = CadenceController(settings: settings)
+        var controller = CadenceController(settings: plain)
         for _ in 0..<10 { _ = controller.adjust(forHeartRate: 100) }
-        var narrower = settings
+        var narrower = plain
         narrower.cadenceMax = 190
         controller.settings = narrower
         XCTAssertEqual(controller.cadence, 190)
     }
 
-    func testUserScenario() {
-        // Начинаем на 180 при пульсе 130, разгоняемся к 150, потом горка и пульс 160.
-        var controller = CadenceController(settings: settings)
-        var hr = 130.0
-        var steps = 0
-        while controller.cadence < 200, steps < 20 {
-            _ = controller.adjust(forHeartRate: hr)
-            hr = min(150, hr + 3)
-            steps += 1
-        }
-        XCTAssertGreaterThan(controller.cadence, 180)
-        let peak = controller.cadence
-        for _ in 0..<5 { _ = controller.adjust(forHeartRate: 160) }
-        XCTAssertLessThan(controller.cadence, peak)
+    // MARK: - Зона подхода и ускоренное снижение
+
+    func testApproachZoneGrowsByOneStep() {
+        var s = plain
+        s.approachPercent = 10   // подход с 135
+        s.holdBand = 8           // удержание с 142
+        var controller = CadenceController(settings: s)
+        XCTAssertEqual(controller.adjust(forHeartRate: 130), .speedUp(4))
+        XCTAssertEqual(controller.adjust(forHeartRate: 136), .speedUp(1))
+        XCTAssertEqual(controller.adjust(forHeartRate: 141), .speedUp(1))
+        XCTAssertEqual(controller.adjust(forHeartRate: 142), .hold)
+        XCTAssertEqual(controller.adjust(forHeartRate: 149), .hold)
+        XCTAssertEqual(controller.adjust(forHeartRate: 151), .slowDown(1))
+    }
+
+    func testSlowdownFactorMakesDescentFaster() {
+        var s = plain
+        s.slowdownFactor = 3
+        var controller = CadenceController(settings: s)
+        controller.setCadence(200)
+        // При симметрии было бы −2, с множителем 3 получаем −6.
+        XCTAssertEqual(controller.adjust(forHeartRate: 160), .slowDown(6))
+        // Потолок снижения тоже в три раза выше максимального шага.
+        XCTAssertEqual(controller.adjust(forHeartRate: 190), .slowDown(12))
+        XCTAssertEqual(controller.cadence, 182)
+    }
+
+    func testDerivedCadenceMaxAndZoneWidth() {
+        var s = RegulatorSettings.default
+        s.setCadenceMinDerivingMax(180)
+        XCTAssertEqual(s.cadenceMax, 207)
+        s.setTargetHeartRateKeepingZoneWidth(160)
+        XCTAssertEqual(s.heartRateMax, 160)
+        XCTAssertEqual(s.heartRateMin, 140)
+        XCTAssertEqual(s.midCadence, 193)
     }
 }

@@ -28,6 +28,8 @@
 	<string>Приложение на часах читает пульс, дистанцию и темп во время тренировки.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Приложение на часах сохраняет тренировку в Здоровье.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Шагомер нужен для фактического каденса и дистанции.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

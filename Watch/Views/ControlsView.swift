@@ -1,34 +1,51 @@
 import SwiftUI
 
-/// Страница управления, как в стандартной «Тренировке»: стоп и пауза.
+/// Страница управления: стоп и пауза, на паузе ещё и настройки.
 struct ControlsView: View {
     @Environment(WatchRunModel.self) private var model
+    @State private var showsSettings = false
 
     var body: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 18) {
-                roundButton(icon: "xmark", title: "Стоп", color: ZoneStyle.stopRed) {
-                    Task { await model.end() }
+        ScrollView {
+            VStack(spacing: 10) {
+                HStack(spacing: 18) {
+                    roundButton(icon: "xmark", title: "Стоп", color: ZoneStyle.stopRed) {
+                        Task { await model.end() }
+                    }
+                    roundButton(
+                        icon: model.phase == .paused ? "play.fill" : "pause.fill",
+                        title: model.phase == .paused ? "Дальше" : "Пауза",
+                        color: ZoneStyle.startBlue
+                    ) {
+                        Task { await model.togglePause() }
+                    }
                 }
-                roundButton(
-                    icon: model.phase == .paused ? "play.fill" : "pause.fill",
-                    title: model.phase == .paused ? "Дальше" : "Пауза",
-                    color: ZoneStyle.startBlue
-                ) {
-                    Task { await model.togglePause() }
+                if model.phase == .paused {
+                    Button {
+                        showsSettings = true
+                    } label: {
+                        Label("Настройки", systemImage: "slider.horizontal.3")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                if let decision = model.lastDecision {
+                    Text(decision)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                if let error = model.errorText {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
                 }
             }
-            if let decision = model.lastDecision {
-                Text(decision)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            if let error = model.errorText {
-                Text(error)
-                    .font(.caption2)
-                    .foregroundStyle(.red)
-                    .multilineTextAlignment(.center)
+        }
+        .sheet(isPresented: $showsSettings) {
+            NavigationStack {
+                QuickSettingsView()
+                    .navigationTitle("Настройки")
             }
         }
     }

@@ -1,27 +1,35 @@
 import Foundation
 import Observation
 
-/// Модель автономной тренировки на часах: тренировка HealthKit, регулятор, метроном.
+/// Модель автономной тренировки на часах: тренировка HealthKit, регулятор,
+/// метроном, шагомер, эффективность и отчёт.
 @MainActor
 @Observable
 final class WatchRunModel {
     enum Phase {
-        case setup, starting, running, paused, finishing
+        case setup, starting, running, paused, finishing, report
     }
 
     let settingsStore = SettingsStore()
     let workout = WatchWorkoutManager()
     let metronome = Metronome()
+    let pedometer = CadenceSensor()
+    let store = WorkoutStore()
+    private let sync = WatchSync()
 
     private(set) var phase: Phase = .setup
     private(set) var cadence: Int
     private(set) var elapsed: TimeInterval = 0
     private(set) var lastError: String?
-    private(set) var summary: String?
     private(set) var lastDecision: String?
+    private(set) var report: WorkoutSummary?
 
     private var engine: RegulatorEngine
+    private var efficiency = EfficiencyTracker()
     private var ticker: Timer?
+    private var startDate: Date?
+    private var metronomeSum = 0
+    private var metronomeCount = 0
 
     init() {
         let initialEngine = RegulatorEngine(settings: settingsStore.settings)
@@ -38,7 +46,20 @@ final class WatchRunModel {
     var smoothedHeartRate: Double? { engine.smoothedHeartRate }
     var distanceMeters: Double { workout.distanceMeters }
     var paceSecondsPerKm: Double? { workout.paceSecondsPerKm }
+    var actualCadence: Int? { pedometer.cadence }
+    var groundContactMs: Double? { workout.groundContactMs }
+    var verticalOscillationCm: Double? { workout.verticalOscillationCm }
+    var recentEfficiency: Double? { efficiency.recent }
     var isActive: Bool { phase == .running || phase == .paused }
+
+    var warmupRemaining: TimeInterval {
+        isActive ? engine.warmupRemaining(at: Date()) : 0
+    }
+
+    var averagePaceSecondsPerKm: Double? {
+        guard distanceMeters > 50, elapsed > 0 else { return nil }
+        return elapsed / (distanceMeters / 1000)
+    }
 
     var zone: HeartRateZone {
         guard let hr = smoothedHeartRate else { return .unknown }
@@ -49,16 +70,22 @@ final class WatchRunModel {
         lastError ?? workout.lastError
     }
 
+    // MARK: - Управление
+
     func start() async {
         guard phase == .setup else { return }
         phase = .starting
         lastError = nil
-        summary = nil
         lastDecision = nil
+        report = nil
 
+        let now = Date()
         engine.settings = settings
-        engine.reset()
+        engine.reset(at: now)
         cadence = engine.cadence
+        efficiency.reset()
+        metronomeSum = 0
+        metronomeCount = 0
         metronome.volume = Float(settings.clickVolume)
         metronome.halfTime = settings.halfTimeClick
         metronome.bpm = Double(cadence)
@@ -78,6 +105,8 @@ final class WatchRunModel {
             phase = .setup
             return
         }
+        pedometer.start(from: now)
+        startDate = now
         elapsed = 0
         phase = .running
         startTicker()
@@ -87,6 +116,7 @@ final class WatchRunModel {
         guard phase == .running else { return }
         workout.pause()
         metronome.stop()
+        engine.markPaused(at: Date())
         phase = .paused
     }
 
@@ -98,6 +128,12 @@ final class WatchRunModel {
             lastError = error.localizedDescription
             return
         }
+        // Настройки могли поменять на паузе.
+        engine.settings = settings
+        cadence = engine.cadence
+        metronome.volume = Float(settings.clickVolume)
+        metronome.halfTime = settings.halfTimeClick
+        metronome.bpm = Double(cadence)
         workout.resume()
         engine.markResumed(at: Date())
         phase = .running
@@ -117,13 +153,43 @@ final class WatchRunModel {
         metronome.stop()
         ticker?.invalidate()
         ticker = nil
+        pedometer.stop()
+
         let finalElapsed = workout.elapsed
         let finalDistance = workout.distanceMeters
+        let averageHeartRate = workout.averageHeartRate()
+        let averageContact = workout.averageGroundContactMs()
+        let averageOscillation = workout.averageVerticalOscillationCm()
+        let averageCadence: Double? = finalElapsed > 30 ? Double(pedometer.steps) / (finalElapsed / 60) : nil
+        let averageMetronome: Double? = metronomeCount > 0 ? Double(metronomeSum) / Double(metronomeCount) : nil
+
         await workout.end()
-        summary = String(localized: "\(formatDistance(finalDistance)) за \(formatElapsed(finalElapsed))")
+
+        let summary = WorkoutSummary(
+            date: startDate ?? Date(),
+            duration: finalElapsed,
+            distanceMeters: finalDistance,
+            averageHeartRate: averageHeartRate,
+            averageCadence: averageCadence,
+            averageMetronome: averageMetronome,
+            efficiencyMetersPerBeat: efficiency.total,
+            averageGroundContactMs: averageContact,
+            averageVerticalOscillationCm: averageOscillation,
+            source: .watch
+        )
+        store.add(summary)
+        sync.send(summary)
+        report = summary
         elapsed = finalElapsed
+        phase = .report
+    }
+
+    func dismissReport() {
+        report = nil
         phase = .setup
     }
+
+    // MARK: - Такт
 
     private func startTicker() {
         ticker?.invalidate()
@@ -133,9 +199,14 @@ final class WatchRunModel {
     }
 
     private func tick() {
+        let now = Date()
         elapsed = workout.elapsed
         guard phase == .running else { return }
-        guard let adjustment = engine.tick(at: Date()) else { return }
+        efficiency.update(time: now, distance: workout.distanceMeters,
+                          heartRate: smoothedHeartRate ?? heartRate.map(Double.init))
+        metronomeSum += cadence
+        metronomeCount += 1
+        guard let adjustment = engine.tick(at: now) else { return }
         cadence = adjustment.cadence
         metronome.bpm = Double(cadence)
         if let line = adjustment.logLine {

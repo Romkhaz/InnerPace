@@ -1,12 +1,13 @@
 import Foundation
 
-/// Регулятор: по сглаженному пульсу решает, куда двигать каденс.
+/// Регулятор: по сглаженному пульсу решает, куда двигать ритм.
 ///
-/// Цель регулятора — верхняя граница зоны пульса. Пока пульс ниже цели,
-/// каденс растёт, пока выше — падает. Шаг пропорционален расстоянию до цели:
-/// на нижней границе зоны шаг максимальный, рядом с целью — один удар в минуту.
-/// Прямо под целью есть полоса удержания, в ней каденс не трогаем,
-/// чтобы система не дёргалась из-за запаздывания пульса.
+/// Цель регулятора — целевой пульс. Зоны снизу вверх:
+/// - далеко ниже цели: ритм растёт, шаг пропорционален расстоянию до цели;
+/// - зона подхода (за `approachPercent` до цели): ритм растёт по одному шагу
+///   за интервал, чтобы инерция пульса не вынесла его за цель;
+/// - полоса удержания (`holdBand` под целью): ритм не меняется;
+/// - выше цели: ритм падает, в `slowdownFactor` раз быстрее, чем рос.
 struct CadenceController {
     enum Action: Equatable {
         case speedUp(Int)
@@ -28,33 +29,41 @@ struct CadenceController {
         cadence = settings.cadenceMin
     }
 
+    mutating func setCadence(_ value: Int) {
+        cadence = clamp(value)
+    }
+
     /// Вызывается раз в `adjustInterval` секунд.
     mutating func adjust(forHeartRate heartRate: Double) -> Action {
         let target = Double(settings.targetHeartRate)
-        let zoneWidth = max(1, Double(settings.heartRateMax - settings.heartRateMin))
+        let zoneWidth = max(1, target - Double(settings.heartRateMin))
         let gain = Double(settings.maxStep) / zoneWidth
-        let error = target - heartRate
 
-        if error > 0 {
-            if error <= Double(settings.holdBand) { return .hold }
-            let step = clampedStep(error * gain)
-            let next = clamp(cadence + step)
-            let delta = next - cadence
-            cadence = next
-            return delta > 0 ? .speedUp(delta) : .hold
+        if heartRate > target {
+            let factor = min(3, max(1, settings.slowdownFactor))
+            let maxDown = max(1, Int((Double(settings.maxStep) * factor).rounded()))
+            let raw = (heartRate - target) * gain * factor
+            let step = min(maxDown, max(1, Int(raw.rounded())))
+            return move(by: -step)
         }
-        if error < 0 {
-            let step = clampedStep(-error * gain)
-            let next = clamp(cadence - step)
-            let delta = cadence - next
-            cadence = next
-            return delta > 0 ? .slowDown(delta) : .hold
+        if heartRate >= settings.holdHeartRate {
+            return .hold
         }
-        return .hold
+        if heartRate >= settings.approachHeartRate {
+            return move(by: 1)
+        }
+        let raw = (target - heartRate) * gain
+        let step = min(settings.maxStep, max(1, Int(raw.rounded())))
+        return move(by: step)
     }
 
-    private func clampedStep(_ raw: Double) -> Int {
-        min(settings.maxStep, max(1, Int(raw.rounded())))
+    private mutating func move(by delta: Int) -> Action {
+        let next = clamp(cadence + delta)
+        let applied = next - cadence
+        cadence = next
+        if applied > 0 { return .speedUp(applied) }
+        if applied < 0 { return .slowDown(-applied) }
+        return .hold
     }
 
     private func clamp(_ value: Int) -> Int {
