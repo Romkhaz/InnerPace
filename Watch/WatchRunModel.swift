@@ -160,7 +160,7 @@ final class WatchRunModel {
         let averageHeartRate = workout.averageHeartRate()
         let averageContact = workout.averageGroundContactMs()
         let averageOscillation = workout.averageVerticalOscillationCm()
-        let averageCadence: Double? = finalElapsed > 30 ? Double(pedometer.steps) / (finalElapsed / 60) : nil
+        let averageCadence: Double? = finalElapsed > 30 && pedometer.steps > 0 ? Double(pedometer.steps) / (finalElapsed / 60) : nil
         let averageMetronome: Double? = metronomeCount > 0 ? Double(metronomeSum) / Double(metronomeCount) : nil
 
         await workout.end()

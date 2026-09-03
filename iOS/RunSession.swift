@@ -174,7 +174,7 @@ final class RunSession {
             duration: elapsed,
             distanceMeters: distanceMeters,
             averageHeartRate: heartRates.isEmpty ? nil : Double(heartRates.reduce(0, +)) / Double(heartRates.count),
-            averageCadence: elapsed > 30 ? Double(pedometer.steps) / (elapsed / 60) : nil,
+            averageCadence: elapsed > 30 && pedometer.steps > 0 ? Double(pedometer.steps) / (elapsed / 60) : nil,
             averageMetronome: samples.isEmpty ? nil : Double(samples.map(\.cadence).reduce(0, +)) / Double(samples.count),
             efficiencyMetersPerBeat: efficiency.total,
             averageGroundContactMs: nil,
