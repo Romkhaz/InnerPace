@@ -66,6 +66,8 @@ struct HistoryView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(ZoneStyle.background.ignoresSafeArea())
         .navigationTitle("История")
         .onAppear { session.refreshTelemetryFiles() }
     }

@@ -41,6 +41,8 @@ struct SettingsView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(ZoneStyle.background.ignoresSafeArea())
         .navigationTitle("Настройки")
     }
 }
@@ -106,6 +108,8 @@ struct AdvancedSettingsView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(ZoneStyle.background.ignoresSafeArea())
         .navigationTitle("Дополнительно")
         .onAppear {
             interval = Int(settings.adjustInterval)
