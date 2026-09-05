@@ -15,6 +15,11 @@ struct CrownNumberField<Field: Hashable>: View {
 
     private var isFocused: Bool { focused == field }
 
+    /// В тёмной теме подсветка приглушённая, чтобы не резала глаз.
+    private var focusFill: Color {
+        palette.isDark ? palette.orange.opacity(0.18) : palette.peach.opacity(0.6)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             Text(title)
@@ -25,7 +30,7 @@ struct CrownNumberField<Field: Hashable>: View {
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text("\(value)")
                     .font(.system(size: 30, weight: .semibold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(isFocused ? palette.coral : palette.ink)
+                    .foregroundStyle(isFocused ? palette.orange : palette.ink)
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.caption2)
@@ -37,11 +42,11 @@ struct CrownNumberField<Field: Hashable>: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(isFocused ? palette.peach.opacity(0.6) : palette.card)
+                .fill(isFocused ? focusFill : palette.card)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isFocused ? palette.coral : palette.cardBorder, lineWidth: isFocused ? 1.5 : 1)
+                .stroke(isFocused ? palette.orange.opacity(palette.isDark ? 0.8 : 1) : palette.cardBorder, lineWidth: isFocused ? 1.5 : 1)
         )
         .contentShape(Rectangle())
         .focusable(true)
