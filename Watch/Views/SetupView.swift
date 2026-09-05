@@ -15,9 +15,10 @@ struct SetupView: View {
                             Text("Последняя")
                             Spacer()
                             Text("\(formatDistance(last.distanceMeters)) · \(formatElapsed(last.duration))")
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(ZoneStyle.inkSecondary)
                         }
                         .font(.caption2)
+                        .foregroundStyle(ZoneStyle.ink)
                     }
                     .buttonStyle(.plain)
                 }
@@ -29,12 +30,12 @@ struct SetupView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.green)
+                .tint(ZoneStyle.orange)
 
                 if let error = model.errorText {
                     Text(error)
                         .font(.caption2)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(ZoneStyle.deepCoral)
                         .multilineTextAlignment(.center)
                 }
 
@@ -47,6 +48,7 @@ struct SetupView: View {
             }
             .padding(.horizontal, 4)
         }
+        .background(ZoneStyle.background.ignoresSafeArea())
         .navigationTitle("InnerPace")
     }
 }
@@ -80,7 +82,7 @@ struct QuickSettingsView: View {
             }
             Text("Ритм до \(store.settings.cadenceMax) · пульс от \(store.settings.heartRateMin)")
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(ZoneStyle.inkSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -127,16 +129,18 @@ struct AdvancedSettingsView: View {
                 sectionTitle("Звук")
                 Toggle("Каждый второй шаг", isOn: $store.settings.halfTimeClick)
                     .font(.caption)
+                    .foregroundStyle(ZoneStyle.ink)
                 Slider(value: $store.settings.clickVolume, in: 0...1) {
                     Text("Громкость")
                 }
                 Text("Громкость")
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(ZoneStyle.inkSecondary)
 
                 sectionTitle("Разработчик")
                 Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
                     .font(.caption)
+                    .foregroundStyle(ZoneStyle.ink)
                 HStack(spacing: 6) {
                     CrownNumberField(title: "Спуск", value: $slowdown,
                                      range: 1...10, field: .slowdown, focused: $focused, unit: "×")
@@ -151,12 +155,14 @@ struct AdvancedSettingsView: View {
                 }
                 Text("Телеметрия пишется посекундно в CSV и пересылается на телефон, папка InnerPace в «Файлах».")
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(ZoneStyle.inkSecondary)
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 4)
         }
+        .background(ZoneStyle.background.ignoresSafeArea())
         .navigationTitle("Ещё")
+        .containerBackground(ZoneStyle.background.gradient, for: .navigation)
         .onAppear {
             interval = Int(store.settings.adjustInterval)
             smoothing = Int(store.settings.smoothingSeconds)
@@ -170,7 +176,7 @@ struct AdvancedSettingsView: View {
     private func sectionTitle(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.caption2)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(ZoneStyle.inkSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 4)
     }

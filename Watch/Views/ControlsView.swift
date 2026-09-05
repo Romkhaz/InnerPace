@@ -29,17 +29,18 @@ struct ControlsView: View {
                 if let decision = model.lastDecision {
                     Text(decision)
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(ZoneStyle.inkSecondary)
                         .multilineTextAlignment(.center)
                 }
                 if let error = model.errorText {
                     Text(error)
                         .font(.caption2)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(ZoneStyle.deepCoral)
                         .multilineTextAlignment(.center)
                 }
             }
         }
+        .background(ZoneStyle.background.ignoresSafeArea())
         .sheet(isPresented: $showsSettings) {
             NavigationStack {
                 ScrollView {
@@ -54,7 +55,9 @@ struct ControlsView: View {
                     }
                     .padding(.horizontal, 4)
                 }
+                .background(ZoneStyle.background.ignoresSafeArea())
                 .navigationTitle("Настройки")
+                .containerBackground(ZoneStyle.background.gradient, for: .navigation)
             }
         }
     }
@@ -72,7 +75,7 @@ struct ControlsView: View {
             .buttonStyle(.plain)
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(ZoneStyle.inkSecondary)
         }
     }
 }

@@ -7,7 +7,7 @@ struct DetailsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 4) {
-                tile(formatElapsed(model.elapsed), "время", accent: .yellow)
+                tile(formatElapsed(model.elapsed), "время", accent: ZoneStyle.coral)
                 HStack(spacing: 4) {
                     tile(formatPace(model.paceSecondsPerKm), "темп, мин/км")
                     tile(formatPace(model.averagePaceSecondsPerKm), "средний темп")
@@ -16,9 +16,10 @@ struct DetailsView: View {
             }
             .padding(.horizontal, 2)
         }
+        .background(ZoneStyle.background.ignoresSafeArea())
     }
 
-    private func tile(_ value: String, _ caption: LocalizedStringKey, accent: Color = .white) -> some View {
+    private func tile(_ value: String, _ caption: LocalizedStringKey, accent: Color = ZoneStyle.ink) -> some View {
         VStack(spacing: 0) {
             Text(value)
                 .font(.system(size: 26, weight: .bold, design: .rounded).monospacedDigit())
@@ -27,12 +28,12 @@ struct DetailsView: View {
                 .minimumScaleFactor(0.6)
             Text(caption)
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(ZoneStyle.inkSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+        .lightCard(radius: 14)
     }
 }

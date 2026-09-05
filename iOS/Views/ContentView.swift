@@ -6,7 +6,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             RunView()
-                .navigationTitle("InnerPace")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         NavigationLink {
@@ -16,6 +16,9 @@ struct ContentView: View {
                         }
                     }
                 }
+                .toolbarBackground(ZoneStyle.background, for: .navigationBar)
         }
+        .tint(ZoneStyle.orange)
+        .preferredColorScheme(.light)
     }
 }

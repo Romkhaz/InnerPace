@@ -25,16 +25,16 @@ struct RunView: View {
                 if let error = session.lastError {
                     Text(error)
                         .font(.footnote)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(ZoneStyle.deepCoral)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 historyRow
             }
             .padding(.horizontal, 16)
+            .padding(.top, 4)
             .padding(.bottom, 24)
         }
-        .background(Color.black.ignoresSafeArea())
-        .preferredColorScheme(.dark)
+        .background(ZoneStyle.background.ignoresSafeArea())
         .sheet(item: Binding(
             get: { session.report },
             set: { session.report = $0 }
@@ -52,16 +52,17 @@ struct RunView: View {
     private var sensorRow: some View {
         HStack(spacing: 10) {
             Circle()
-                .fill(session.polar.state.isConnected ? Color.green : Color.gray)
+                .fill(session.polar.state.isConnected ? ZoneStyle.orange : ZoneStyle.track)
                 .frame(width: 10, height: 10)
             VStack(alignment: .leading, spacing: 1) {
                 Text(session.polar.state.label)
+                    .foregroundStyle(ZoneStyle.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 if let battery = session.polar.batteryLevel, session.polar.state.isConnected {
                     (Text("Батарея") + Text(verbatim: " \(battery)%"))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(ZoneStyle.inkSecondary)
                 }
             }
             Spacer()
@@ -77,32 +78,30 @@ struct RunView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22))
+        .lightCard()
     }
 
-    // MARK: - Каденс
+    // MARK: - Ритм
 
     private var cadenceCard: some View {
         VStack(spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 bigNumber("\(session.cadence)", "BPM")
                 Rectangle()
-                    .fill(Color.white.opacity(0.25))
+                    .fill(Color.white.opacity(0.35))
                     .frame(width: 1, height: 60)
                 bigNumber(session.actualCadence.map(String.init) ?? "—", "шаг/мин")
             }
             if session.warmupRemaining > 0 {
                 Text("разминка \(formatElapsed(session.warmupRemaining))")
-                    .font(.subheadline)
-                    .foregroundStyle(.yellow)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.9))
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(
-            ZoneStyle.cadenceGradient,
-            in: RoundedRectangle(cornerRadius: 26)
-        )
+        .background(ZoneStyle.cadenceGradient, in: RoundedRectangle(cornerRadius: 26))
+        .shadow(color: ZoneStyle.coral.opacity(0.25), radius: 14, x: 0, y: 6)
     }
 
     private func bigNumber(_ value: String, _ caption: LocalizedStringKey) -> some View {
@@ -116,7 +115,7 @@ struct RunView: View {
                 .minimumScaleFactor(0.6)
             Text(caption)
                 .font(.headline)
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(.white.opacity(0.9))
         }
         .frame(maxWidth: .infinity)
     }
@@ -130,56 +129,61 @@ struct RunView: View {
                 .foregroundStyle(ZoneStyle.accent(zone))
             Text(value)
                 .font(.system(size: 48, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(.white)
+                .foregroundStyle(ZoneStyle.foreground(zone))
                 .contentTransition(.numericText())
             caption
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.8))
+                .foregroundStyle(ZoneStyle.foregroundSecondary(zone))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .background(ZoneStyle.gradient(zone), in: RoundedRectangle(cornerRadius: 24))
+        .overlay(RoundedRectangle(cornerRadius: 24).stroke(ZoneStyle.cardBorder, lineWidth: 1))
         .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(zone))
     }
 
-    // MARK: - Зона и время
+    // MARK: - Зона и метрики
 
     private var zoneCard: some View {
-        VStack(spacing: 6) {
+        let zone = session.zone
+        return VStack(spacing: 6) {
             ZoneBar(
                 heartRate: session.smoothedHeartRate ?? session.heartRate.map(Double.init),
                 settings: session.settings,
-                accent: ZoneStyle.accent(session.zone)
+                accent: ZoneStyle.accent(zone),
+                track: ZoneStyle.trackColor(zone),
+                labelColor: ZoneStyle.foregroundSecondary(zone)
             )
             HStack {
-                metric(formatEfficiency(session.recentEfficiency), "м/удар")
+                metric(formatEfficiency(session.recentEfficiency), "м/удар", zone: zone)
                 Spacer()
-                metric(formatDistance(session.distanceMeters), "дистанция")
+                metric(formatDistance(session.distanceMeters), "дистанция", zone: zone)
                 Spacer()
-                metric(formatPace(session.paceSecondsPerKm), "мин/км")
+                metric(formatPace(session.paceSecondsPerKm), "мин/км", zone: zone)
                 Spacer()
-                metric(formatElapsed(session.elapsed), "время")
+                metric(formatElapsed(session.elapsed), "время", zone: zone)
             }
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 10)
-        .background(ZoneStyle.gradient(session.zone), in: RoundedRectangle(cornerRadius: 24))
-        .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(session.zone))
+        .background(ZoneStyle.gradient(zone), in: RoundedRectangle(cornerRadius: 24))
+        .overlay(RoundedRectangle(cornerRadius: 24).stroke(ZoneStyle.cardBorder, lineWidth: 1))
+        .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(zone))
     }
 
-    private func metric(_ value: String, _ caption: LocalizedStringKey) -> some View {
+    private func metric(_ value: String, _ caption: LocalizedStringKey, zone: HeartRateZone) -> some View {
         VStack(spacing: 0) {
             Text(value)
                 .font(.system(size: 22, weight: .semibold, design: .rounded).monospacedDigit())
-                .foregroundStyle(.white)
+                .foregroundStyle(ZoneStyle.foreground(zone))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(caption)
                 .font(.caption2)
-                .foregroundStyle(.white.opacity(0.7))
+                .foregroundStyle(ZoneStyle.foregroundSecondary(zone))
         }
     }
 
@@ -190,7 +194,7 @@ struct RunView: View {
             RoundButton(
                 icon: session.state == .running ? "pause.fill" : "play.fill",
                 title: startTitle,
-                color: ZoneStyle.startBlue,
+                color: ZoneStyle.startColor,
                 enabled: true
             ) {
                 session.toggleStartPause()
@@ -198,7 +202,7 @@ struct RunView: View {
             RoundButton(
                 icon: "stop.fill",
                 title: "Стоп",
-                color: ZoneStyle.stopRed,
+                color: ZoneStyle.stopColor,
                 enabled: session.state != .idle
             ) {
                 session.stop()
@@ -225,19 +229,19 @@ struct RunView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("История")
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(ZoneStyle.ink)
                     Text(session.events.first?.text ?? String(localized: "Пока пусто"))
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(ZoneStyle.inkSecondary)
                         .lineLimit(1)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(ZoneStyle.orange)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22))
+            .lightCard()
         }
         .buttonStyle(.plain)
     }
@@ -258,13 +262,14 @@ private struct RoundButton: View {
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: 80, height: 80)
-                    .background(enabled ? color : Color.white.opacity(0.15), in: Circle())
+                    .background(enabled ? color : ZoneStyle.track, in: Circle())
+                    .shadow(color: enabled ? color.opacity(0.35) : .clear, radius: 10, x: 0, y: 5)
             }
             .buttonStyle(.plain)
             .disabled(!enabled)
             Text(title)
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(ZoneStyle.inkSecondary)
         }
     }
 }

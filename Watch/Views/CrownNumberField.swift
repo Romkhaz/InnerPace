@@ -18,17 +18,17 @@ struct CrownNumberField<Field: Hashable>: View {
         VStack(spacing: 0) {
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(ZoneStyle.inkSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text("\(value)")
                     .font(.system(size: 30, weight: .semibold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(isFocused ? Color.green : Color.primary)
+                    .foregroundStyle(isFocused ? ZoneStyle.coral : ZoneStyle.ink)
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(ZoneStyle.inkSecondary)
                 }
             }
         }
@@ -36,11 +36,11 @@ struct CrownNumberField<Field: Hashable>: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(isFocused ? 0.16 : 0.07))
+                .fill(isFocused ? ZoneStyle.peach.opacity(0.6) : ZoneStyle.card)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isFocused ? Color.green : Color.clear, lineWidth: 1.5)
+                .stroke(isFocused ? ZoneStyle.coral : ZoneStyle.cardBorder, lineWidth: isFocused ? 1.5 : 1)
         )
         .contentShape(Rectangle())
         .focusable(true)

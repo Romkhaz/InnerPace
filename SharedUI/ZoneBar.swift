@@ -4,7 +4,9 @@ import SwiftUI
 struct ZoneBar: View {
     let heartRate: Double?
     let settings: RegulatorSettings
-    var accent: Color = .green
+    var accent: Color = ZoneStyle.orange
+    var track: Color = ZoneStyle.track
+    var labelColor: Color = ZoneStyle.inkSecondary
     var barHeight: CGFloat = 10
     var markerSize: CGFloat = 30
     var showsLabels = true
@@ -20,7 +22,7 @@ struct ZoneBar: View {
                 let zoneEnd = width * fraction(Double(settings.heartRateMax))
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.white.opacity(0.15))
+                        .fill(track)
                         .frame(height: barHeight)
                     Capsule()
                         .fill(accent.opacity(0.9))
@@ -29,10 +31,11 @@ struct ZoneBar: View {
                     if let heartRate {
                         Image(systemName: "figure.run")
                             .font(.system(size: markerSize / 2, weight: .bold))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(ZoneStyle.ink)
                             .frame(width: markerSize, height: markerSize)
-                            .background(accent, in: Circle())
-                            .overlay(Circle().stroke(Color.black.opacity(0.6), lineWidth: 2))
+                            .background(Color.white, in: Circle())
+                            .overlay(Circle().stroke(accent, lineWidth: 2))
+                            .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
                             .offset(x: width * fraction(heartRate) - markerSize / 2)
                             .animation(.easeInOut(duration: 0.6), value: heartRate)
                     }
@@ -47,7 +50,7 @@ struct ZoneBar: View {
                     Text("\(settings.heartRateMax)")
                 }
                 .font(.caption.monospacedDigit())
-                .foregroundStyle(.white.opacity(0.75))
+                .foregroundStyle(labelColor)
             }
         }
     }

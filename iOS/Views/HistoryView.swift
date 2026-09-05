@@ -97,13 +97,9 @@ struct HistoryView: View {
 
     // Пара цветов проверена на различимость при дальтонизме и контраст к фону
     // отдельно для светлой и тёмной темы.
-    private var heartRateColor: Color {
-        colorScheme == .dark ? Color(red: 0.937, green: 0.361, blue: 0.400) : Color(red: 0.906, green: 0.227, blue: 0.275)
-    }
+    private var heartRateColor: Color { ZoneStyle.deepCoral }
 
-    private var cadenceColor: Color {
-        colorScheme == .dark ? Color(red: 0.310, green: 0.576, blue: 0.933) : Color(red: 0.114, green: 0.435, blue: 0.878)
-    }
+    private var cadenceColor: Color { Color(red: 0.93, green: 0.49, blue: 0.10) }
 
     private var chart: some View {
         let samples = session.samples
@@ -122,7 +118,7 @@ struct HistoryView: View {
                 yStart: .value("Целевая зона", Double(settings.heartRateMin)),
                 yEnd: .value("Целевая зона", Double(settings.heartRateMax))
             )
-            .foregroundStyle(Color.green.opacity(0.12))
+            .foregroundStyle(ZoneStyle.peach.opacity(0.35))
 
             ForEach(samples) { sample in
                 if let hr = sample.smoothedHeartRate {

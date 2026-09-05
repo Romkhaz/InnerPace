@@ -33,10 +33,12 @@ struct ReportView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.green)
+                    .tint(ZoneStyle.orange)
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(ZoneStyle.background.ignoresSafeArea())
         .navigationTitle(Text(summary.date, format: .dateTime.day().month().hour().minute()))
     }
 
