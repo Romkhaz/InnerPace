@@ -23,6 +23,25 @@ struct HistoryView: View {
                     for index in offsets { session.store.remove(session.store.workouts[index]) }
                 }
             }
+            if !session.telemetryFiles.isEmpty {
+                Section("Телеметрия") {
+                    ForEach(session.telemetryFiles, id: \.self) { url in
+                        HStack {
+                            Text(url.lastPathComponent)
+                                .font(.caption.monospaced())
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                            Spacer()
+                            ShareLink(item: url) {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                        }
+                    }
+                    .onDelete { offsets in
+                        for index in offsets { session.deleteTelemetryFile(session.telemetryFiles[index]) }
+                    }
+                }
+            }
             Section("График последней пробежки") {
                 if session.samples.count < 2 {
                     Text("Нет данных за пробежку")
@@ -48,6 +67,7 @@ struct HistoryView: View {
             }
         }
         .navigationTitle("История")
+        .onAppear { session.refreshTelemetryFiles() }
     }
 
     private func workoutRow(_ workout: WorkoutSummary) -> some View {

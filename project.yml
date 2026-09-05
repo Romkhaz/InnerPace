@@ -42,6 +42,8 @@ targets:
         UIBackgroundModes: [audio, bluetooth-central]
         NSBluetoothAlwaysUsageDescription: Нужен для подключения к пульсометру Polar H10.
         NSMotionUsageDescription: Шагомер нужен для фактического каденса и дистанции.
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
         NSHealthShareUsageDescription: Приложение на часах читает пульс, дистанцию и темп во время тренировки.
         NSHealthUpdateUsageDescription: Приложение на часах сохраняет тренировку в Здоровье.
         ITSAppUsesNonExemptEncryption: false

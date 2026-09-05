@@ -2,7 +2,7 @@ import Foundation
 import Observation
 
 /// Ядро тренировки на телефоне: пульс с Polar, общий регулятор, метроном,
-/// шагомер, эффективность, отчёт и хранение тренировок.
+/// шагомер, эффективность, отчёт, телеметрия и хранение тренировок.
 @MainActor
 @Observable
 final class RunSession {
@@ -45,6 +45,7 @@ final class RunSession {
     private(set) var events: [Event] = []
     private(set) var samples: [Sample] = []
     private(set) var lastError: String?
+    private(set) var telemetryFiles: [URL] = TelemetryRecorder.savedFiles()
     /// Отчёт о только что завершённой тренировке, показывается один раз.
     var report: WorkoutSummary?
 
@@ -53,6 +54,7 @@ final class RunSession {
 
     private var engine: RegulatorEngine
     private var efficiency = EfficiencyTracker()
+    private var telemetry = TelemetryRecorder()
     private var ticker: Timer?
     private var segmentStart: Date?
     private var accumulated: TimeInterval = 0
@@ -73,6 +75,9 @@ final class RunSession {
         }
         sync.onWorkout = { [weak self] summary in
             self?.store.add(summary)
+        }
+        sync.onTelemetryFile = { [weak self] _ in
+            self?.telemetryFiles = TelemetryRecorder.savedFiles()
         }
         polar.connect()
         startTicker()
@@ -112,6 +117,15 @@ final class RunSession {
         return HeartRateZone(heartRate: Double(hr), settings: settings)
     }
 
+    func refreshTelemetryFiles() {
+        telemetryFiles = TelemetryRecorder.savedFiles()
+    }
+
+    func deleteTelemetryFile(_ url: URL) {
+        try? FileManager.default.removeItem(at: url)
+        refreshTelemetryFiles()
+    }
+
     // MARK: - Управление
 
     func start() {
@@ -121,6 +135,7 @@ final class RunSession {
         engine.reset(at: now)
         cadence = engine.cadence
         efficiency.reset()
+        telemetry.start(settings: settings)
         accumulated = 0
         elapsed = 0
         events.removeAll()
@@ -148,10 +163,7 @@ final class RunSession {
     func resume() {
         guard state == .paused else { return }
         guard startMetronome() else { return }
-        // Настройки могли поменять на паузе.
-        engine.settings = settings
-        cadence = engine.cadence
-        metronome.bpm = Double(cadence)
+        applySettings()
         segmentStart = Date()
         engine.markResumed(at: Date())
         state = .running
@@ -183,6 +195,9 @@ final class RunSession {
         )
         if elapsed > 60 {
             store.add(summary)
+        }
+        if settings.developerMode, telemetry.write(date: summary.date, source: .phone) != nil {
+            refreshTelemetryFiles()
         }
         report = summary
     }
@@ -235,31 +250,39 @@ final class RunSession {
 
     private func tick() {
         let now = Date()
-        syncSettings()
+        applySettings()
         if !engine.isHeartRateFresh(at: now) {
             heartRateSource = .none
         }
         guard state == .running else { return }
         if let segmentStart { elapsed = accumulated + now.timeIntervalSince(segmentStart) }
         efficiency.update(time: now, distance: distanceMeters, heartRate: smoothedHeartRate)
+        var decision: String?
         if let adjustment = engine.tick(at: now) {
             cadence = adjustment.cadence
             metronome.bpm = Double(cadence)
             if let line = adjustment.logLine {
                 log(line)
+                decision = line
             }
         }
         samples.append(Sample(time: now, heartRate: heartRateSource == .polar ? heartRate : nil,
                               smoothedHeartRate: smoothedHeartRate, cadence: cadence))
         if samples.count > maxSamples { samples.removeFirst(samples.count - maxSamples) }
+        if settings.developerMode {
+            telemetry.append(TelemetryRow(
+                time: now, elapsed: elapsed, heartRate: heartRateSource == .polar ? heartRate : nil,
+                smoothedHeartRate: smoothedHeartRate, decisionHeartRate: engine.decisionHeartRate,
+                metronome: cadence, actualCadence: actualCadence,
+                distanceMeters: distanceMeters, speedMetersPerSecond: paceSecondsPerKm.map { 1000 / $0 },
+                groundContactMs: nil, verticalOscillationCm: nil, strideLengthMeters: nil, powerWatts: nil,
+                efficiencyRecent: efficiency.recent, warmup: engine.isWarmingUp(at: now), decision: decision
+            ))
+        }
     }
 
-    private func syncSettings() {
-        // Во время бега настройки применяются только на паузе, чтобы ритм не прыгал.
-        guard state != .running else {
-            applySettingsToMetronome()
-            return
-        }
+    /// Настройки применяются сразу, и на бегу, и на паузе.
+    private func applySettings() {
         if engine.settings != settings {
             engine.settings = settings
             cadence = engine.cadence

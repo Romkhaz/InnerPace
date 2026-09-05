@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Главный экран тренировки: ритм и фактический каденс, пульс с зоной,
-/// контакт с землёй, вертикальные колебания и эффективность.
+/// Главный экран тренировки: ритм и фактический каденс в одну строку,
+/// пульс с зоной, ниже крупно эффективность, контакт с землёй и колебания.
 struct MetricsView: View {
     @Environment(WatchRunModel.self) private var model
 
@@ -17,52 +17,50 @@ struct MetricsView: View {
     }
 
     private var rhythmCard: some View {
-        VStack(spacing: -2) {
-            Text("\(model.cadence)")
-                .font(.system(size: 38, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(.white)
-                .contentTransition(.numericText())
-                .animation(.snappy, value: model.cadence)
-            HStack(spacing: 4) {
-                Text("BPM")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.85))
-                Text("·")
-                    .foregroundStyle(.white.opacity(0.5))
-                Text("шаг")
-                    .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.7))
-                Text(model.actualCadence.map(String.init) ?? "—")
-                    .font(.caption2.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(.white)
-                if model.warmupRemaining > 0 {
-                    Text("· разминка \(formatElapsed(model.warmupRemaining))")
-                        .font(.caption2)
-                        .foregroundStyle(.yellow)
-                }
-                if model.phase == .paused {
-                    Text("· пауза")
-                        .font(.caption2)
-                        .foregroundStyle(.yellow)
-                }
+        VStack(spacing: 0) {
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                bigNumber("\(model.cadence)", "BPM")
+                Rectangle()
+                    .fill(Color.white.opacity(0.25))
+                    .frame(width: 1, height: 30)
+                bigNumber(model.actualCadence.map(String.init) ?? "—", "шаг/мин")
             }
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
+            if model.warmupRemaining > 0 || model.phase == .paused {
+                Text(model.phase == .paused ? "пауза" : "разминка \(formatElapsed(model.warmupRemaining))")
+                    .font(.caption2)
+                    .foregroundStyle(.yellow)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 4)
         .background(ZoneStyle.cadenceGradient, in: RoundedRectangle(cornerRadius: 14))
     }
 
+    private func bigNumber(_ value: String, _ caption: LocalizedStringKey) -> some View {
+        VStack(spacing: -4) {
+            Text(value)
+                .font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit())
+                .foregroundStyle(.white)
+                .contentTransition(.numericText())
+                .animation(.snappy, value: value)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(caption)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.8))
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private var heartCard: some View {
         let zone = model.zone
-        return VStack(spacing: 4) {
+        return VStack(spacing: 3) {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 16))
+                    .font(.system(size: 15))
                     .foregroundStyle(ZoneStyle.accent(zone))
                 Text(model.heartRate.map(String.init) ?? "—")
-                    .font(.system(size: 24, weight: .bold, design: .rounded).monospacedDigit())
+                    .font(.system(size: 22, weight: .bold, design: .rounded).monospacedDigit())
                     .foregroundStyle(.white)
                 if let smoothed = model.smoothedHeartRate {
                     Text("· \(Int(smoothed.rounded()))")
@@ -79,38 +77,39 @@ struct MetricsView: View {
                 settings: model.settings,
                 accent: ZoneStyle.accent(zone),
                 barHeight: 5,
-                markerSize: 16,
+                markerSize: 14,
                 showsLabels: false
             )
         }
         .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        .padding(.vertical, 4)
         .background(ZoneStyle.gradient(zone), in: RoundedRectangle(cornerRadius: 14))
         .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(zone))
     }
 
     private var formCard: some View {
-        HStack {
-            metric(model.groundContactMs.map { "\(Int($0.rounded()))" } ?? "—", "мс контакт")
-            Spacer()
-            metric(model.verticalOscillationCm.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "—", "см колеб.")
-            Spacer()
+        HStack(spacing: 4) {
             metric(formatEfficiency(model.recentEfficiency), "м/удар")
+            metric(model.groundContactMs.map { "\(Int($0.rounded()))" } ?? "—", "мс контакт")
+            metric(model.verticalOscillationCm.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "—", "см колеб.")
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 8)
         .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
     }
 
     private func metric(_ value: String, _ caption: LocalizedStringKey) -> some View {
-        VStack(spacing: 0) {
+        VStack(spacing: -2) {
             Text(value)
-                .font(.system(size: 17, weight: .semibold, design: .rounded).monospacedDigit())
+                .font(.system(size: 26, weight: .bold, design: .rounded).monospacedDigit())
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
             Text(caption)
-                .font(.system(size: 9))
+                .font(.system(size: 10))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
+        .frame(maxWidth: .infinity)
     }
 }

@@ -2,11 +2,11 @@ import Foundation
 
 /// Параметры регулятора каденса по пульсу.
 struct RegulatorSettings: Codable, Equatable {
-    /// Нижняя граница каденса, шагов в минуту. Основная настройка.
+    /// Нижняя граница ритма, ударов в минуту. Основная настройка, с неё начинается забег.
     var cadenceMin: Int = 180
-    /// Верхняя граница каденса. По умолчанию считается от нижней плюс `cadenceSpanPercent`.
+    /// Верхняя граница ритма. По умолчанию считается от нижней плюс `cadenceSpanPercent`.
     var cadenceMax: Int = 207
-    /// На сколько процентов верхняя граница каденса выше нижней, когда считается автоматически.
+    /// На сколько процентов верхняя граница ритма выше нижней, когда считается автоматически.
     var cadenceSpanPercent: Int = 15
     /// Нижняя граница зоны пульса. Задаёт масштаб шага регулятора и подсветку.
     var heartRateMin: Int = 130
@@ -16,20 +16,22 @@ struct RegulatorSettings: Codable, Equatable {
     var approachPercent: Int = 10
     /// Полоса под целевым пульсом, внутри которой ритм не растёт.
     var holdBand: Int = 8
-    /// Во сколько раз ритм падает быстрее, чем растёт. От 1 до 3.
-    var slowdownFactor: Double = 2
-    /// Первые минуты забега ритм держится на середине диапазона и не разгоняется.
+    /// Во сколько раз ритм падает быстрее, чем растёт. От 1 до 10.
+    var slowdownFactor: Double = 3
+    /// Первые минуты забега ритм стоит на нижней границе и не меняется.
     var warmupMinutes: Int = 3
     /// Сколько секунд между двумя подстройками ритма.
     var adjustInterval: TimeInterval = 5
     /// Максимальное изменение ритма за одну подстройку при разгоне.
     var maxStep: Int = 4
     /// Постоянная времени сглаживания пульса, секунды.
-    var smoothingSeconds: Double = 10
+    var smoothingSeconds: Double = 5
     /// Щёлкать на каждый второй шаг.
     var halfTimeClick: Bool = false
     /// Громкость щелчка, от 0 до 1.
     var clickVolume: Double = 0.8
+    /// Режим разработчика: посекундная телеметрия пишется в файл.
+    var developerMode: Bool = false
 
     static let `default` = RegulatorSettings()
 
@@ -54,13 +56,11 @@ struct RegulatorSettings: Codable, Equatable {
         smoothingSeconds = try c.decodeIfPresent(Double.self, forKey: .smoothingSeconds) ?? d.smoothingSeconds
         halfTimeClick = try c.decodeIfPresent(Bool.self, forKey: .halfTimeClick) ?? d.halfTimeClick
         clickVolume = try c.decodeIfPresent(Double.self, forKey: .clickVolume) ?? d.clickVolume
+        developerMode = try c.decodeIfPresent(Bool.self, forKey: .developerMode) ?? d.developerMode
     }
 
     var targetHeartRate: Int { heartRateMax }
     var isValid: Bool { cadenceMin < cadenceMax && heartRateMin < heartRateMax }
-
-    /// Середина диапазона каденса, с неё начинается разминка.
-    var midCadence: Int { (cadenceMin + cadenceMax) / 2 }
 
     /// Пульс, с которого рост ритма замедляется.
     var approachHeartRate: Double {
@@ -76,7 +76,7 @@ struct RegulatorSettings: Codable, Equatable {
         Int((Double(cadenceMin) * (1 + Double(spanPercent) / 100)).rounded())
     }
 
-    /// Меняет нижнюю границу каденса и пересчитывает верхнюю по проценту.
+    /// Меняет нижнюю границу ритма и пересчитывает верхнюю по проценту.
     mutating func setCadenceMinDerivingMax(_ value: Int) {
         cadenceMin = value
         cadenceMax = RegulatorSettings.derivedCadenceMax(from: value, spanPercent: cadenceSpanPercent)
@@ -97,7 +97,7 @@ struct RegulatorSettings: Codable, Equatable {
         copy.cadenceSpanPercent = min(50, max(1, copy.cadenceSpanPercent))
         copy.approachPercent = min(30, max(0, copy.approachPercent))
         copy.holdBand = max(0, copy.holdBand)
-        copy.slowdownFactor = min(3, max(1, copy.slowdownFactor))
+        copy.slowdownFactor = min(10, max(1, copy.slowdownFactor))
         copy.warmupMinutes = max(0, copy.warmupMinutes)
         copy.maxStep = max(1, copy.maxStep)
         copy.adjustInterval = max(1, copy.adjustInterval)

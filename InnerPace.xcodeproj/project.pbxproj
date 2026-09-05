@@ -10,6 +10,7 @@
 		035589084B11E2CB469CFFDD /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FAA78E3FC087F45A57C0993 /* HistoryView.swift */; };
 		0683633D54CC2948D956CD3D /* ZoneBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E82056788F69268F67BE66 /* ZoneBar.swift */; };
 		09B5228D5B94F968D373BD9F /* RegulatorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048CE161612AE5CDE43A51F8 /* RegulatorSettings.swift */; };
+		0A804D759A352A58D869CD4A /* TelemetryRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */; };
 		0C60CAD1065A16176486C40D /* HeartRateSmoother.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5165E6F2813F4194DE11FFBA /* HeartRateSmoother.swift */; };
 		0D88BA2A20C7B805D4BE6DDF /* RunSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 209259BDC7466920A286886A /* RunSession.swift */; };
 		18D989D72E8F140E4D947CFE /* WatchWorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50837DB0BB65557BDBBC4AB /* WatchWorkoutManager.swift */; };
@@ -22,11 +23,13 @@
 		3FFF983C9206DDB858ED51F9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 752FF15D945DEFC8C4282C40 /* Localizable.xcstrings */; };
 		40583B757C36EFCB8B0C8A3F /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D750CCDAB16028AE707EF4FF /* InfoPlist.xcstrings */; };
 		4291E747E184EDC6D085ECE4 /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D07F8FDCBAE34404EBEE09C8 /* Formatting.swift */; };
+		42E79B087A2ABE8C23A1F1E3 /* TelemetryRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */; };
 		43B7D60B893CC119A59AC4E6 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF700CD0D1E003336FDD846 /* SettingsStore.swift */; };
 		45F2DC2471F6169F507DF511 /* ZoneBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E82056788F69268F67BE66 /* ZoneBar.swift */; };
 		47556EAD98EA2F4F73784792 /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1A8F58DF25AD2FFEAC71D /* ReportView.swift */; };
 		47E14FAEA5BB15CB20706E74 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3A82599C1BBFEE48BD1669 /* SetupView.swift */; };
 		4A88C0BD41BFEE6EC461E58D /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
+		4E01AABA2F753B15B1B5E9C3 /* TelemetryRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */; };
 		4F6F765F679E8C06123AC09C /* EfficiencyTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA1D82FDAB65342DC0E25C7 /* EfficiencyTracker.swift */; };
 		5091DE77F44183518474077E /* RunFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC1341BA00535751DB5A6A4 /* RunFormatting.swift */; };
 		531AD3E8FF1A2E8F8C476113 /* WatchSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BBEE3B6CE65272FA3B89A /* WatchSync.swift */; };
@@ -142,6 +145,7 @@
 		A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateZone.swift; sourceTree = "<group>"; };
 		A3E1A8F58DF25AD2FFEAC71D /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		A5A16F713EC20D3C2F6296E0 /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
+		AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryRecorder.swift; sourceTree = "<group>"; };
 		AE9757C77EAE89B7E8208864 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B09AD8AA9A479809C95F398A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B19473978148670142164142 /* DetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsView.swift; sourceTree = "<group>"; };
@@ -303,6 +307,7 @@
 				048CE161612AE5CDE43A51F8 /* RegulatorSettings.swift */,
 				8BC1341BA00535751DB5A6A4 /* RunFormatting.swift */,
 				FAF700CD0D1E003336FDD846 /* SettingsStore.swift */,
+				AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */,
 				F010138CDB5BFE92B9D48146 /* WorkoutSummary.swift */,
 			);
 			path = Shared;
@@ -482,6 +487,7 @@
 				DFB306077FF6D30C5A63447B /* RunView.swift in Sources */,
 				757175BD64FF13F9FE3D5F70 /* SettingsStore.swift in Sources */,
 				CE7D75DAF0EE4DB1EF1C56A1 /* SettingsView.swift in Sources */,
+				4E01AABA2F753B15B1B5E9C3 /* TelemetryRecorder.swift in Sources */,
 				3A90D03F917CDE50F5914817 /* WorkoutSummary.swift in Sources */,
 				45F2DC2471F6169F507DF511 /* ZoneBar.swift in Sources */,
 				983064E1F2150C5DF0290480 /* ZoneStyle.swift in Sources */,
@@ -510,6 +516,7 @@
 				ECA7B214967B947CB9DFBCF7 /* RunFormatting.swift in Sources */,
 				B7F860C58CD68C28D2C6298D /* SettingsStore.swift in Sources */,
 				47E14FAEA5BB15CB20706E74 /* SetupView.swift in Sources */,
+				42E79B087A2ABE8C23A1F1E3 /* TelemetryRecorder.swift in Sources */,
 				7A4A9274A5A0B5E2CBDB6F88 /* WatchRootView.swift in Sources */,
 				80170A137179926E67EE5F69 /* WatchRunModel.swift in Sources */,
 				531AD3E8FF1A2E8F8C476113 /* WatchSync.swift in Sources */,
@@ -538,6 +545,7 @@
 				D72FBCA0AA5DAB286B9A99CB /* RegulatorSettingsTests.swift in Sources */,
 				72BF615B439DFD1E0E87A132 /* RunFormatting.swift in Sources */,
 				43B7D60B893CC119A59AC4E6 /* SettingsStore.swift in Sources */,
+				0A804D759A352A58D869CD4A /* TelemetryRecorder.swift in Sources */,
 				AACEC495EAC70C8810505131 /* WorkoutSummary.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

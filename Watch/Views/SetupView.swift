@@ -87,17 +87,17 @@ struct QuickSettingsView: View {
     }
 }
 
-/// Тонкие параметры регулятора и звука.
+/// Тонкие параметры регулятора, звук и режим разработчика.
 struct AdvancedSettingsView: View {
     enum Field: Hashable {
-        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, warmup, interval, maxStep, smoothing
+        case cadenceMax, span, heartRateMin, approach, holdBand, warmup, slowdown, smoothing, interval, maxStep
     }
 
     @Environment(WatchRunModel.self) private var model
     @FocusState private var focused: Field?
     @State private var interval: Int = 5
-    @State private var smoothing: Int = 10
-    @State private var slowdown: Int = 2
+    @State private var smoothing: Int = 5
+    @State private var slowdown: Int = 3
 
     var body: some View {
         @Bindable var store = model.settingsStore
@@ -121,21 +121,8 @@ struct AdvancedSettingsView: View {
                 HStack(spacing: 6) {
                     CrownNumberField(title: "Удержание", value: $store.settings.holdBand,
                                      range: 0...20, field: .holdBand, focused: $focused)
-                    CrownNumberField(title: "Спуск", value: $slowdown,
-                                     range: 1...3, field: .slowdown, focused: $focused, unit: "×")
-                }
-                sectionTitle("Темп подстройки")
-                HStack(spacing: 6) {
                     CrownNumberField(title: "Разминка", value: $store.settings.warmupMinutes,
                                      range: 0...15, field: .warmup, focused: $focused, unit: "мин")
-                    CrownNumberField(title: "Интервал", value: $interval,
-                                     range: 2...30, field: .interval, focused: $focused, unit: "с")
-                }
-                HStack(spacing: 6) {
-                    CrownNumberField(title: "Шаг", value: $store.settings.maxStep,
-                                     range: 1...10, field: .maxStep, focused: $focused)
-                    CrownNumberField(title: "Сглажив.", value: $smoothing,
-                                     range: 0...30, field: .smoothing, focused: $focused, unit: "с")
                 }
                 sectionTitle("Звук")
                 Toggle("Каждый второй шаг", isOn: $store.settings.halfTimeClick)
@@ -146,6 +133,26 @@ struct AdvancedSettingsView: View {
                 Text("Громкость")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+
+                sectionTitle("Разработчик")
+                Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
+                    .font(.caption)
+                HStack(spacing: 6) {
+                    CrownNumberField(title: "Спуск", value: $slowdown,
+                                     range: 1...10, field: .slowdown, focused: $focused, unit: "×")
+                    CrownNumberField(title: "Сглажив.", value: $smoothing,
+                                     range: 0...30, field: .smoothing, focused: $focused, unit: "с")
+                }
+                HStack(spacing: 6) {
+                    CrownNumberField(title: "Интервал", value: $interval,
+                                     range: 2...30, field: .interval, focused: $focused, unit: "с")
+                    CrownNumberField(title: "Шаг", value: $store.settings.maxStep,
+                                     range: 1...10, field: .maxStep, focused: $focused)
+                }
+                Text("Телеметрия пишется посекундно в CSV и пересылается на телефон, папка InnerPace в «Файлах».")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 4)
         }

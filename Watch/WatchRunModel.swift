@@ -2,7 +2,7 @@ import Foundation
 import Observation
 
 /// Модель автономной тренировки на часах: тренировка HealthKit, регулятор,
-/// метроном, шагомер, эффективность и отчёт.
+/// метроном, шагомер, эффективность, отчёт и телеметрия.
 @MainActor
 @Observable
 final class WatchRunModel {
@@ -26,6 +26,7 @@ final class WatchRunModel {
 
     private var engine: RegulatorEngine
     private var efficiency = EfficiencyTracker()
+    private var telemetry = TelemetryRecorder()
     private var ticker: Timer?
     private var startDate: Date?
     private var metronomeSum = 0
@@ -84,10 +85,10 @@ final class WatchRunModel {
         engine.reset(at: now)
         cadence = engine.cadence
         efficiency.reset()
+        telemetry.start(settings: settings)
         metronomeSum = 0
         metronomeCount = 0
-        metronome.volume = Float(settings.clickVolume)
-        metronome.halfTime = settings.halfTimeClick
+        applySettingsToMetronome()
         metronome.bpm = Double(cadence)
 
         do {
@@ -128,12 +129,7 @@ final class WatchRunModel {
             lastError = error.localizedDescription
             return
         }
-        // Настройки могли поменять на паузе.
-        engine.settings = settings
-        cadence = engine.cadence
-        metronome.volume = Float(settings.clickVolume)
-        metronome.halfTime = settings.halfTimeClick
-        metronome.bpm = Double(cadence)
+        applySettings()
         workout.resume()
         engine.markResumed(at: Date())
         phase = .running
@@ -179,6 +175,9 @@ final class WatchRunModel {
         )
         store.add(summary)
         sync.send(summary)
+        if settings.developerMode, let url = telemetry.write(date: summary.date, source: .watch) {
+            sync.send(file: url)
+        }
         report = summary
         elapsed = finalElapsed
         phase = .report
@@ -187,6 +186,23 @@ final class WatchRunModel {
     func dismissReport() {
         report = nil
         phase = .setup
+    }
+
+    // MARK: - Настройки на бегу
+
+    /// Настройки применяются сразу, и на бегу, и на паузе.
+    private func applySettings() {
+        if engine.settings != settings {
+            engine.settings = settings
+            cadence = engine.cadence
+            metronome.bpm = Double(cadence)
+        }
+        applySettingsToMetronome()
+    }
+
+    private func applySettingsToMetronome() {
+        metronome.volume = Float(settings.clickVolume)
+        metronome.halfTime = settings.halfTimeClick
     }
 
     // MARK: - Такт
@@ -202,15 +218,30 @@ final class WatchRunModel {
         let now = Date()
         elapsed = workout.elapsed
         guard phase == .running else { return }
+        applySettings()
         efficiency.update(time: now, distance: workout.distanceMeters,
                           heartRate: smoothedHeartRate ?? heartRate.map(Double.init))
         metronomeSum += cadence
         metronomeCount += 1
-        guard let adjustment = engine.tick(at: now) else { return }
-        cadence = adjustment.cadence
-        metronome.bpm = Double(cadence)
-        if let line = adjustment.logLine {
-            lastDecision = line
+        var decision: String?
+        if let adjustment = engine.tick(at: now) {
+            cadence = adjustment.cadence
+            metronome.bpm = Double(cadence)
+            if let line = adjustment.logLine {
+                lastDecision = line
+                decision = line
+            }
+        }
+        if settings.developerMode {
+            telemetry.append(TelemetryRow(
+                time: now, elapsed: elapsed, heartRate: heartRate,
+                smoothedHeartRate: smoothedHeartRate, decisionHeartRate: engine.decisionHeartRate,
+                metronome: cadence, actualCadence: actualCadence,
+                distanceMeters: workout.distanceMeters, speedMetersPerSecond: workout.speedMetersPerSecond,
+                groundContactMs: groundContactMs, verticalOscillationCm: verticalOscillationCm,
+                strideLengthMeters: workout.strideLengthMeters, powerWatts: workout.powerWatts,
+                efficiencyRecent: efficiency.recent, warmup: engine.isWarmingUp(at: now), decision: decision
+            ))
         }
     }
 }

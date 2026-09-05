@@ -41,15 +41,13 @@ final class CadenceControllerTests: XCTestCase {
         XCTAssertEqual(controller.cadence, 180)
     }
 
-    func testHighHeartRateSlowsDown() {
+    func testHighHeartRateSlowsDownRoundingUp() {
         var controller = CadenceController(settings: plain)
-        _ = controller.adjust(forHeartRate: 120)
-        _ = controller.adjust(forHeartRate: 120)
-        XCTAssertEqual(controller.cadence, 188)
-        XCTAssertEqual(controller.adjust(forHeartRate: 152), .slowDown(1))
-        XCTAssertEqual(controller.adjust(forHeartRate: 160), .slowDown(2))
+        controller.setCadence(190)
+        XCTAssertEqual(controller.adjust(forHeartRate: 151), .slowDown(1))
+        XCTAssertEqual(controller.adjust(forHeartRate: 156), .slowDown(2), "1,2 шага округляем вверх до 2")
         XCTAssertEqual(controller.adjust(forHeartRate: 175), .slowDown(4))
-        XCTAssertEqual(controller.cadence, 181)
+        XCTAssertEqual(controller.cadence, 183)
     }
 
     func testClampsToRange() {
@@ -98,6 +96,17 @@ final class CadenceControllerTests: XCTestCase {
         XCTAssertEqual(controller.cadence, 182)
     }
 
+    func testSlowdownFactorTenDropsToFloorInOneStep() {
+        var s = plain
+        s.slowdownFactor = 10
+        var controller = CadenceController(settings: s)
+        controller.setCadence(200)
+        // 4 удара выше цели: 4 × 0,2 × 10 = 8 ударов вниз за один интервал.
+        XCTAssertEqual(controller.adjust(forHeartRate: 154), .slowDown(8))
+        XCTAssertEqual(controller.adjust(forHeartRate: 163), .slowDown(12))
+        XCTAssertEqual(controller.cadence, 180)
+    }
+
     func testDerivedCadenceMaxAndZoneWidth() {
         var s = RegulatorSettings.default
         s.setCadenceMinDerivingMax(180)
@@ -105,6 +114,5 @@ final class CadenceControllerTests: XCTestCase {
         s.setTargetHeartRateKeepingZoneWidth(160)
         XCTAssertEqual(s.heartRateMax, 160)
         XCTAssertEqual(s.heartRateMin, 140)
-        XCTAssertEqual(s.midCadence, 193)
     }
 }

@@ -20,13 +20,13 @@ final class RegulatorEngineTests: XCTestCase {
         var engine = RegulatorEngine(settings: settings)
         let t0 = Date(timeIntervalSince1970: 1_000)
         engine.reset(at: t0)
-        XCTAssertEqual(engine.cadence, 190, "разминки нет, но старт всё равно с середины диапазона")
+        XCTAssertEqual(engine.cadence, 180, "старт с нижней границы")
         engine.ingest(bpm: 130, at: t0)
         XCTAssertNil(engine.tick(at: t0))
         XCTAssertNil(engine.tick(at: t0.addingTimeInterval(4)))
         let adjustment = engine.tick(at: t0.addingTimeInterval(5))
         XCTAssertEqual(adjustment?.action, .speedUp(4))
-        XCTAssertEqual(engine.cadence, 194)
+        XCTAssertEqual(engine.cadence, 184)
     }
 
     func testFreezesWhenHeartRateIsStale() {
@@ -36,7 +36,7 @@ final class RegulatorEngineTests: XCTestCase {
         engine.ingest(bpm: 120, at: t0)
         XCTAssertNil(engine.tick(at: t0))
         XCTAssertNil(engine.tick(at: t0.addingTimeInterval(30)))
-        XCTAssertEqual(engine.cadence, 190)
+        XCTAssertEqual(engine.cadence, 180)
     }
 
     func testResumeDelaysNextAdjustment() {
@@ -60,22 +60,20 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertEqual(engine.cadence, 195)
     }
 
-    func testWarmupHoldsMidCadenceButAllowsSlowdown() {
+    func testWarmupHoldsLowerCadenceNoMatterWhat() {
         var s = settings
         s.warmupMinutes = 3
         var engine = RegulatorEngine(settings: s)
         let t0 = Date(timeIntervalSince1970: 1_000)
         engine.reset(at: t0)
-        XCTAssertEqual(engine.cadence, 190)
-        XCTAssertTrue(engine.isWarmingUp(at: t0.addingTimeInterval(60)))
-        XCTAssertNil(engine.tick(at: t0), "первый такт только запускает отсчёт интервала")
+        XCTAssertEqual(engine.cadence, 180)
+        XCTAssertNil(engine.tick(at: t0))
 
         engine.ingest(bpm: 110, at: t0.addingTimeInterval(5))
         XCTAssertEqual(engine.tick(at: t0.addingTimeInterval(5))?.action, .hold)
-        XCTAssertEqual(engine.cadence, 190)
-
-        engine.ingest(bpm: 165, at: t0.addingTimeInterval(10))
-        XCTAssertEqual(engine.tick(at: t0.addingTimeInterval(10))?.action, .slowDown(3))
+        engine.ingest(bpm: 170, at: t0.addingTimeInterval(10))
+        XCTAssertEqual(engine.tick(at: t0.addingTimeInterval(10))?.action, .hold, "на разминке ритм не трогаем даже при высоком пульсе")
+        XCTAssertEqual(engine.cadence, 180)
 
         engine.ingest(bpm: 110, at: t0.addingTimeInterval(181))
         XCTAssertFalse(engine.isWarmingUp(at: t0.addingTimeInterval(181)))
@@ -95,6 +93,24 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertFalse(engine.isWarmingUp(at: t0.addingTimeInterval(721)))
     }
 
+    func testRawHeartRateAboveTargetBypassesSmoothing() {
+        var s = settings
+        s.smoothingSeconds = 30
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        engine.ingest(bpm: 120, at: t0)
+        XCTAssertNil(engine.tick(at: t0))
+        for second in 1...5 { _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second))) }
+        XCTAssertEqual(engine.cadence, 184)
+        // Пульс прыгнул выше цели: сглаженный ещё около 121, решение принимается по сырому 160.
+        engine.ingest(bpm: 160, at: t0.addingTimeInterval(6))
+        XCTAssertLessThan(engine.smoothedHeartRate ?? 0, 130)
+        XCTAssertEqual(engine.decisionHeartRate ?? 0, 160, accuracy: 0.001)
+        let adjustment = engine.tick(at: t0.addingTimeInterval(10))
+        XCTAssertEqual(adjustment?.action, .slowDown(2))
+    }
+
     func testLogLine() {
         let up = RegulatorEngine.Adjustment(heartRate: 140.4, cadence: 186, action: .speedUp(2))
         XCTAssertEqual(up.logLine, "Пульс 140 → ритм 186 (+2)")
@@ -107,5 +123,19 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertEqual(formatPace(nil), "—")
         XCTAssertEqual(formatPace(0), "—")
         XCTAssertTrue(formatDistance(3420).hasSuffix(" км"))
+    }
+
+    func testTelemetryCSV() {
+        var recorder = TelemetryRecorder()
+        recorder.start(settings: settings)
+        recorder.append(TelemetryRow(time: Date(timeIntervalSince1970: 0), elapsed: 1, heartRate: 140,
+                                     smoothedHeartRate: 139.5, decisionHeartRate: 139.5, metronome: 182,
+                                     actualCadence: 178, distanceMeters: 3.2, speedMetersPerSecond: 3.1,
+                                     groundContactMs: 240, verticalOscillationCm: 8.4, strideLengthMeters: 1.05,
+                                     powerWatts: 250, efficiencyRecent: nil, warmup: true, decision: "a, b"))
+        let csv = recorder.csv()
+        XCTAssertTrue(csv.hasPrefix("# settings {"))
+        XCTAssertTrue(csv.contains(TelemetryRecorder.header))
+        XCTAssertTrue(csv.contains(",140,139.5,139.5,182,178,3.2,3.10,240,8.4,1.05,250,,1,a; b"))
     }
 }

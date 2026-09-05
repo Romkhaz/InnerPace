@@ -1,13 +1,14 @@
 import Foundation
 
-/// Регулятор: по сглаженному пульсу решает, куда двигать ритм.
+/// Регулятор: по пульсу решает, куда двигать ритм.
 ///
 /// Цель регулятора — целевой пульс. Зоны снизу вверх:
 /// - далеко ниже цели: ритм растёт, шаг пропорционален расстоянию до цели;
 /// - зона подхода (за `approachPercent` до цели): ритм растёт по одному шагу
 ///   за интервал, чтобы инерция пульса не вынесла его за цель;
 /// - полоса удержания (`holdBand` под целью): ритм не меняется;
-/// - выше цели: ритм падает, в `slowdownFactor` раз быстрее, чем рос.
+/// - выше цели: ритм падает, в `slowdownFactor` раз быстрее, чем рос,
+///   и шаг округляется вверх, чтобы даже малое превышение давало отклик.
 struct CadenceController {
     enum Action: Equatable {
         case speedUp(Int)
@@ -40,10 +41,10 @@ struct CadenceController {
         let gain = Double(settings.maxStep) / zoneWidth
 
         if heartRate > target {
-            let factor = min(3, max(1, settings.slowdownFactor))
+            let factor = min(10, max(1, settings.slowdownFactor))
             let maxDown = max(1, Int((Double(settings.maxStep) * factor).rounded()))
             let raw = (heartRate - target) * gain * factor
-            let step = min(maxDown, max(1, Int(raw.rounded())))
+            let step = min(maxDown, max(1, Int(raw.rounded(.up))))
             return move(by: -step)
         }
         if heartRate >= settings.holdHeartRate {

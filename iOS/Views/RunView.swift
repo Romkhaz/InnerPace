@@ -84,27 +84,17 @@ struct RunView: View {
 
     private var cadenceCard: some View {
         VStack(spacing: 2) {
-            Text("\(session.cadence)")
-                .font(.system(size: 92, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(.white)
-                .contentTransition(.numericText())
-                .animation(.snappy, value: session.cadence)
-            HStack(spacing: 6) {
-                Text("BPM")
-                    .font(.headline)
-                    .foregroundStyle(.white.opacity(0.85))
-                Text("·").foregroundStyle(.white.opacity(0.5))
-                Text("шаг")
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                bigNumber("\(session.cadence)", "BPM")
+                Rectangle()
+                    .fill(Color.white.opacity(0.25))
+                    .frame(width: 1, height: 60)
+                bigNumber(session.actualCadence.map(String.init) ?? "—", "шаг/мин")
+            }
+            if session.warmupRemaining > 0 {
+                Text("разминка \(formatElapsed(session.warmupRemaining))")
                     .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.7))
-                Text(session.actualCadence.map(String.init) ?? "—")
-                    .font(.headline.monospacedDigit())
-                    .foregroundStyle(.white)
-                if session.warmupRemaining > 0 {
-                    Text("· разминка \(formatElapsed(session.warmupRemaining))")
-                        .font(.subheadline)
-                        .foregroundStyle(.yellow)
-                }
+                    .foregroundStyle(.yellow)
             }
         }
         .frame(maxWidth: .infinity)
@@ -113,6 +103,22 @@ struct RunView: View {
             ZoneStyle.cadenceGradient,
             in: RoundedRectangle(cornerRadius: 26)
         )
+    }
+
+    private func bigNumber(_ value: String, _ caption: LocalizedStringKey) -> some View {
+        VStack(spacing: -4) {
+            Text(value)
+                .font(.system(size: 76, weight: .bold, design: .rounded).monospacedDigit())
+                .foregroundStyle(.white)
+                .contentTransition(.numericText())
+                .animation(.snappy, value: value)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text(caption)
+                .font(.headline)
+                .foregroundStyle(.white.opacity(0.85))
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Пульс

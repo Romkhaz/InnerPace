@@ -22,6 +22,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Нужен для подключения к пульсометру Polar H10.</string>
 	<key>NSHealthShareUsageDescription</key>
@@ -35,6 +37,8 @@
 		<string>audio</string>
 		<string>bluetooth-central</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

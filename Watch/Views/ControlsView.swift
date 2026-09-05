@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Страница управления: стоп и пауза, на паузе ещё и настройки.
+/// Страница управления: стоп, пауза и настройки, доступные прямо на бегу.
 struct ControlsView: View {
     @Environment(WatchRunModel.self) private var model
     @State private var showsSettings = false
@@ -20,13 +20,11 @@ struct ControlsView: View {
                         Task { await model.togglePause() }
                     }
                 }
-                if model.phase == .paused {
-                    Button {
-                        showsSettings = true
-                    } label: {
-                        Label("Настройки", systemImage: "slider.horizontal.3")
-                            .frame(maxWidth: .infinity)
-                    }
+                Button {
+                    showsSettings = true
+                } label: {
+                    Label("Настройки", systemImage: "slider.horizontal.3")
+                        .frame(maxWidth: .infinity)
                 }
                 if let decision = model.lastDecision {
                     Text(decision)
@@ -44,8 +42,19 @@ struct ControlsView: View {
         }
         .sheet(isPresented: $showsSettings) {
             NavigationStack {
-                QuickSettingsView()
-                    .navigationTitle("Настройки")
+                ScrollView {
+                    VStack(spacing: 8) {
+                        QuickSettingsView()
+                        NavigationLink {
+                            AdvancedSettingsView()
+                        } label: {
+                            Label("Ещё", systemImage: "slider.horizontal.3")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .padding(.horizontal, 4)
+                }
+                .navigationTitle("Настройки")
             }
         }
     }

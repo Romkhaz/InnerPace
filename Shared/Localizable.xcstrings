@@ -122,6 +122,16 @@
         }
       }
     },
+    "В зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт. На разминке ритм стоит на нижней границе и не меняется.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the approach zone the beat rises by one per interval and holds in the hold band. During warm-up the beat stays at the lower bound and does not change."
+          }
+        }
+      }
+    },
     "Верт. колебания": {
       "localizations": {
         "en": {
@@ -158,6 +168,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Time, min"
+          }
+        }
+      }
+    },
+    "Выше цели решение принимается по сырому пульсу без задержки сглаживания. Телеметрия пишется посекундно в CSV, файлы лежат в папке InnerPace в «Файлах» и в «Истории».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Above the target the decision uses the raw heart rate with no smoothing delay. Telemetry is written per second to CSV; the files live in the InnerPace folder in Files and in History."
           }
         }
       }
@@ -652,6 +672,16 @@
         }
       }
     },
+    "Разработчик": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Developer"
+          }
+        }
+      }
+    },
     "Регулятор ведёт пульс к этой цели. Рост ритма замедляется с %lld и останавливается с %lld.": {
       "localizations": {
         "en": {
@@ -862,12 +892,52 @@
         }
       }
     },
+    "Телеметрия": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetry"
+          }
+        }
+      }
+    },
+    "Телеметрия в файл": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetry to file"
+          }
+        }
+      }
+    },
+    "Телеметрия пишется посекундно в CSV и пересылается на телефон, папка InnerPace в «Файлах».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetry is written per second to CSV and sent to the phone, InnerPace folder in Files."
+          }
+        }
+      }
+    },
     "Темп подстройки": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Adjustment pace"
+          }
+        }
+      }
+    },
+    "Тренировка идёт: новые значения применяются сразу.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout in progress: new values apply immediately."
           }
         }
       }
@@ -1042,12 +1112,32 @@
         }
       }
     },
+    "пауза": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "paused"
+          }
+        }
+      }
+    },
     "пульс · %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "HR · %@"
+          }
+        }
+      }
+    },
+    "разминка %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "warm-up %@"
           }
         }
       }

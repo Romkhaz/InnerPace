@@ -20,6 +20,7 @@ struct RegulatorEngine {
     private var controller: CadenceController
     private var smoother: HeartRateSmoother
     private(set) var smoothedHeartRate: Double?
+    private(set) var latestHeartRate: Double?
     private(set) var lastHeartRateAt: Date?
     private var lastAdjust: Date?
     private var startedAt: Date?
@@ -36,12 +37,12 @@ struct RegulatorEngine {
 
     var cadence: Int { controller.cadence }
 
-    /// Начало тренировки: ритм на середину диапазона для разминки, история пульса забыта.
+    /// Начало тренировки: ритм на нижнюю границу, история пульса забыта.
     mutating func reset(at now: Date = Date()) {
         controller.reset()
-        controller.setCadence(settings.midCadence)
         smoother = HeartRateSmoother(timeConstant: settings.smoothingSeconds)
         smoothedHeartRate = nil
+        latestHeartRate = nil
         lastAdjust = nil
         startedAt = now
         pausedAt = nil
@@ -49,12 +50,23 @@ struct RegulatorEngine {
 
     mutating func ingest(bpm: Int, at time: Date) {
         lastHeartRateAt = time
+        latestHeartRate = Double(bpm)
         smoothedHeartRate = smoother.add(Double(bpm), at: time)
     }
 
     func isHeartRateFresh(at now: Date) -> Bool {
         guard let lastHeartRateAt else { return false }
         return now.timeIntervalSince(lastHeartRateAt) <= staleAfter
+    }
+
+    /// Пульс, по которому принимается решение. Пока пульс ниже цели, это сглаженное
+    /// значение. Как только сырой пульс выше цели, берём его без задержки сглаживания,
+    /// чтобы спуск ритма начинался сразу, а не когда фильтр догонит.
+    var decisionHeartRate: Double? {
+        guard let smoothed = smoothedHeartRate else { return latestHeartRate }
+        guard let latest = latestHeartRate else { return smoothed }
+        let target = Double(settings.targetHeartRate)
+        return latest > target ? max(smoothed, latest) : smoothed
     }
 
     /// Сколько секунд разминки осталось. Ноль, когда разминка закончилась или её нет.
@@ -88,9 +100,9 @@ struct RegulatorEngine {
         if lastAdjust == nil { lastAdjust = now }
         guard let lastAdjust, now.timeIntervalSince(lastAdjust) >= settings.adjustInterval else { return nil }
         self.lastAdjust = now
-        guard let heartRate = smoothedHeartRate, isHeartRateFresh(at: now) else { return nil }
-        // На разминке ритм держится на середине; разрешаем только сброс, если пульс уже выше цели.
-        if isWarmingUp(at: now), heartRate <= Double(settings.targetHeartRate) {
+        guard let heartRate = decisionHeartRate, isHeartRateFresh(at: now) else { return nil }
+        // На разминке ритм стоит на нижней границе и не меняется.
+        if isWarmingUp(at: now) {
             return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: .hold)
         }
         let action = controller.adjust(forHeartRate: heartRate)

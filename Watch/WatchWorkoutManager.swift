@@ -15,6 +15,7 @@ final class WatchWorkoutManager: NSObject {
     private(set) var groundContactMs: Double?
     private(set) var verticalOscillationCm: Double?
     private(set) var strideLengthMeters: Double?
+    private(set) var powerWatts: Double?
     private(set) var routePointCount = 0
     private(set) var lastError: String?
 
@@ -130,6 +131,7 @@ final class WatchWorkoutManager: NSObject {
             groundContactMs = nil
             verticalOscillationCm = nil
             strideLengthMeters = nil
+            powerWatts = nil
             routePointCount = 0
             isActive = true
             lastError = nil
@@ -207,6 +209,7 @@ extension WatchWorkoutManager: HKLiveWorkoutBuilderDelegate {
         var newContact: Double?
         var newOscillation: Double?
         var newStride: Double?
+        var newPower: Double?
 
         for type in collectedTypes {
             guard let quantityType = type as? HKQuantityType,
@@ -228,6 +231,8 @@ extension WatchWorkoutManager: HKLiveWorkoutBuilderDelegate {
                 if let q = statistics.mostRecentQuantity() { newOscillation = q.doubleValue(for: HKUnit.meterUnit(with: .centi)) }
             case HKQuantityType(.runningStrideLength):
                 if let q = statistics.mostRecentQuantity() { newStride = q.doubleValue(for: .meter()) }
+            case HKQuantityType(.runningPower):
+                if let q = statistics.mostRecentQuantity() { newPower = q.doubleValue(for: .watt()) }
             default:
                 break
             }
@@ -243,6 +248,7 @@ extension WatchWorkoutManager: HKLiveWorkoutBuilderDelegate {
             if let newContact { self.groundContactMs = newContact }
             if let newOscillation { self.verticalOscillationCm = newOscillation }
             if let newStride { self.strideLengthMeters = newStride }
+            if let newPower { self.powerWatts = newPower }
         }
     }
 
@@ -266,6 +272,8 @@ extension WatchWorkoutManager: CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        // «Позиция неизвестна» приходит, пока GPS ловит спутники; CoreLocation велит просто ждать.
+        if let clError = error as? CLError, clError.code == .locationUnknown { return }
         DispatchQueue.main.async {
             self.lastError = String(localized: "GPS: \(error.localizedDescription)")
         }

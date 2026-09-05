@@ -34,9 +34,9 @@ struct SettingsView: View {
                     Label("Дополнительно", systemImage: "slider.horizontal.3")
                 }
             }
-            if session.state == .paused {
+            if session.state != .idle {
                 Section {
-                    Text("Тренировка на паузе: новые границы применятся при продолжении.")
+                    Text("Тренировка идёт: новые значения применяются сразу.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
             }
@@ -45,12 +45,12 @@ struct SettingsView: View {
     }
 }
 
-/// Тонкие параметры регулятора, разминка и звук.
+/// Тонкие параметры регулятора, звук и режим разработчика.
 struct AdvancedSettingsView: View {
     @Environment(RunSession.self) private var session
     @State private var previewing = false
     @State private var interval: Int = 5
-    @State private var smoothing: Int = 10
+    @State private var smoothing: Int = 5
 
     var body: some View {
         @Bindable var store = session.settingsStore
@@ -69,24 +69,8 @@ struct AdvancedSettingsView: View {
                           range: 40...(settings.heartRateMax - 1))
                 AdjustRow(title: "Зона подхода", value: $store.settings.approachPercent, range: 0...30, unit: "%")
                 AdjustRow(title: "Полоса удержания", value: $store.settings.holdBand, range: 0...20)
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text("Спуск быстрее подъёма")
-                        Spacer()
-                        Text("×\(settings.slowdownFactor.formatted(.number.precision(.fractionLength(1))))")
-                            .font(.body.weight(.semibold).monospacedDigit())
-                    }
-                    Slider(value: $store.settings.slowdownFactor, in: 1...3, step: 0.5)
-                }
-                Text("В зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт. Выше цели ритм падает быстрее, чем рос.")
-                    .font(.footnote).foregroundStyle(.secondary)
-            }
-            Section("Темп подстройки") {
                 AdjustRow(title: "Разминка", value: $store.settings.warmupMinutes, range: 0...15, unit: "мин")
-                AdjustRow(title: "Интервал", value: $interval, range: 2...30, unit: "с")
-                AdjustRow(title: "Макс. шаг", value: $store.settings.maxStep, range: 1...10, unit: "уд/мин")
-                AdjustRow(title: "Сглаживание пульса", value: $smoothing, range: 0...30, unit: "с")
-                Text("На разминке ритм держится на середине диапазона и не разгоняется.")
+                Text("В зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт. На разминке ритм стоит на нижней границе и не меняется.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Звук") {
@@ -98,6 +82,23 @@ struct AdvancedSettingsView: View {
                 }
                 Toggle("Проверить звук", isOn: $previewing)
                     .disabled(session.state != .idle)
+            }
+            Section("Разработчик") {
+                Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Спуск быстрее подъёма")
+                        Spacer()
+                        Text("×\(settings.slowdownFactor.formatted(.number.precision(.fractionLength(1))))")
+                            .font(.body.weight(.semibold).monospacedDigit())
+                    }
+                    Slider(value: $store.settings.slowdownFactor, in: 1...10, step: 0.5)
+                }
+                AdjustRow(title: "Сглаживание пульса", value: $smoothing, range: 0...30, unit: "с")
+                AdjustRow(title: "Интервал", value: $interval, range: 2...30, unit: "с")
+                AdjustRow(title: "Макс. шаг", value: $store.settings.maxStep, range: 1...10, unit: "уд/мин")
+                Text("Выше цели решение принимается по сырому пульсу без задержки сглаживания. Телеметрия пишется посекундно в CSV, файлы лежат в папке InnerPace в «Файлах» и в «Истории».")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
             Section {
                 Button("Забыть пульсометр", role: .destructive) {
