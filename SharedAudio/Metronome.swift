@@ -15,17 +15,24 @@ enum MetronomeError: LocalizedError {
 /// Метроном на AVAudioSourceNode: щелчок синтезируется прямо в аудиопотоке,
 /// поэтому темп меняется мгновенно и не плывёт. Один код для телефона и часов,
 /// отличается только настройка аудиосессии.
+///
+/// В режиме `warning` щелчок становится глуше и ниже, а каждый четвёртый такт
+/// звучит двойным ударом: так слышно, что ритм упёрся в предел и надо сбавлять усилие.
 final class Metronome {
     private struct Params {
         var bpm: Double = 180
         var volume: Float = 0.8
         var halfTime = false
+        var warning = false
     }
 
     /// Состояние генератора, живёт только в аудиопотоке.
     private final class RenderState {
         var samplesToNextClick = 0
         var clickPosition = Int.max
+        var beatIndex = 0
+        var echoCountdown = -1
+        var usingWarning = false
     }
 
     private let params = OSAllocatedUnfairLock(initialState: Params())
@@ -47,6 +54,12 @@ final class Metronome {
     var halfTime: Bool {
         get { params.withLock { $0.halfTime } }
         set { params.withLock { $0.halfTime = newValue } }
+    }
+
+    /// Предупреждающий тембр: ритм на пределе, пульс выше цели.
+    var warning: Bool {
+        get { params.withLock { $0.warning } }
+        set { params.withLock { $0.warning = newValue } }
     }
 
     init() {
@@ -114,7 +127,9 @@ final class Metronome {
             throw NSError(domain: "Metronome", code: 1,
                           userInfo: [NSLocalizedDescriptionKey: String(localized: "Не удалось создать аудиоформат")])
         }
-        let click = Metronome.makeClick(sampleRate: sampleRate)
+        let click = Metronome.makeClick(sampleRate: sampleRate, frequency: 1500, overtone: 3000, duration: 0.03, decay: 120)
+        let warningClick = Metronome.makeClick(sampleRate: sampleRate, frequency: 620, overtone: 930, duration: 0.05, decay: 70)
+        let echoDelay = Int(sampleRate * 0.10)
         let state = RenderState()
         let params = self.params
 
@@ -133,11 +148,22 @@ final class Metronome {
             for index in 0..<frames {
                 if state.samplesToNextClick <= 0 {
                     state.clickPosition = 0
+                    state.usingWarning = current.warning
                     state.samplesToNextClick = interval
+                    state.beatIndex &+= 1
+                    // Каждый четвёртый такт в режиме предупреждения дублируется коротким эхом.
+                    state.echoCountdown = (current.warning && state.beatIndex % 4 == 0) ? echoDelay : -1
                 }
+                if state.echoCountdown == 0 {
+                    state.clickPosition = 0
+                    state.usingWarning = true
+                }
+                if state.echoCountdown >= 0 { state.echoCountdown -= 1 }
+
                 var sample: Float = 0
-                if state.clickPosition < click.count {
-                    sample = click[state.clickPosition] * current.volume
+                let buffer = state.usingWarning ? warningClick : click
+                if state.clickPosition < buffer.count {
+                    sample = buffer[state.clickPosition] * current.volume
                     state.clickPosition += 1
                 }
                 out[index] = sample
@@ -183,14 +209,14 @@ final class Metronome {
         try? engine.start()
     }
 
-    /// Короткий щелчок: две гармоники с быстрым затуханием, 30 мс.
-    private static func makeClick(sampleRate: Double) -> [Float] {
-        let duration = 0.03
+    /// Короткий щелчок: две гармоники с быстрым затуханием.
+    private static func makeClick(sampleRate: Double, frequency: Double, overtone: Double,
+                                  duration: Double, decay: Double) -> [Float] {
         let count = Int(sampleRate * duration)
         return (0..<count).map { index in
             let t = Double(index) / sampleRate
-            let envelope = exp(-t * 120)
-            let tone = sin(2 * .pi * 1500 * t) * 0.7 + sin(2 * .pi * 3000 * t) * 0.3
+            let envelope = exp(-t * decay)
+            let tone = sin(2 * .pi * frequency * t) * 0.7 + sin(2 * .pi * overtone * t) * 0.3
             return Float(envelope * tone)
         }
     }

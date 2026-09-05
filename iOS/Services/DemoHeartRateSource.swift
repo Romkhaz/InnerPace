@@ -32,8 +32,9 @@ final class DemoHeartRateSource {
         // Целевой пульс: 120 при 180 шагах, плюс 1,6 удара на каждый шаг каденса
         // и «горка» раз в четыре минуты, чтобы пульс уходил выше зоны.
         phase += 1
-        let hill = phase.truncatingRemainder(dividingBy: 240) > 150 ? 22.0 : 0.0
-        let target = 120 + Double(cadence() - 180) * 1.6 + hill
+        // Ниже 130 регулятор ждёт; горка выводит пульс за цель при ритме на нижней границе.
+        let hill = phase.truncatingRemainder(dividingBy: 240) > 150 ? 40.0 : 0.0
+        let target = 126 + Double(cadence() - 180) * 1.6 + hill
         heartRate += (target - heartRate) * 0.06
         let noise = Double.random(in: -1.5...1.5)
         onHeartRate?(Int((heartRate + noise).rounded()), Date())

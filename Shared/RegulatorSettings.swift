@@ -32,6 +32,12 @@ struct RegulatorSettings: Codable, Equatable {
     var developerMode: Bool = false
     /// Оформление: авто, светлая или тёмная.
     var theme: AppTheme = .auto
+    /// Голосовые подсказки «сбавь» и «в норме».
+    var voiceCues: Bool = true
+    /// Повтор «сбавь», секунды. Ноль означает только на переходах.
+    var voiceRepeatSeconds: Int = 0
+    /// Громкость голоса, от 0 до 1.
+    var voiceVolume: Double = 1
 
     static let `default` = RegulatorSettings()
 
@@ -57,6 +63,9 @@ struct RegulatorSettings: Codable, Equatable {
         clickVolume = try c.decodeIfPresent(Double.self, forKey: .clickVolume) ?? d.clickVolume
         developerMode = try c.decodeIfPresent(Bool.self, forKey: .developerMode) ?? d.developerMode
         theme = try c.decodeIfPresent(AppTheme.self, forKey: .theme) ?? d.theme
+        voiceCues = try c.decodeIfPresent(Bool.self, forKey: .voiceCues) ?? d.voiceCues
+        voiceRepeatSeconds = try c.decodeIfPresent(Int.self, forKey: .voiceRepeatSeconds) ?? d.voiceRepeatSeconds
+        voiceVolume = try c.decodeIfPresent(Double.self, forKey: .voiceVolume) ?? d.voiceVolume
     }
 
     var targetHeartRate: Int { heartRateMax }
@@ -102,6 +111,8 @@ struct RegulatorSettings: Codable, Equatable {
         copy.adjustInterval = max(1, copy.adjustInterval)
         copy.smoothingSeconds = max(0, copy.smoothingSeconds)
         copy.clickVolume = min(1, max(0, copy.clickVolume))
+        copy.voiceRepeatSeconds = min(120, max(0, copy.voiceRepeatSeconds))
+        copy.voiceVolume = min(1, max(0, copy.voiceVolume))
         return copy
     }
 }

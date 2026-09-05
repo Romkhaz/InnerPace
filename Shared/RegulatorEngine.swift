@@ -6,6 +6,10 @@ import Foundation
 /// Старт всегда с нижней границы ритма. Регулятор включается, когда пульс
 /// впервые дошёл до нижней границы зоны, то есть сердце вошло в рабочий режим,
 /// и дальше работает до конца тренировки.
+///
+/// Если ритм уже упёрся в нижнюю границу, а пульс всё равно выше цели дольше
+/// `overLimitDelay`, включается состояние «предел»: снижать ритм больше нечего,
+/// нужно сбавлять усилие. Состояние снимается, когда пульс вернулся под цель.
 struct RegulatorEngine {
     struct Adjustment: Equatable {
         let heartRate: Double
@@ -27,10 +31,17 @@ struct RegulatorEngine {
     private(set) var latestHeartRate: Double?
     private(set) var lastHeartRateAt: Date?
     private(set) var isRegulating = false
+    private(set) var isOverLimit = false
+    private var overLimitSince: Date?
     private var lastAdjust: Date?
 
     /// Сколько секунд без свежего пульса, после чего ритм замораживаем.
     var staleAfter: TimeInterval = 15
+    /// Сколько секунд пульс должен держаться выше цели при ритме на нижней границе,
+    /// прежде чем объявить предел. Отсекает секундные всплески.
+    var overLimitDelay: TimeInterval = 10
+    /// На сколько ударов пульс должен опуститься ниже цели, чтобы предел снялся.
+    var overLimitHysteresis: Double = 2
 
     init(settings: RegulatorSettings) {
         self.settings = settings
@@ -48,6 +59,8 @@ struct RegulatorEngine {
         latestHeartRate = nil
         lastAdjust = nil
         isRegulating = false
+        isOverLimit = false
+        overLimitSince = nil
     }
 
     mutating func ingest(bpm: Int, at time: Date) {
@@ -80,6 +93,7 @@ struct RegulatorEngine {
 
     /// Вызывается раз в секунду. Возвращает решение, если подошло время подстройки.
     mutating func tick(at now: Date) -> Adjustment? {
+        updateOverLimit(at: now)
         if lastAdjust == nil { lastAdjust = now }
         guard let lastAdjust, now.timeIntervalSince(lastAdjust) >= settings.adjustInterval else { return nil }
         self.lastAdjust = now
@@ -91,7 +105,34 @@ struct RegulatorEngine {
             isRegulating = true
         }
         let action = controller.adjust(forHeartRate: heartRate)
+        updateOverLimit(at: now)
         return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: action)
+    }
+
+    private mutating func updateOverLimit(at now: Date) {
+        let target = Double(settings.targetHeartRate)
+        guard isRegulating, isHeartRateFresh(at: now), let heartRate = decisionHeartRate else {
+            overLimitSince = nil
+            isOverLimit = false
+            return
+        }
+        let atFloor = controller.cadence <= settings.cadenceMin
+        if isOverLimit {
+            // Снимаем предел, когда пульс ушёл под цель с запасом или ритм снова есть куда снижать.
+            if heartRate <= target - overLimitHysteresis || !atFloor {
+                isOverLimit = false
+                overLimitSince = nil
+            }
+            return
+        }
+        if atFloor, heartRate > target {
+            if overLimitSince == nil { overLimitSince = now }
+            if let since = overLimitSince, now.timeIntervalSince(since) >= overLimitDelay {
+                isOverLimit = true
+            }
+        } else {
+            overLimitSince = nil
+        }
     }
 }
 

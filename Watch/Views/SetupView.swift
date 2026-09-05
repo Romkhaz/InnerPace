@@ -95,7 +95,7 @@ struct QuickSettingsView: View {
 struct AdvancedSettingsView: View {
     @Environment(\.palette) private var palette
     enum Field: Hashable {
-        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep
+        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep, voiceRepeat
     }
 
     @Environment(WatchRunModel.self) private var model
@@ -147,6 +147,12 @@ struct AdvancedSettingsView: View {
                     .font(.caption2)
                     .foregroundStyle(palette.inkSecondary)
 
+                sectionTitle("Голос")
+                Toggle("Подсказки голосом", isOn: $store.settings.voiceCues)
+                    .font(.caption)
+                    .foregroundStyle(palette.ink)
+                CrownNumberField(title: "Повтор «сбавь»", value: $store.settings.voiceRepeatSeconds,
+                                 range: 0...120, field: .voiceRepeat, focused: $focused, unit: "с")
                 sectionTitle("Разработчик")
                 Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
                     .font(.caption)

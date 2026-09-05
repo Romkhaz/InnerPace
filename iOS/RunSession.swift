@@ -55,6 +55,7 @@ final class RunSession {
     private var engine: RegulatorEngine
     private var efficiency = EfficiencyTracker()
     private var telemetry = TelemetryRecorder()
+    private let cues = CueCoordinator()
     private var ticker: Timer?
     private var segmentStart: Date?
     private var accumulated: TimeInterval = 0
@@ -133,6 +134,8 @@ final class RunSession {
         cadence = engine.cadence
         efficiency.reset()
         telemetry.start(settings: settings)
+        cues.reset()
+        metronome.warning = false
         accumulated = 0
         elapsed = 0
         events.removeAll()
@@ -263,6 +266,11 @@ final class RunSession {
                 decision = line
             }
         }
+        metronome.warning = engine.isOverLimit
+        if let cue = cues.update(overLimit: engine.isOverLimit, settings: settings, now: now) {
+            log(cue)
+            decision = cue
+        }
         samples.append(Sample(time: now, heartRate: heartRateSource == .polar ? heartRate : nil,
                               smoothedHeartRate: smoothedHeartRate, cadence: cadence))
         if samples.count > maxSamples { samples.removeFirst(samples.count - maxSamples) }
@@ -273,7 +281,7 @@ final class RunSession {
                 metronome: cadence, actualCadence: actualCadence,
                 distanceMeters: distanceMeters, speedMetersPerSecond: paceSecondsPerKm.map { 1000 / $0 },
                 groundContactMs: nil, verticalOscillationCm: nil, strideLengthMeters: nil, powerWatts: nil,
-                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, decision: decision
+                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, decision: decision
             ))
         }
     }

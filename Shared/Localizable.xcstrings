@@ -142,6 +142,16 @@
         }
       }
     },
+    "В норме": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back in range"
+          }
+        }
+      }
+    },
     "Верт. колебания": {
       "localizations": {
         "en": {
@@ -188,6 +198,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Above the target the decision uses the raw heart rate with no smoothing delay. Telemetry is written per second to CSV; the files live in the InnerPace folder in Files and in History."
+          }
+        }
+      }
+    },
+    "Голос": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice"
           }
         }
       }
@@ -372,6 +392,16 @@
         }
       }
     },
+    "Когда ритм упёрся в нижнюю границу, а пульс выше цели дольше десяти секунд, щелчок становится глуше с двойным ударом на каждый четвёртый такт и звучит «сбавь». Когда пульс вернулся под цель, звучит «в норме». Повтор 0 значит только на переходах.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When the beat is at its lower bound and heart rate stays above target for ten seconds, the click turns duller with a double hit every fourth beat and you hear “ease off”. When heart rate drops back below target you hear “back in range”. Repeat 0 means transitions only."
+          }
+        }
+      }
+    },
     "Контакт с землёй": {
       "localizations": {
         "en": {
@@ -512,6 +542,16 @@
         }
       }
     },
+    "Повтор «сбавь»": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeat “ease off”"
+          }
+        }
+      }
+    },
     "Подключение: %@": {
       "localizations": {
         "en": {
@@ -538,6 +578,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Connect"
+          }
+        }
+      }
+    },
+    "Подсказки голосом": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice cues"
           }
         }
       }
@@ -592,6 +642,16 @@
         }
       }
     },
+    "Предел: сбавьте усилие": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limit: ease off"
+          }
+        }
+      }
+    },
     "Проверить звук": {
       "localizations": {
         "en": {
@@ -638,6 +698,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "HR %1$lld → beat %2$lld (−%3$lld)"
+          }
+        }
+      }
+    },
+    "Пульс в норме": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart rate back in range"
           }
         }
       }
@@ -748,6 +818,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Series"
+          }
+        }
+      }
+    },
+    "Сбавь": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ease off"
           }
         }
       }

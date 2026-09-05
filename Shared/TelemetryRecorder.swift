@@ -17,6 +17,7 @@ struct TelemetryRow {
     var powerWatts: Double?
     var efficiencyRecent: Double?
     var warmup: Bool
+    var overLimit: Bool = false
     var decision: String?
 }
 
@@ -24,7 +25,7 @@ struct TelemetryRecorder {
     private(set) var rows: [TelemetryRow] = []
     private(set) var settingsLine: String = ""
 
-    static let header = "time,elapsed_s,hr,hr_smoothed,hr_decision,metronome_bpm,cadence_spm,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,decision"
+    static let header = "time,elapsed_s,hr,hr_smoothed,hr_decision,metronome_bpm,cadence_spm,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,over_limit,decision"
 
     mutating func start(settings: RegulatorSettings) {
         rows.removeAll()
@@ -60,6 +61,7 @@ struct TelemetryRecorder {
                 r.powerWatts.map { String(format: "%.0f", $0) } ?? "",
                 r.efficiencyRecent.map { String(format: "%.3f", $0) } ?? "",
                 r.warmup ? "1" : "0",
+                r.overLimit ? "1" : "0",
                 (r.decision ?? "").replacingOccurrences(of: ",", with: ";"),
             ]
             lines.append(fields.joined(separator: ","))

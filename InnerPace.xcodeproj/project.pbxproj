@@ -20,6 +20,7 @@
 		330B62A1EF616315FD3BB01F /* DetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B19473978148670142164142 /* DetailsView.swift */; };
 		3A90D03F917CDE50F5914817 /* WorkoutSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010138CDB5BFE92B9D48146 /* WorkoutSummary.swift */; };
 		3DBE056F59AF1C22F6A04E76 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B09AD8AA9A479809C95F398A /* Assets.xcassets */; };
+		3E90D14BDA2D45FF0B456584 /* VoiceCues.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C313DB20789C546EB040D1 /* VoiceCues.swift */; };
 		3FFF983C9206DDB858ED51F9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 752FF15D945DEFC8C4282C40 /* Localizable.xcstrings */; };
 		40583B757C36EFCB8B0C8A3F /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D750CCDAB16028AE707EF4FF /* InfoPlist.xcstrings */; };
 		4291E747E184EDC6D085ECE4 /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D07F8FDCBAE34404EBEE09C8 /* Formatting.swift */; };
@@ -33,6 +34,7 @@
 		4F6F765F679E8C06123AC09C /* EfficiencyTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA1D82FDAB65342DC0E25C7 /* EfficiencyTracker.swift */; };
 		5091DE77F44183518474077E /* RunFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC1341BA00535751DB5A6A4 /* RunFormatting.swift */; };
 		531AD3E8FF1A2E8F8C476113 /* WatchSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BBEE3B6CE65272FA3B89A /* WatchSync.swift */; };
+		54B7DFD4CEFCB0BDFC56907B /* VoiceCues.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C313DB20789C546EB040D1 /* VoiceCues.swift */; };
 		5A81D81DC4BC4BED34C70701 /* RegulatorEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5916193FA3CD86DE025A0B7A /* RegulatorEngine.swift */; };
 		5B0AD2A789DB7CF5E7A6799A /* AdjustRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155B28C13753C67E4E36FCA0 /* AdjustRow.swift */; };
 		5EEB108EA5FBDEB7C11C06E0 /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
@@ -149,6 +151,7 @@
 		A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateZone.swift; sourceTree = "<group>"; };
 		A3E1A8F58DF25AD2FFEAC71D /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		A5A16F713EC20D3C2F6296E0 /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
+		A7C313DB20789C546EB040D1 /* VoiceCues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCues.swift; sourceTree = "<group>"; };
 		AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryRecorder.swift; sourceTree = "<group>"; };
 		AE9757C77EAE89B7E8208864 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B09AD8AA9A479809C95F398A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -192,6 +195,7 @@
 			isa = PBXGroup;
 			children = (
 				6B697B2F9D7DA392940B8DFB /* Metronome.swift */,
+				A7C313DB20789C546EB040D1 /* VoiceCues.swift */,
 			);
 			path = SharedAudio;
 			sourceTree = "<group>";
@@ -494,6 +498,7 @@
 				757175BD64FF13F9FE3D5F70 /* SettingsStore.swift in Sources */,
 				CE7D75DAF0EE4DB1EF1C56A1 /* SettingsView.swift in Sources */,
 				4E01AABA2F753B15B1B5E9C3 /* TelemetryRecorder.swift in Sources */,
+				54B7DFD4CEFCB0BDFC56907B /* VoiceCues.swift in Sources */,
 				3A90D03F917CDE50F5914817 /* WorkoutSummary.swift in Sources */,
 				45F2DC2471F6169F507DF511 /* ZoneBar.swift in Sources */,
 				983064E1F2150C5DF0290480 /* ZoneStyle.swift in Sources */,
@@ -524,6 +529,7 @@
 				B7F860C58CD68C28D2C6298D /* SettingsStore.swift in Sources */,
 				47E14FAEA5BB15CB20706E74 /* SetupView.swift in Sources */,
 				42E79B087A2ABE8C23A1F1E3 /* TelemetryRecorder.swift in Sources */,
+				3E90D14BDA2D45FF0B456584 /* VoiceCues.swift in Sources */,
 				7A4A9274A5A0B5E2CBDB6F88 /* WatchRootView.swift in Sources */,
 				80170A137179926E67EE5F69 /* WatchRunModel.swift in Sources */,
 				531AD3E8FF1A2E8F8C476113 /* WatchSync.swift in Sources */,

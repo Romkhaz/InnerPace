@@ -27,6 +27,7 @@ final class WatchRunModel {
     private var engine: RegulatorEngine
     private var efficiency = EfficiencyTracker()
     private var telemetry = TelemetryRecorder()
+    private let cues = CueCoordinator()
     private var ticker: Timer?
     private var startDate: Date?
     private var metronomeSum = 0
@@ -83,6 +84,8 @@ final class WatchRunModel {
         cadence = engine.cadence
         efficiency.reset()
         telemetry.start(settings: settings)
+        cues.reset()
+        metronome.warning = false
         metronomeSum = 0
         metronomeCount = 0
         applySettingsToMetronome()
@@ -143,6 +146,7 @@ final class WatchRunModel {
     func end() async {
         guard isActive else { return }
         phase = .finishing
+        metronome.warning = false
         metronome.stop()
         ticker?.invalidate()
         ticker = nil
@@ -229,6 +233,11 @@ final class WatchRunModel {
                 decision = line
             }
         }
+        metronome.warning = engine.isOverLimit
+        if let cue = cues.update(overLimit: engine.isOverLimit, settings: settings, now: now) {
+            lastDecision = cue
+            decision = cue
+        }
         if settings.developerMode {
             telemetry.append(TelemetryRow(
                 time: now, elapsed: elapsed, heartRate: heartRate,
@@ -237,7 +246,7 @@ final class WatchRunModel {
                 distanceMeters: workout.distanceMeters, speedMetersPerSecond: workout.speedMetersPerSecond,
                 groundContactMs: groundContactMs, verticalOscillationCm: verticalOscillationCm,
                 strideLengthMeters: workout.strideLengthMeters, powerWatts: workout.powerWatts,
-                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, decision: decision
+                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, decision: decision
             ))
         }
     }

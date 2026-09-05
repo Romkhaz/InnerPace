@@ -96,6 +96,17 @@ struct AdvancedSettingsView: View {
                 Toggle("Проверить звук", isOn: $previewing)
                     .disabled(session.state != .idle)
             }
+            Section("Голос") {
+                Toggle("Подсказки голосом", isOn: $store.settings.voiceCues)
+                AdjustRow(title: "Повтор «сбавь»", value: $store.settings.voiceRepeatSeconds, range: 0...120, unit: "с")
+                HStack {
+                    Image(systemName: "speaker.wave.1.fill")
+                    Slider(value: $store.settings.voiceVolume, in: 0...1)
+                    Image(systemName: "speaker.wave.3.fill")
+                }
+                Text("Когда ритм упёрся в нижнюю границу, а пульс выше цели дольше десяти секунд, щелчок становится глуше с двойным ударом на каждый четвёртый такт и звучит «сбавь». Когда пульс вернулся под цель, звучит «в норме». Повтор 0 значит только на переходах.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
             Section("Разработчик") {
                 Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
                 VStack(alignment: .leading, spacing: 6) {

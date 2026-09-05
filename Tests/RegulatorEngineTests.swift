@@ -114,6 +114,59 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertEqual(adjustment?.action, .slowDown(2))
     }
 
+    func testOverLimitArmsAfterDelayAtFloorAndClearsBelowTarget() {
+        var s = settings
+        s.cadenceMin = 180
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        XCTAssertNil(engine.tick(at: t0))
+        // Включаем регулятор и сразу перегружаем: ритм на нижней границе, пульс выше цели.
+        engine.ingest(bpm: 165, at: t0.addingTimeInterval(5))
+        _ = engine.tick(at: t0.addingTimeInterval(5))
+        XCTAssertTrue(engine.isRegulating)
+        XCTAssertEqual(engine.cadence, 180, "снижать уже некуда")
+        XCTAssertFalse(engine.isOverLimit, "десять секунд ещё не прошло")
+        for second in 6...14 {
+            engine.ingest(bpm: 165, at: t0.addingTimeInterval(TimeInterval(second)))
+            _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second)))
+        }
+        XCTAssertFalse(engine.isOverLimit)
+        engine.ingest(bpm: 165, at: t0.addingTimeInterval(15))
+        _ = engine.tick(at: t0.addingTimeInterval(15))
+        XCTAssertTrue(engine.isOverLimit)
+
+        // Пульс чуть ниже цели, но в пределах гистерезиса: предел держится.
+        engine.ingest(bpm: 149, at: t0.addingTimeInterval(20))
+        _ = engine.tick(at: t0.addingTimeInterval(20))
+        XCTAssertTrue(engine.isOverLimit)
+        // Опустился с запасом: предел снят.
+        engine.ingest(bpm: 147, at: t0.addingTimeInterval(25))
+        _ = engine.tick(at: t0.addingTimeInterval(25))
+        XCTAssertFalse(engine.isOverLimit)
+    }
+
+    func testOverLimitNeedsFloorNotJustHighHeartRate() {
+        var engine = RegulatorEngine(settings: settings)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        XCTAssertNil(engine.tick(at: t0))
+        // Разгоняем ритм до 192, потом пульс выше цели: ритм ещё есть куда снижать.
+        for second in stride(from: 5, through: 20, by: 5) {
+            engine.ingest(bpm: 120, at: t0.addingTimeInterval(TimeInterval(second)))
+            _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second)))
+        }
+        engine.ingest(bpm: 135, at: t0.addingTimeInterval(25))
+        _ = engine.tick(at: t0.addingTimeInterval(25))
+        XCTAssertGreaterThan(engine.cadence, 180)
+        for second in 26...45 {
+            engine.ingest(bpm: 165, at: t0.addingTimeInterval(TimeInterval(second)))
+            _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second)))
+            if engine.cadence > 180 { XCTAssertFalse(engine.isOverLimit) }
+        }
+        XCTAssertEqual(engine.cadence, 180)
+    }
+
     func testLogLine() {
         let up = RegulatorEngine.Adjustment(heartRate: 140.4, cadence: 186, action: .speedUp(2))
         XCTAssertEqual(up.logLine, "Пульс 140 → ритм 186 (+2)")
@@ -139,6 +192,6 @@ final class RegulatorEngineTests: XCTestCase {
         let csv = recorder.csv()
         XCTAssertTrue(csv.hasPrefix("# settings {"))
         XCTAssertTrue(csv.contains(TelemetryRecorder.header))
-        XCTAssertTrue(csv.contains(",140,139.5,139.5,182,178,3.2,3.10,240,8.4,1.05,250,,1,a; b"))
+        XCTAssertTrue(csv.contains(",140,139.5,139.5,182,178,3.2,3.10,240,8.4,1.05,250,,1,0,a; b"))
     }
 }
