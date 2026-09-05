@@ -101,9 +101,6 @@ final class RunSession {
     var paceSecondsPerKm: Double? { pedometer.paceSecondsPerKm }
     var recentEfficiency: Double? { efficiency.recent }
 
-    var warmupRemaining: TimeInterval {
-        state == .idle ? 0 : engine.warmupRemaining(at: Date())
-    }
 
     /// Зона по сглаженному пульсу. Именно по ней принимает решение регулятор.
     var zone: HeartRateZone {
@@ -276,7 +273,7 @@ final class RunSession {
                 metronome: cadence, actualCadence: actualCadence,
                 distanceMeters: distanceMeters, speedMetersPerSecond: paceSecondsPerKm.map { 1000 / $0 },
                 groundContactMs: nil, verticalOscillationCm: nil, strideLengthMeters: nil, powerWatts: nil,
-                efficiencyRecent: efficiency.recent, warmup: engine.isWarmingUp(at: now), decision: decision
+                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, decision: decision
             ))
         }
     }

@@ -3,6 +3,7 @@ import SwiftUI
 /// Главный экран тренировки: ритм и фактический каденс в одну строку,
 /// пульс с зоной, ниже крупно эффективность, контакт с землёй и колебания.
 struct MetricsView: View {
+    @Environment(\.palette) private var palette
     @Environment(WatchRunModel.self) private var model
 
     var body: some View {
@@ -14,7 +15,7 @@ struct MetricsView: View {
             }
             .padding(.horizontal, 2)
         }
-        .background(ZoneStyle.background.ignoresSafeArea())
+        .background(palette.background.ignoresSafeArea())
     }
 
     private var rhythmCard: some View {
@@ -24,17 +25,17 @@ struct MetricsView: View {
                 Rectangle()
                     .fill(Color.white.opacity(0.35))
                     .frame(width: 1, height: 30)
-                bigNumber(model.actualCadence.map(String.init) ?? "—", "шаг/мин")
+                bigNumber(model.actualCadence.map(String.init) ?? "—", "SPM")
             }
-            if model.warmupRemaining > 0 || model.phase == .paused {
-                Text(model.phase == .paused ? "пауза" : "разминка \(formatElapsed(model.warmupRemaining))")
+            if model.phase == .paused {
+                Text("пауза")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.white.opacity(0.9))
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 4)
-        .background(ZoneStyle.cadenceGradient, in: RoundedRectangle(cornerRadius: 14))
+        .background(palette.cadenceGradient, in: RoundedRectangle(cornerRadius: 14))
     }
 
     private func bigNumber(_ value: String, _ caption: LocalizedStringKey) -> some View {
@@ -59,25 +60,25 @@ struct MetricsView: View {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 15))
-                    .foregroundStyle(ZoneStyle.accent(zone))
+                    .foregroundStyle(palette.accent(zone))
                 Text(model.heartRate.map(String.init) ?? "—")
                     .font(.system(size: 22, weight: .bold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(ZoneStyle.foreground(zone))
+                    .foregroundStyle(palette.foreground(zone))
                 if let smoothed = model.smoothedHeartRate {
                     Text("· \(Int(smoothed.rounded()))")
                         .font(.caption2)
-                        .foregroundStyle(ZoneStyle.foregroundSecondary(zone))
+                        .foregroundStyle(palette.foregroundSecondary(zone))
                 }
                 Spacer()
                 Text("\(model.settings.heartRateMax)")
                     .font(.caption2.monospacedDigit())
-                    .foregroundStyle(ZoneStyle.foregroundSecondary(zone))
+                    .foregroundStyle(palette.foregroundSecondary(zone))
             }
             ZoneBar(
                 heartRate: model.smoothedHeartRate ?? model.heartRate.map(Double.init),
                 settings: model.settings,
-                accent: ZoneStyle.accent(zone),
-                track: ZoneStyle.trackColor(zone),
+                accent: palette.accent(zone),
+                track: palette.trackColor(zone),
                 barHeight: 5,
                 markerSize: 14,
                 showsLabels: false
@@ -85,8 +86,8 @@ struct MetricsView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 4)
-        .background(ZoneStyle.gradient(zone), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(ZoneStyle.cardBorder, lineWidth: 1))
+        .background(palette.gradient(zone), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.cardBorder, lineWidth: 1))
         .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(zone))
     }
 
@@ -105,12 +106,12 @@ struct MetricsView: View {
         VStack(spacing: -2) {
             Text(value)
                 .font(.system(size: 26, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(ZoneStyle.ink)
+                .foregroundStyle(palette.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             Text(caption)
                 .font(.system(size: 10))
-                .foregroundStyle(ZoneStyle.inkSecondary)
+                .foregroundStyle(palette.inkSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }

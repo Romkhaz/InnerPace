@@ -48,6 +48,7 @@
 		78394EDBB4C0CCA87D083398 /* RegulatorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048CE161612AE5CDE43A51F8 /* RegulatorSettings.swift */; };
 		79E72C2822ADF506D29AB35D /* CadenceSensor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC2271C10B4CDED5D8EE16A6 /* CadenceSensor.swift */; };
 		7A4A9274A5A0B5E2CBDB6F88 /* WatchRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65BDBE86F8BD11AE26DDFDE /* WatchRootView.swift */; };
+		7C9BF7D244FED46AADD5A029 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0E10B747FFC0957437346F /* AppTheme.swift */; };
 		80170A137179926E67EE5F69 /* WatchRunModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71DAC4B68B8A547451D31468 /* WatchRunModel.swift */; };
 		816AD62CEB0EE9D4C83BF724 /* CrownNumberField.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0AF3F3FCC66610E63240939 /* CrownNumberField.swift */; };
 		83A431EFA4EBC3E5E9B27A06 /* CadenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A0675CC2979F5014427916 /* CadenceController.swift */; };
@@ -60,12 +61,14 @@
 		910C9C05C6CBBCE968AE7DAF /* InnerPaceWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = EE648A299A5D52E2D27AAB1E /* InnerPaceWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		94D7764D9C8CDE68AE603B59 /* InnerPaceWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CE2437603846860437854C /* InnerPaceWatchApp.swift */; };
 		983064E1F2150C5DF0290480 /* ZoneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */; };
+		9BBA08859B8C9D4D8468CDC0 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0E10B747FFC0957437346F /* AppTheme.swift */; };
 		A3426938B37F76E48EA834AE /* ZoneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */; };
 		A4197E4BAF54A73A82B4DE5A /* EfficiencyTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA1D82FDAB65342DC0E25C7 /* EfficiencyTracker.swift */; };
 		A6153A01F68F5C3A3453E673 /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
 		A67EA45B66191E26A11E1F12 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1347CAA91A28880C0E033DC /* ContentView.swift */; };
 		A6FEE7DE81B3563CAA551D65 /* CadenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71A0675CC2979F5014427916 /* CadenceController.swift */; };
 		AACEC495EAC70C8810505131 /* WorkoutSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010138CDB5BFE92B9D48146 /* WorkoutSummary.swift */; };
+		ACCE389A0292BAB361024B4B /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0E10B747FFC0957437346F /* AppTheme.swift */; };
 		B167F70FD5FB1ECE35B453A8 /* RegulatorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048CE161612AE5CDE43A51F8 /* RegulatorSettings.swift */; };
 		B7F860C58CD68C28D2C6298D /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF700CD0D1E003336FDD846 /* SettingsStore.swift */; };
 		BBB4DCFF92EBE0CE5BC24078 /* Metronome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B697B2F9D7DA392940B8DFB /* Metronome.swift */; };
@@ -123,6 +126,7 @@
 		3230AFEF2FEB7A93D6F3CDA4 /* RunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
 		3C3A82599C1BBFEE48BD1669 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoneStyle.swift; sourceTree = "<group>"; };
+		4F0E10B747FFC0957437346F /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		4FF82682B8521B4251015BBA /* RegulatorSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegulatorSettingsTests.swift; sourceTree = "<group>"; };
 		5165E6F2813F4194DE11FFBA /* HeartRateSmoother.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateSmoother.swift; sourceTree = "<group>"; };
 		541E89296DFD853707E387B9 /* HeartRegulatorWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeartRegulatorWatch.entitlements; sourceTree = "<group>"; };
@@ -297,6 +301,7 @@
 		E8D5766C537C45F11FBD390D /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				4F0E10B747FFC0957437346F /* AppTheme.swift */,
 				71A0675CC2979F5014427916 /* CadenceController.swift */,
 				EFA1D82FDAB65342DC0E25C7 /* EfficiencyTracker.swift */,
 				D07F8FDCBAE34404EBEE09C8 /* Formatting.swift */,
@@ -466,6 +471,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5B0AD2A789DB7CF5E7A6799A /* AdjustRow.swift in Sources */,
+				ACCE389A0292BAB361024B4B /* AppTheme.swift in Sources */,
 				EDD9D1EB08F7588CA28BD3A4 /* CadenceController.swift in Sources */,
 				79E72C2822ADF506D29AB35D /* CadenceSensor.swift in Sources */,
 				A67EA45B66191E26A11E1F12 /* ContentView.swift in Sources */,
@@ -498,6 +504,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BBA08859B8C9D4D8468CDC0 /* AppTheme.swift in Sources */,
 				A6FEE7DE81B3563CAA551D65 /* CadenceController.swift in Sources */,
 				19713A6C1BAC0CBFE6B63029 /* CadenceSensor.swift in Sources */,
 				19B603AA5B0C3A0077F013B1 /* ControlsView.swift in Sources */,
@@ -531,6 +538,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7C9BF7D244FED46AADD5A029 /* AppTheme.swift in Sources */,
 				83A431EFA4EBC3E5E9B27A06 /* CadenceController.swift in Sources */,
 				C780992500ECBA467098B657 /* CadenceControllerTests.swift in Sources */,
 				A4197E4BAF54A73A82B4DE5A /* EfficiencyTracker.swift in Sources */,

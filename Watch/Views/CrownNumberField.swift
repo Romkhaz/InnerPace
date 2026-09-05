@@ -3,6 +3,7 @@ import SwiftUI
 /// Плитка с числом. Нажатие выбирает её, дальше значение меняется колёсиком
 /// Digital Crown. Повторное нажатие снимает выделение.
 struct CrownNumberField<Field: Hashable>: View {
+    @Environment(\.palette) private var palette
     let title: LocalizedStringKey
     @Binding var value: Int
     let range: ClosedRange<Int>
@@ -18,17 +19,17 @@ struct CrownNumberField<Field: Hashable>: View {
         VStack(spacing: 0) {
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(ZoneStyle.inkSecondary)
+                .foregroundStyle(palette.inkSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text("\(value)")
                     .font(.system(size: 30, weight: .semibold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(isFocused ? ZoneStyle.coral : ZoneStyle.ink)
+                    .foregroundStyle(isFocused ? palette.coral : palette.ink)
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.caption2)
-                        .foregroundStyle(ZoneStyle.inkSecondary)
+                        .foregroundStyle(palette.inkSecondary)
                 }
             }
         }
@@ -36,11 +37,11 @@ struct CrownNumberField<Field: Hashable>: View {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(isFocused ? ZoneStyle.peach.opacity(0.6) : ZoneStyle.card)
+                .fill(isFocused ? palette.peach.opacity(0.6) : palette.card)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isFocused ? ZoneStyle.coral : ZoneStyle.cardBorder, lineWidth: isFocused ? 1.5 : 1)
+                .stroke(isFocused ? palette.coral : palette.cardBorder, lineWidth: isFocused ? 1.5 : 1)
         )
         .contentShape(Rectangle())
         .focusable(true)

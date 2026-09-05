@@ -3,6 +3,7 @@ import SwiftUI
 
 /// История: сохранённые тренировки, график текущей пробежки и журнал решений.
 struct HistoryView: View {
+    @Environment(\.palette) private var palette
     @Environment(RunSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
 
@@ -67,7 +68,7 @@ struct HistoryView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(ZoneStyle.background.ignoresSafeArea())
+        .background(palette.background.ignoresSafeArea())
         .navigationTitle("История")
         .onAppear { session.refreshTelemetryFiles() }
     }
@@ -99,7 +100,7 @@ struct HistoryView: View {
 
     // Пара цветов проверена на различимость при дальтонизме и контраст к фону
     // отдельно для светлой и тёмной темы.
-    private var heartRateColor: Color { ZoneStyle.deepCoral }
+    private var heartRateColor: Color { palette.deepCoral }
 
     private var cadenceColor: Color { Color(red: 0.93, green: 0.49, blue: 0.10) }
 
@@ -120,7 +121,7 @@ struct HistoryView: View {
                 yStart: .value("Целевая зона", Double(settings.heartRateMin)),
                 yEnd: .value("Целевая зона", Double(settings.heartRateMax))
             )
-            .foregroundStyle(ZoneStyle.peach.opacity(0.35))
+            .foregroundStyle(palette.peach.opacity(0.35))
 
             ForEach(samples) { sample in
                 if let hr = sample.smoothedHeartRate {

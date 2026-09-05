@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Страница управления: стоп, пауза и настройки, доступные прямо на бегу.
 struct ControlsView: View {
+    @Environment(\.palette) private var palette
     @Environment(WatchRunModel.self) private var model
     @State private var showsSettings = false
 
@@ -9,13 +10,13 @@ struct ControlsView: View {
         ScrollView {
             VStack(spacing: 10) {
                 HStack(spacing: 18) {
-                    roundButton(icon: "xmark", title: "Стоп", color: ZoneStyle.stopRed) {
+                    roundButton(icon: "xmark", title: "Стоп", color: palette.stopColor) {
                         Task { await model.end() }
                     }
                     roundButton(
                         icon: model.phase == .paused ? "play.fill" : "pause.fill",
                         title: model.phase == .paused ? "Дальше" : "Пауза",
-                        color: ZoneStyle.startBlue
+                        color: palette.startColor
                     ) {
                         Task { await model.togglePause() }
                     }
@@ -29,18 +30,18 @@ struct ControlsView: View {
                 if let decision = model.lastDecision {
                     Text(decision)
                         .font(.caption2)
-                        .foregroundStyle(ZoneStyle.inkSecondary)
+                        .foregroundStyle(palette.inkSecondary)
                         .multilineTextAlignment(.center)
                 }
                 if let error = model.errorText {
                     Text(error)
                         .font(.caption2)
-                        .foregroundStyle(ZoneStyle.deepCoral)
+                        .foregroundStyle(palette.deepCoral)
                         .multilineTextAlignment(.center)
                 }
             }
         }
-        .background(ZoneStyle.background.ignoresSafeArea())
+        .background(palette.background.ignoresSafeArea())
         .sheet(isPresented: $showsSettings) {
             NavigationStack {
                 ScrollView {
@@ -55,9 +56,9 @@ struct ControlsView: View {
                     }
                     .padding(.horizontal, 4)
                 }
-                .background(ZoneStyle.background.ignoresSafeArea())
+                .background(palette.background.ignoresSafeArea())
                 .navigationTitle("Настройки")
-                .containerBackground(ZoneStyle.background.gradient, for: .navigation)
+                .containerBackground(palette.background.gradient, for: .navigation)
             }
         }
     }
@@ -75,7 +76,7 @@ struct ControlsView: View {
             .buttonStyle(.plain)
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(ZoneStyle.inkSecondary)
+                .foregroundStyle(palette.inkSecondary)
         }
     }
 }

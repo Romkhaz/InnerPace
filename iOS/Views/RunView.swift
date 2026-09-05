@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct RunView: View {
+    @Environment(\.palette) private var palette
     @Environment(RunSession.self) private var session
 
     var body: some View {
@@ -25,7 +26,7 @@ struct RunView: View {
                 if let error = session.lastError {
                     Text(error)
                         .font(.footnote)
-                        .foregroundStyle(ZoneStyle.deepCoral)
+                        .foregroundStyle(palette.deepCoral)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 historyRow
@@ -34,7 +35,7 @@ struct RunView: View {
             .padding(.top, 4)
             .padding(.bottom, 24)
         }
-        .background(ZoneStyle.background.ignoresSafeArea())
+        .background(palette.background.ignoresSafeArea())
         .sheet(item: Binding(
             get: { session.report },
             set: { session.report = $0 }
@@ -52,17 +53,17 @@ struct RunView: View {
     private var sensorRow: some View {
         HStack(spacing: 10) {
             Circle()
-                .fill(session.polar.state.isConnected ? ZoneStyle.orange : ZoneStyle.track)
+                .fill(session.polar.state.isConnected ? palette.orange : palette.track)
                 .frame(width: 10, height: 10)
             VStack(alignment: .leading, spacing: 1) {
                 Text(session.polar.state.label)
-                    .foregroundStyle(ZoneStyle.ink)
+                    .foregroundStyle(palette.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 if let battery = session.polar.batteryLevel, session.polar.state.isConnected {
                     (Text("Батарея") + Text(verbatim: " \(battery)%"))
                         .font(.caption)
-                        .foregroundStyle(ZoneStyle.inkSecondary)
+                        .foregroundStyle(palette.inkSecondary)
                 }
             }
             Spacer()
@@ -90,18 +91,13 @@ struct RunView: View {
                 Rectangle()
                     .fill(Color.white.opacity(0.35))
                     .frame(width: 1, height: 60)
-                bigNumber(session.actualCadence.map(String.init) ?? "—", "шаг/мин")
-            }
-            if session.warmupRemaining > 0 {
-                Text("разминка \(formatElapsed(session.warmupRemaining))")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.9))
+                bigNumber(session.actualCadence.map(String.init) ?? "—", "SPM")
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(ZoneStyle.cadenceGradient, in: RoundedRectangle(cornerRadius: 26))
-        .shadow(color: ZoneStyle.coral.opacity(0.25), radius: 14, x: 0, y: 6)
+        .background(palette.cadenceGradient, in: RoundedRectangle(cornerRadius: 26))
+        .shadow(color: palette.coral.opacity(0.25), radius: 14, x: 0, y: 6)
     }
 
     private func bigNumber(_ value: String, _ caption: LocalizedStringKey) -> some View {
@@ -126,21 +122,21 @@ struct RunView: View {
         VStack(spacing: 6) {
             Image(systemName: "heart.fill")
                 .font(.system(size: 26))
-                .foregroundStyle(ZoneStyle.accent(zone))
+                .foregroundStyle(palette.accent(zone))
             Text(value)
                 .font(.system(size: 48, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(ZoneStyle.foreground(zone))
+                .foregroundStyle(palette.foreground(zone))
                 .contentTransition(.numericText())
             caption
                 .font(.subheadline)
-                .foregroundStyle(ZoneStyle.foregroundSecondary(zone))
+                .foregroundStyle(palette.foregroundSecondary(zone))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(ZoneStyle.gradient(zone), in: RoundedRectangle(cornerRadius: 24))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(ZoneStyle.cardBorder, lineWidth: 1))
+        .background(palette.gradient(zone), in: RoundedRectangle(cornerRadius: 24))
+        .overlay(RoundedRectangle(cornerRadius: 24).stroke(palette.cardBorder, lineWidth: 1))
         .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(zone))
     }
 
@@ -152,9 +148,9 @@ struct RunView: View {
             ZoneBar(
                 heartRate: session.smoothedHeartRate ?? session.heartRate.map(Double.init),
                 settings: session.settings,
-                accent: ZoneStyle.accent(zone),
-                track: ZoneStyle.trackColor(zone),
-                labelColor: ZoneStyle.foregroundSecondary(zone)
+                accent: palette.accent(zone),
+                track: palette.trackColor(zone),
+                labelColor: palette.foregroundSecondary(zone)
             )
             HStack {
                 metric(formatEfficiency(session.recentEfficiency), "м/удар", zone: zone)
@@ -169,8 +165,8 @@ struct RunView: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 10)
-        .background(ZoneStyle.gradient(zone), in: RoundedRectangle(cornerRadius: 24))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(ZoneStyle.cardBorder, lineWidth: 1))
+        .background(palette.gradient(zone), in: RoundedRectangle(cornerRadius: 24))
+        .overlay(RoundedRectangle(cornerRadius: 24).stroke(palette.cardBorder, lineWidth: 1))
         .animation(.easeInOut(duration: 0.4), value: ZoneStyle.index(zone))
     }
 
@@ -178,12 +174,12 @@ struct RunView: View {
         VStack(spacing: 0) {
             Text(value)
                 .font(.system(size: 22, weight: .semibold, design: .rounded).monospacedDigit())
-                .foregroundStyle(ZoneStyle.foreground(zone))
+                .foregroundStyle(palette.foreground(zone))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(caption)
                 .font(.caption2)
-                .foregroundStyle(ZoneStyle.foregroundSecondary(zone))
+                .foregroundStyle(palette.foregroundSecondary(zone))
         }
     }
 
@@ -194,7 +190,7 @@ struct RunView: View {
             RoundButton(
                 icon: session.state == .running ? "pause.fill" : "play.fill",
                 title: startTitle,
-                color: ZoneStyle.startColor,
+                color: palette.startColor,
                 enabled: true
             ) {
                 session.toggleStartPause()
@@ -202,7 +198,7 @@ struct RunView: View {
             RoundButton(
                 icon: "stop.fill",
                 title: "Стоп",
-                color: ZoneStyle.stopColor,
+                color: palette.stopColor,
                 enabled: session.state != .idle
             ) {
                 session.stop()
@@ -229,15 +225,15 @@ struct RunView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("История")
                         .font(.headline)
-                        .foregroundStyle(ZoneStyle.ink)
+                        .foregroundStyle(palette.ink)
                     Text(session.events.first?.text ?? String(localized: "Пока пусто"))
                         .font(.footnote)
-                        .foregroundStyle(ZoneStyle.inkSecondary)
+                        .foregroundStyle(palette.inkSecondary)
                         .lineLimit(1)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundStyle(ZoneStyle.orange)
+                    .foregroundStyle(palette.orange)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
@@ -249,6 +245,7 @@ struct RunView: View {
 
 /// Круглая кнопка с подписью под ней.
 private struct RoundButton: View {
+    @Environment(\.palette) private var palette
     let icon: String
     let title: LocalizedStringKey
     let color: Color
@@ -262,14 +259,14 @@ private struct RoundButton: View {
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: 80, height: 80)
-                    .background(enabled ? color : ZoneStyle.track, in: Circle())
+                    .background(enabled ? color : palette.track, in: Circle())
                     .shadow(color: enabled ? color.opacity(0.35) : .clear, radius: 10, x: 0, y: 5)
             }
             .buttonStyle(.plain)
             .disabled(!enabled)
             Text(title)
                 .font(.footnote)
-                .foregroundStyle(ZoneStyle.inkSecondary)
+                .foregroundStyle(palette.inkSecondary)
         }
     }
 }

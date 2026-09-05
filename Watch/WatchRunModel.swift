@@ -53,9 +53,6 @@ final class WatchRunModel {
     var recentEfficiency: Double? { efficiency.recent }
     var isActive: Bool { phase == .running || phase == .paused }
 
-    var warmupRemaining: TimeInterval {
-        isActive ? engine.warmupRemaining(at: Date()) : 0
-    }
 
     var averagePaceSecondsPerKm: Double? {
         guard distanceMeters > 50, elapsed > 0 else { return nil }
@@ -240,7 +237,7 @@ final class WatchRunModel {
                 distanceMeters: workout.distanceMeters, speedMetersPerSecond: workout.speedMetersPerSecond,
                 groundContactMs: groundContactMs, verticalOscillationCm: verticalOscillationCm,
                 strideLengthMeters: workout.strideLengthMeters, powerWatts: workout.powerWatts,
-                efficiencyRecent: efficiency.recent, warmup: engine.isWarmingUp(at: now), decision: decision
+                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, decision: decision
             ))
         }
     }

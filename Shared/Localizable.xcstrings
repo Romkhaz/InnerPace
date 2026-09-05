@@ -73,6 +73,16 @@
     "InnerPace": {
       "shouldTranslate": false
     },
+    "SPM": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SPM"
+          }
+        }
+      }
+    },
     "·": {
       "shouldTranslate": false
     },
@@ -89,18 +99,28 @@
         }
       }
     },
-    "· разминка %@": {
+    "×%@": {
+      "shouldTranslate": false
+    },
+    "Авто": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "· warm-up %@"
+            "value": "Auto"
           }
         }
       }
     },
-    "×%@": {
-      "shouldTranslate": false
+    "Авто следует за оформлением iPhone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto follows the iPhone appearance."
+          }
+        }
+      }
     },
     "Батарея": {
       "localizations": {
@@ -118,16 +138,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "In the approach zone the beat rises by one per interval and holds in the hold band. Above the target it drops faster than it rose."
-          }
-        }
-      }
-    },
-    "В зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт. На разминке ритм стоит на нижней границе и не меняется.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In the approach zone the beat rises by one per interval and holds in the hold band. During warm-up the beat stays at the lower bound and does not change."
           }
         }
       }
@@ -402,16 +412,6 @@
         }
       }
     },
-    "На разминке ритм держится на середине диапазона и не разгоняется.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "During warm-up the beat stays at the middle of the range and does not speed up."
-          }
-        }
-      }
-    },
     "Настройки": {
       "localizations": {
         "en": {
@@ -488,6 +488,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Disconnect"
+          }
+        }
+      }
+    },
+    "Оформление": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
           }
         }
       }
@@ -662,16 +672,6 @@
         }
       }
     },
-    "Разминка": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Warm-up"
-          }
-        }
-      }
-    },
     "Разработчик": {
       "localizations": {
         "en": {
@@ -748,6 +748,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Series"
+          }
+        }
+      }
+    },
+    "Светлая": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
           }
         }
       }
@@ -862,6 +872,16 @@
         }
       }
     },
+    "Старт с нижней границы ритма. Регулятор включается, когда пульс дойдёт до нижней границы зоны, и дальше работает всю тренировку: в зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт, выше цели падает быстрее, чем рос.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starts at the lower beat bound. The regulator switches on once heart rate reaches the lower bound of the zone and stays on for the whole run: in the approach zone the beat rises by one per interval, in the hold band it holds, above the target it drops faster than it rose."
+          }
+        }
+      }
+    },
     "Старт. Ритм %lld": {
       "localizations": {
         "en": {
@@ -922,6 +942,16 @@
         }
       }
     },
+    "Тема": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme"
+          }
+        }
+      }
+    },
     "Темп подстройки": {
       "localizations": {
         "en": {
@@ -958,6 +988,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Workouts"
+          }
+        }
+      }
+    },
+    "Тёмная": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        }
+      }
+    },
+    "Тёмная тема": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark theme"
           }
         }
       }
@@ -1128,16 +1178,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "HR · %@"
-          }
-        }
-      }
-    },
-    "разминка %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "warm-up %@"
           }
         }
       }

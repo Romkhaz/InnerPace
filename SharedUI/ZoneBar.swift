@@ -2,11 +2,13 @@ import SwiftUI
 
 /// Шкала зоны пульса: зона подсвечена, бегун отмечает текущий пульс.
 struct ZoneBar: View {
+    @Environment(\.palette) private var palette
+
     let heartRate: Double?
     let settings: RegulatorSettings
-    var accent: Color = ZoneStyle.orange
-    var track: Color = ZoneStyle.track
-    var labelColor: Color = ZoneStyle.inkSecondary
+    var accent: Color? = nil
+    var track: Color? = nil
+    var labelColor: Color? = nil
     var barHeight: CGFloat = 10
     var markerSize: CGFloat = 30
     var showsLabels = true
@@ -15,6 +17,7 @@ struct ZoneBar: View {
     private var upper: Double { Double(settings.heartRateMax) + 20 }
 
     var body: some View {
+        let accentColor = accent ?? palette.orange
         VStack(spacing: 6) {
             GeometryReader { geo in
                 let width = geo.size.width
@@ -22,19 +25,19 @@ struct ZoneBar: View {
                 let zoneEnd = width * fraction(Double(settings.heartRateMax))
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(track)
+                        .fill(track ?? palette.track)
                         .frame(height: barHeight)
                     Capsule()
-                        .fill(accent.opacity(0.9))
+                        .fill(accentColor.opacity(0.9))
                         .frame(width: max(0, zoneEnd - zoneStart), height: barHeight)
                         .offset(x: zoneStart)
                     if let heartRate {
                         Image(systemName: "figure.run")
                             .font(.system(size: markerSize / 2, weight: .bold))
-                            .foregroundStyle(ZoneStyle.ink)
+                            .foregroundStyle(Color(red: 0.16, green: 0.10, blue: 0.08))
                             .frame(width: markerSize, height: markerSize)
                             .background(Color.white, in: Circle())
-                            .overlay(Circle().stroke(accent, lineWidth: 2))
+                            .overlay(Circle().stroke(accentColor, lineWidth: 2))
                             .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
                             .offset(x: width * fraction(heartRate) - markerSize / 2)
                             .animation(.easeInOut(duration: 0.6), value: heartRate)
@@ -50,7 +53,7 @@ struct ZoneBar: View {
                     Text("\(settings.heartRateMax)")
                 }
                 .font(.caption.monospacedDigit())
-                .foregroundStyle(labelColor)
+                .foregroundStyle(labelColor ?? palette.inkSecondary)
             }
         }
     }

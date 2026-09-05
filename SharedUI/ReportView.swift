@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Отчёт о тренировке. Один и тот же на телефоне и часах.
 struct ReportView: View {
+    @Environment(\.palette) private var palette
     let summary: WorkoutSummary
     var onDone: (() -> Void)? = nil
 
@@ -14,7 +15,7 @@ struct ReportView: View {
             }
             Section {
                 row("Средний пульс", summary.averageHeartRate.map { "\(Int($0.rounded()))" } ?? "—")
-                row("Средний каденс", summary.averageCadence.map { "\(Int($0.rounded()))" } ?? "—", unit: "шаг/мин")
+                row("Средний каденс", summary.averageCadence.map { "\(Int($0.rounded()))" } ?? "—", unit: "SPM")
                 row("Средний ритм", summary.averageMetronome.map { "\(Int($0.rounded()))" } ?? "—", unit: "BPM")
             }
             Section {
@@ -33,12 +34,12 @@ struct ReportView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(ZoneStyle.orange)
+                    .tint(palette.orange)
                 }
             }
         }
         .scrollContentBackground(.hidden)
-        .background(ZoneStyle.background.ignoresSafeArea())
+        .background(palette.background.ignoresSafeArea())
         .navigationTitle(Text(summary.date, format: .dateTime.day().month().hour().minute()))
     }
 

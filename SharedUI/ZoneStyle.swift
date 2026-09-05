@@ -1,62 +1,82 @@
 import SwiftUI
 
-/// Светлая палитра в цветах иконки: оранжевый, персиковый, коралловый.
-/// Общая для телефона и часов.
-enum ZoneStyle {
+/// Палитра в цветах иконки: оранжевый, персиковый, коралловый. Есть светлый
+/// и тёмный вариант, экраны берут её из окружения.
+struct Palette {
+    let isDark: Bool
+
     // Базовые цвета иконки.
-    static let orange = Color(red: 0.97, green: 0.53, blue: 0.17)
-    static let coral = Color(red: 1.0, green: 0.24, blue: 0.36)
-    static let peach = Color(red: 1.0, green: 0.80, blue: 0.64)
-    static let deepCoral = Color(red: 0.91, green: 0.14, blue: 0.29)
+    let orange = Color(red: 0.97, green: 0.53, blue: 0.17)
+    let coral = Color(red: 1.0, green: 0.24, blue: 0.36)
+    let peach = Color(red: 1.0, green: 0.80, blue: 0.64)
+    let deepCoral = Color(red: 0.91, green: 0.14, blue: 0.29)
 
-    /// Фон экрана и карточек.
-    static let background = Color(red: 1.0, green: 0.97, blue: 0.94)
-    static let card = Color.white
-    static let cardBorder = Color(red: 1.0, green: 0.85, blue: 0.75)
-    /// Основной и второстепенный текст на светлых карточках.
-    static let ink = Color(red: 0.16, green: 0.10, blue: 0.08)
-    static let inkSecondary = Color(red: 0.16, green: 0.10, blue: 0.08).opacity(0.55)
-    /// Дорожка шкалы на светлой карточке.
-    static let track = Color(red: 0.16, green: 0.10, blue: 0.08).opacity(0.12)
+    let background: Color
+    let card: Color
+    let cardBorder: Color
+    let ink: Color
+    let inkSecondary: Color
+    let track: Color
 
-    static let cadenceGradient = LinearGradient(
-        colors: [orange, coral],
-        startPoint: .topLeading, endPoint: .bottomTrailing
+    static let light = Palette(
+        isDark: false,
+        background: Color(red: 1.0, green: 0.97, blue: 0.94),
+        card: .white,
+        cardBorder: Color(red: 1.0, green: 0.85, blue: 0.75),
+        ink: Color(red: 0.16, green: 0.10, blue: 0.08),
+        inkSecondary: Color(red: 0.16, green: 0.10, blue: 0.08).opacity(0.55),
+        track: Color(red: 0.16, green: 0.10, blue: 0.08).opacity(0.12)
     )
 
-    static let startColor = orange
-    static let stopColor = deepCoral
-    /// Прежние имена, чтобы не трогать вызовы.
-    static let startBlue = orange
-    static let stopRed = deepCoral
+    static let dark = Palette(
+        isDark: true,
+        background: Color(red: 0.10, green: 0.08, blue: 0.07),
+        card: Color(red: 0.16, green: 0.13, blue: 0.12),
+        cardBorder: Color(red: 0.30, green: 0.22, blue: 0.18),
+        ink: Color(red: 0.98, green: 0.94, blue: 0.91),
+        inkSecondary: Color(red: 0.98, green: 0.94, blue: 0.91).opacity(0.6),
+        track: Color.white.opacity(0.15)
+    )
 
-    static func index(_ zone: HeartRateZone) -> Int {
-        switch zone {
-        case .unknown: return 0
-        case .below: return 1
-        case .inside: return 2
-        case .above: return 3
-        }
+    private init(isDark: Bool, background: Color, card: Color, cardBorder: Color,
+                 ink: Color, inkSecondary: Color, track: Color) {
+        self.isDark = isDark
+        self.background = background
+        self.card = card
+        self.cardBorder = cardBorder
+        self.ink = ink
+        self.inkSecondary = inkSecondary
+        self.track = track
     }
 
+    var cadenceGradient: LinearGradient {
+        LinearGradient(colors: [orange, coral], startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    var startColor: Color { orange }
+    var stopColor: Color { deepCoral }
+
     /// Акцент зоны: маркер на шкале, сердце.
-    static func accent(_ zone: HeartRateZone) -> Color {
+    func accent(_ zone: HeartRateZone) -> Color {
         switch zone {
-        case .unknown: return Color(red: 0.16, green: 0.10, blue: 0.08).opacity(0.35)
+        case .unknown: return inkSecondary
         case .below: return orange
-        case .inside: return Color.white
-        case .above: return Color.white
+        case .inside, .above: return .white
         }
     }
 
     /// Фон карточки зоны: ниже цели персиковая, в зоне оранжевая, выше коралловая.
-    static func gradient(_ zone: HeartRateZone) -> LinearGradient {
+    func gradient(_ zone: HeartRateZone) -> LinearGradient {
         let colors: [Color]
         switch zone {
         case .unknown:
-            colors = [Color.white, Color(red: 0.98, green: 0.95, blue: 0.92)]
+            colors = isDark
+                ? [Color(red: 0.18, green: 0.15, blue: 0.13), Color(red: 0.14, green: 0.11, blue: 0.10)]
+                : [Color.white, Color(red: 0.98, green: 0.95, blue: 0.92)]
         case .below:
-            colors = [Color(red: 1.0, green: 0.89, blue: 0.78), Color(red: 1.0, green: 0.82, blue: 0.66)]
+            colors = isDark
+                ? [Color(red: 0.38, green: 0.24, blue: 0.15), Color(red: 0.28, green: 0.18, blue: 0.12)]
+                : [Color(red: 1.0, green: 0.89, blue: 0.78), Color(red: 1.0, green: 0.82, blue: 0.66)]
         case .inside:
             colors = [Color(red: 1.0, green: 0.60, blue: 0.27), Color(red: 1.0, green: 0.46, blue: 0.20)]
         case .above:
@@ -66,14 +86,14 @@ enum ZoneStyle {
     }
 
     /// Цвет текста на карточке зоны.
-    static func foreground(_ zone: HeartRateZone) -> Color {
+    func foreground(_ zone: HeartRateZone) -> Color {
         switch zone {
         case .unknown, .below: return ink
         case .inside, .above: return .white
         }
     }
 
-    static func foregroundSecondary(_ zone: HeartRateZone) -> Color {
+    func foregroundSecondary(_ zone: HeartRateZone) -> Color {
         switch zone {
         case .unknown, .below: return inkSecondary
         case .inside, .above: return Color.white.opacity(0.8)
@@ -81,28 +101,60 @@ enum ZoneStyle {
     }
 
     /// Дорожка шкалы зоны на карточке.
-    static func trackColor(_ zone: HeartRateZone) -> Color {
+    func trackColor(_ zone: HeartRateZone) -> Color {
         switch zone {
         case .unknown, .below: return track
         case .inside, .above: return Color.white.opacity(0.3)
         }
     }
+
+    /// Какую палитру выбрать по настройке и системной теме.
+    static func resolve(theme: AppTheme, systemIsDark: Bool) -> Palette {
+        switch theme {
+        case .light: return .light
+        case .dark: return .dark
+        case .auto: return systemIsDark ? .dark : .light
+        }
+    }
 }
 
-/// Светлая карточка с тонкой персиковой рамкой.
-struct LightCard: ViewModifier {
+enum ZoneStyle {
+    static func index(_ zone: HeartRateZone) -> Int {
+        switch zone {
+        case .unknown: return 0
+        case .below: return 1
+        case .inside: return 2
+        case .above: return 3
+        }
+    }
+}
+
+private struct PaletteKey: EnvironmentKey {
+    static let defaultValue = Palette.light
+}
+
+extension EnvironmentValues {
+    var palette: Palette {
+        get { self[PaletteKey.self] }
+        set { self[PaletteKey.self] = newValue }
+    }
+}
+
+/// Карточка с тонкой рамкой в цветах палитры.
+struct PaletteCard: ViewModifier {
+    @Environment(\.palette) private var palette
     var radius: CGFloat = 22
 
     func body(content: Content) -> some View {
         content
-            .background(ZoneStyle.card, in: RoundedRectangle(cornerRadius: radius))
-            .overlay(RoundedRectangle(cornerRadius: radius).stroke(ZoneStyle.cardBorder, lineWidth: 1))
-            .shadow(color: ZoneStyle.orange.opacity(0.10), radius: 10, x: 0, y: 4)
+            .background(palette.card, in: RoundedRectangle(cornerRadius: radius))
+            .overlay(RoundedRectangle(cornerRadius: radius).stroke(palette.cardBorder, lineWidth: 1))
+            .shadow(color: palette.orange.opacity(palette.isDark ? 0 : 0.10), radius: 10, x: 0, y: 4)
     }
 }
 
 extension View {
     func lightCard(radius: CGFloat = 22) -> some View {
-        modifier(LightCard(radius: radius))
+        modifier(PaletteCard(radius: radius))
     }
 }

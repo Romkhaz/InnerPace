@@ -24,7 +24,7 @@ struct TelemetryRecorder {
     private(set) var rows: [TelemetryRow] = []
     private(set) var settingsLine: String = ""
 
-    static let header = "time,elapsed_s,hr,hr_smoothed,hr_decision,metronome_bpm,cadence_spm,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,warmup,decision"
+    static let header = "time,elapsed_s,hr,hr_smoothed,hr_decision,metronome_bpm,cadence_spm,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,decision"
 
     mutating func start(settings: RegulatorSettings) {
         rows.removeAll()

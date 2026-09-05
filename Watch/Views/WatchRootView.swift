@@ -4,13 +4,18 @@ struct WatchRootView: View {
     @Environment(WatchRunModel.self) private var model
     @State private var page = 1
 
+    /// На часах нет системного переключения тем: авто равно светлой.
+    private var palette: Palette {
+        model.settings.theme == .dark ? .dark : .light
+    }
+
     var body: some View {
         Group {
             switch model.phase {
             case .setup:
                 NavigationStack {
                     SetupView()
-                        .containerBackground(ZoneStyle.background.gradient, for: .navigation)
+                        .containerBackground(palette.background.gradient, for: .navigation)
                 }
             case .starting:
                 ProgressView("Запуск…")
@@ -22,7 +27,7 @@ struct WatchRootView: View {
                         ReportView(summary: summary) {
                             model.dismissReport()
                         }
-                        .containerBackground(ZoneStyle.background.gradient, for: .navigation)
+                        .containerBackground(palette.background.gradient, for: .navigation)
                     }
                 }
             case .running, .paused:
@@ -32,10 +37,11 @@ struct WatchRootView: View {
                     DetailsView().tag(2)
                 }
                 .tabViewStyle(.verticalPage)
-                .containerBackground(ZoneStyle.background.gradient, for: .tabView)
+                .containerBackground(palette.background.gradient, for: .tabView)
                 .onAppear { page = 1 }
             }
         }
-        .tint(ZoneStyle.orange)
+        .tint(palette.orange)
+        .environment(\.palette, palette)
     }
 }

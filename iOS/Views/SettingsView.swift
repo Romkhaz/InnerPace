@@ -3,6 +3,7 @@ import SwiftUI
 /// Основные настройки: нижняя граница ритма и целевой пульс.
 /// Всё остальное считается автоматически или живёт в «Дополнительно».
 struct SettingsView: View {
+    @Environment(\.palette) private var palette
     @Environment(RunSession.self) private var session
 
     var body: some View {
@@ -27,6 +28,16 @@ struct SettingsView: View {
                 Text("Регулятор ведёт пульс к этой цели. Рост ритма замедляется с \(Int(settings.approachHeartRate)) и останавливается с \(Int(settings.holdHeartRate)).")
                     .font(.footnote).foregroundStyle(.secondary)
             }
+            Section("Оформление") {
+                Picker("Тема", selection: $store.settings.theme) {
+                    Text("Авто").tag(AppTheme.auto)
+                    Text("Светлая").tag(AppTheme.light)
+                    Text("Тёмная").tag(AppTheme.dark)
+                }
+                .pickerStyle(.segmented)
+                Text("Авто следует за оформлением iPhone.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
             Section {
                 NavigationLink {
                     AdvancedSettingsView()
@@ -42,13 +53,14 @@ struct SettingsView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(ZoneStyle.background.ignoresSafeArea())
+        .background(palette.background.ignoresSafeArea())
         .navigationTitle("Настройки")
     }
 }
 
 /// Тонкие параметры регулятора, звук и режим разработчика.
 struct AdvancedSettingsView: View {
+    @Environment(\.palette) private var palette
     @Environment(RunSession.self) private var session
     @State private var previewing = false
     @State private var interval: Int = 5
@@ -71,8 +83,7 @@ struct AdvancedSettingsView: View {
                           range: 40...(settings.heartRateMax - 1))
                 AdjustRow(title: "Зона подхода", value: $store.settings.approachPercent, range: 0...30, unit: "%")
                 AdjustRow(title: "Полоса удержания", value: $store.settings.holdBand, range: 0...20)
-                AdjustRow(title: "Разминка", value: $store.settings.warmupMinutes, range: 0...15, unit: "мин")
-                Text("В зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт. На разминке ритм стоит на нижней границе и не меняется.")
+                Text("Старт с нижней границы ритма. Регулятор включается, когда пульс дойдёт до нижней границы зоны, и дальше работает всю тренировку: в зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт, выше цели падает быстрее, чем рос.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Звук") {
@@ -109,7 +120,7 @@ struct AdvancedSettingsView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(ZoneStyle.background.ignoresSafeArea())
+        .background(palette.background.ignoresSafeArea())
         .navigationTitle("Дополнительно")
         .onAppear {
             interval = Int(settings.adjustInterval)

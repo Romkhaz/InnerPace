@@ -18,8 +18,6 @@ struct RegulatorSettings: Codable, Equatable {
     var holdBand: Int = 8
     /// Во сколько раз ритм падает быстрее, чем растёт. От 1 до 10.
     var slowdownFactor: Double = 3
-    /// Первые минуты забега ритм стоит на нижней границе и не меняется.
-    var warmupMinutes: Int = 3
     /// Сколько секунд между двумя подстройками ритма.
     var adjustInterval: TimeInterval = 5
     /// Максимальное изменение ритма за одну подстройку при разгоне.
@@ -32,6 +30,8 @@ struct RegulatorSettings: Codable, Equatable {
     var clickVolume: Double = 0.8
     /// Режим разработчика: посекундная телеметрия пишется в файл.
     var developerMode: Bool = false
+    /// Оформление: авто, светлая или тёмная.
+    var theme: AppTheme = .auto
 
     static let `default` = RegulatorSettings()
 
@@ -50,13 +50,13 @@ struct RegulatorSettings: Codable, Equatable {
         approachPercent = try c.decodeIfPresent(Int.self, forKey: .approachPercent) ?? d.approachPercent
         holdBand = try c.decodeIfPresent(Int.self, forKey: .holdBand) ?? d.holdBand
         slowdownFactor = try c.decodeIfPresent(Double.self, forKey: .slowdownFactor) ?? d.slowdownFactor
-        warmupMinutes = try c.decodeIfPresent(Int.self, forKey: .warmupMinutes) ?? d.warmupMinutes
         adjustInterval = try c.decodeIfPresent(TimeInterval.self, forKey: .adjustInterval) ?? d.adjustInterval
         maxStep = try c.decodeIfPresent(Int.self, forKey: .maxStep) ?? d.maxStep
         smoothingSeconds = try c.decodeIfPresent(Double.self, forKey: .smoothingSeconds) ?? d.smoothingSeconds
         halfTimeClick = try c.decodeIfPresent(Bool.self, forKey: .halfTimeClick) ?? d.halfTimeClick
         clickVolume = try c.decodeIfPresent(Double.self, forKey: .clickVolume) ?? d.clickVolume
         developerMode = try c.decodeIfPresent(Bool.self, forKey: .developerMode) ?? d.developerMode
+        theme = try c.decodeIfPresent(AppTheme.self, forKey: .theme) ?? d.theme
     }
 
     var targetHeartRate: Int { heartRateMax }
@@ -98,7 +98,6 @@ struct RegulatorSettings: Codable, Equatable {
         copy.approachPercent = min(30, max(0, copy.approachPercent))
         copy.holdBand = max(0, copy.holdBand)
         copy.slowdownFactor = min(10, max(1, copy.slowdownFactor))
-        copy.warmupMinutes = max(0, copy.warmupMinutes)
         copy.maxStep = max(1, copy.maxStep)
         copy.adjustInterval = max(1, copy.adjustInterval)
         copy.smoothingSeconds = max(0, copy.smoothingSeconds)

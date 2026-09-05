@@ -2,6 +2,10 @@ import Foundation
 
 /// Общий цикл регулятора для телефона и часов: принимает пульс, раз в интервал
 /// решает, куда двигать ритм. Чистая логика без таймеров и звука.
+///
+/// Старт всегда с нижней границы ритма. Регулятор включается, когда пульс
+/// впервые дошёл до нижней границы зоны, то есть сердце вошло в рабочий режим,
+/// и дальше работает до конца тренировки.
 struct RegulatorEngine {
     struct Adjustment: Equatable {
         let heartRate: Double
@@ -22,9 +26,8 @@ struct RegulatorEngine {
     private(set) var smoothedHeartRate: Double?
     private(set) var latestHeartRate: Double?
     private(set) var lastHeartRateAt: Date?
+    private(set) var isRegulating = false
     private var lastAdjust: Date?
-    private var startedAt: Date?
-    private var pausedAt: Date?
 
     /// Сколько секунд без свежего пульса, после чего ритм замораживаем.
     var staleAfter: TimeInterval = 15
@@ -37,15 +40,14 @@ struct RegulatorEngine {
 
     var cadence: Int { controller.cadence }
 
-    /// Начало тренировки: ритм на нижнюю границу, история пульса забыта.
+    /// Начало тренировки: ритм на нижнюю границу, история пульса забыта, регулятор ждёт пульса.
     mutating func reset(at now: Date = Date()) {
         controller.reset()
         smoother = HeartRateSmoother(timeConstant: settings.smoothingSeconds)
         smoothedHeartRate = nil
         latestHeartRate = nil
         lastAdjust = nil
-        startedAt = now
-        pausedAt = nil
+        isRegulating = false
     }
 
     mutating func ingest(bpm: Int, at time: Date) {
@@ -69,29 +71,10 @@ struct RegulatorEngine {
         return latest > target ? max(smoothed, latest) : smoothed
     }
 
-    /// Сколько секунд разминки осталось. Ноль, когда разминка закончилась или её нет.
-    func warmupRemaining(at now: Date) -> TimeInterval {
-        guard let startedAt, settings.warmupMinutes > 0 else { return 0 }
-        let reference = pausedAt ?? now
-        let elapsed = reference.timeIntervalSince(startedAt)
-        return max(0, TimeInterval(settings.warmupMinutes * 60) - elapsed)
-    }
+    mutating func markPaused(at now: Date) {}
 
-    func isWarmingUp(at now: Date) -> Bool {
-        warmupRemaining(at: now) > 0
-    }
-
-    mutating func markPaused(at now: Date) {
-        pausedAt = now
-    }
-
-    /// После паузы: разминка не тратится на паузу, а первая подстройка случится
-    /// не сразу, а через полный интервал.
+    /// После паузы первая подстройка случится не сразу, а через полный интервал.
     mutating func markResumed(at now: Date) {
-        if let pausedAt, let startedAt {
-            self.startedAt = startedAt.addingTimeInterval(now.timeIntervalSince(pausedAt))
-        }
-        pausedAt = nil
         lastAdjust = now
     }
 
@@ -101,9 +84,11 @@ struct RegulatorEngine {
         guard let lastAdjust, now.timeIntervalSince(lastAdjust) >= settings.adjustInterval else { return nil }
         self.lastAdjust = now
         guard let heartRate = decisionHeartRate, isHeartRateFresh(at: now) else { return nil }
-        // На разминке ритм стоит на нижней границе и не меняется.
-        if isWarmingUp(at: now) {
-            return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: .hold)
+        if !isRegulating {
+            guard heartRate >= Double(settings.heartRateMin) else {
+                return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: .hold)
+            }
+            isRegulating = true
         }
         let action = controller.adjust(forHeartRate: heartRate)
         return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: action)

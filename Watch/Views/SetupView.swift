@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Экран перед стартом: две главные настройки и кнопка «Старт».
 struct SetupView: View {
+    @Environment(\.palette) private var palette
     @Environment(WatchRunModel.self) private var model
 
     var body: some View {
@@ -15,10 +16,10 @@ struct SetupView: View {
                             Text("Последняя")
                             Spacer()
                             Text("\(formatDistance(last.distanceMeters)) · \(formatElapsed(last.duration))")
-                                .foregroundStyle(ZoneStyle.inkSecondary)
+                                .foregroundStyle(palette.inkSecondary)
                         }
                         .font(.caption2)
-                        .foregroundStyle(ZoneStyle.ink)
+                        .foregroundStyle(palette.ink)
                     }
                     .buttonStyle(.plain)
                 }
@@ -30,12 +31,12 @@ struct SetupView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(ZoneStyle.orange)
+                .tint(palette.orange)
 
                 if let error = model.errorText {
                     Text(error)
                         .font(.caption2)
-                        .foregroundStyle(ZoneStyle.deepCoral)
+                        .foregroundStyle(palette.deepCoral)
                         .multilineTextAlignment(.center)
                 }
 
@@ -48,14 +49,15 @@ struct SetupView: View {
             }
             .padding(.horizontal, 4)
         }
-        .background(ZoneStyle.background.ignoresSafeArea())
-        .navigationTitle("InnerPace")
+        .background(palette.background.ignoresSafeArea())
+        .navigationBarHidden(true)
     }
 }
 
 /// Две главные плитки: нижняя граница ритма и целевой пульс.
 /// Верхняя граница ритма и нижняя граница пульса считаются автоматически.
 struct QuickSettingsView: View {
+    @Environment(\.palette) private var palette
     enum Field: Hashable {
         case cadenceMin, heartRateMax
     }
@@ -82,7 +84,7 @@ struct QuickSettingsView: View {
             }
             Text("Ритм до \(store.settings.cadenceMax) · пульс от \(store.settings.heartRateMin)")
                 .font(.caption2)
-                .foregroundStyle(ZoneStyle.inkSecondary)
+                .foregroundStyle(palette.inkSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -91,8 +93,9 @@ struct QuickSettingsView: View {
 
 /// Тонкие параметры регулятора, звук и режим разработчика.
 struct AdvancedSettingsView: View {
+    @Environment(\.palette) private var palette
     enum Field: Hashable {
-        case cadenceMax, span, heartRateMin, approach, holdBand, warmup, slowdown, smoothing, interval, maxStep
+        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep
     }
 
     @Environment(WatchRunModel.self) private var model
@@ -123,46 +126,49 @@ struct AdvancedSettingsView: View {
                 HStack(spacing: 6) {
                     CrownNumberField(title: "Удержание", value: $store.settings.holdBand,
                                      range: 0...20, field: .holdBand, focused: $focused)
-                    CrownNumberField(title: "Разминка", value: $store.settings.warmupMinutes,
-                                     range: 0...15, field: .warmup, focused: $focused, unit: "мин")
+                    CrownNumberField(title: "Спуск", value: $slowdown,
+                                     range: 1...10, field: .slowdown, focused: $focused, unit: "×")
                 }
+                sectionTitle("Оформление")
+                Toggle("Тёмная тема", isOn: Binding(
+                    get: { store.settings.theme == .dark },
+                    set: { store.settings.theme = $0 ? .dark : .light }
+                ))
+                .font(.caption)
+                .foregroundStyle(palette.ink)
                 sectionTitle("Звук")
                 Toggle("Каждый второй шаг", isOn: $store.settings.halfTimeClick)
                     .font(.caption)
-                    .foregroundStyle(ZoneStyle.ink)
+                    .foregroundStyle(palette.ink)
                 Slider(value: $store.settings.clickVolume, in: 0...1) {
                     Text("Громкость")
                 }
                 Text("Громкость")
                     .font(.caption2)
-                    .foregroundStyle(ZoneStyle.inkSecondary)
+                    .foregroundStyle(palette.inkSecondary)
 
                 sectionTitle("Разработчик")
                 Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
                     .font(.caption)
-                    .foregroundStyle(ZoneStyle.ink)
+                    .foregroundStyle(palette.ink)
                 HStack(spacing: 6) {
-                    CrownNumberField(title: "Спуск", value: $slowdown,
-                                     range: 1...10, field: .slowdown, focused: $focused, unit: "×")
                     CrownNumberField(title: "Сглажив.", value: $smoothing,
                                      range: 0...30, field: .smoothing, focused: $focused, unit: "с")
-                }
-                HStack(spacing: 6) {
                     CrownNumberField(title: "Интервал", value: $interval,
                                      range: 2...30, field: .interval, focused: $focused, unit: "с")
-                    CrownNumberField(title: "Шаг", value: $store.settings.maxStep,
-                                     range: 1...10, field: .maxStep, focused: $focused)
                 }
+                CrownNumberField(title: "Шаг", value: $store.settings.maxStep,
+                                 range: 1...10, field: .maxStep, focused: $focused)
                 Text("Телеметрия пишется посекундно в CSV и пересылается на телефон, папка InnerPace в «Файлах».")
                     .font(.caption2)
-                    .foregroundStyle(ZoneStyle.inkSecondary)
+                    .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 4)
         }
-        .background(ZoneStyle.background.ignoresSafeArea())
+        .background(palette.background.ignoresSafeArea())
         .navigationTitle("Ещё")
-        .containerBackground(ZoneStyle.background.gradient, for: .navigation)
+        .containerBackground(palette.background.gradient, for: .navigation)
         .onAppear {
             interval = Int(store.settings.adjustInterval)
             smoothing = Int(store.settings.smoothingSeconds)
@@ -176,7 +182,7 @@ struct AdvancedSettingsView: View {
     private func sectionTitle(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.caption2)
-            .foregroundStyle(ZoneStyle.inkSecondary)
+            .foregroundStyle(palette.inkSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 4)
     }
