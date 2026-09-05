@@ -10,8 +10,8 @@ struct DetailsView: View {
             VStack(spacing: 4) {
                 tile(formatElapsed(model.elapsed), "время", accent: palette.coral)
                 HStack(spacing: 4) {
-                    tile(formatPace(model.paceSecondsPerKm), "темп, мин/км")
-                    tile(formatPace(model.averagePaceSecondsPerKm), "средний темп")
+                    tile(formatPace(model.paceSecondsPerKm), "темп")
+                    tile(formatPace(model.averagePaceSecondsPerKm), "ср. темп")
                 }
                 tile(formatDistance(model.distanceMeters), "дистанция")
             }

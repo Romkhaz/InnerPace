@@ -27,12 +27,6 @@ struct ControlsView: View {
                     Label("Настройки", systemImage: "slider.horizontal.3")
                         .frame(maxWidth: .infinity)
                 }
-                if let decision = model.lastDecision {
-                    Text(decision)
-                        .font(.caption2)
-                        .foregroundStyle(palette.inkSecondary)
-                        .multilineTextAlignment(.center)
-                }
                 if let error = model.errorText {
                     Text(error)
                         .font(.caption2)

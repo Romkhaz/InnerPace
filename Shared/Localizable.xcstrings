@@ -1222,12 +1222,32 @@
         }
       }
     },
+    "ср. темп": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "avg pace"
+          }
+        }
+      }
+    },
     "средний темп": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "avg pace"
+          }
+        }
+      }
+    },
+    "темп": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pace"
           }
         }
       }
