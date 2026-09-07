@@ -277,7 +277,7 @@ final class RunSession {
         if settings.developerMode {
             telemetry.append(TelemetryRow(
                 time: now, elapsed: elapsed, heartRate: heartRateSource == .polar ? heartRate : nil,
-                smoothedHeartRate: smoothedHeartRate, decisionHeartRate: engine.decisionHeartRate,
+                smoothedHeartRate: smoothedHeartRate, trendPerMinute: engine.trendPerMinute, decisionHeartRate: engine.decisionHeartRate,
                 metronome: cadence, actualCadence: actualCadence,
                 distanceMeters: distanceMeters, speedMetersPerSecond: paceSecondsPerKm.map { 1000 / $0 },
                 groundContactMs: nil, verticalOscillationCm: nil, strideLengthMeters: nil, powerWatts: nil,

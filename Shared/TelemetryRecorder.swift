@@ -6,6 +6,7 @@ struct TelemetryRow {
     var elapsed: TimeInterval
     var heartRate: Int?
     var smoothedHeartRate: Double?
+    var trendPerMinute: Double?
     var decisionHeartRate: Double?
     var metronome: Int
     var actualCadence: Int?
@@ -25,7 +26,7 @@ struct TelemetryRecorder {
     private(set) var rows: [TelemetryRow] = []
     private(set) var settingsLine: String = ""
 
-    static let header = "time,elapsed_s,hr,hr_smoothed,hr_decision,metronome_bpm,cadence_spm,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,over_limit,decision"
+    static let header = "time,elapsed_s,hr,hr_smoothed,hr_trend_bpm_min,hr_decision,metronome_bpm,cadence_spm,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,over_limit,decision"
 
     mutating func start(settings: RegulatorSettings) {
         rows.removeAll()
@@ -50,6 +51,7 @@ struct TelemetryRecorder {
                 String(format: "%.0f", r.elapsed),
                 r.heartRate.map(String.init) ?? "",
                 r.smoothedHeartRate.map { String(format: "%.1f", $0) } ?? "",
+                r.trendPerMinute.map { String(format: "%.1f", $0) } ?? "",
                 r.decisionHeartRate.map { String(format: "%.1f", $0) } ?? "",
                 String(r.metronome),
                 r.actualCadence.map(String.init) ?? "",

@@ -11,6 +11,7 @@
 		0683633D54CC2948D956CD3D /* ZoneBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E82056788F69268F67BE66 /* ZoneBar.swift */; };
 		09B5228D5B94F968D373BD9F /* RegulatorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048CE161612AE5CDE43A51F8 /* RegulatorSettings.swift */; };
 		0A804D759A352A58D869CD4A /* TelemetryRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */; };
+		0B874C622009553A353C892C /* HeartRateTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFA43F78D3ADF364FE2B530 /* HeartRateTrend.swift */; };
 		0C60CAD1065A16176486C40D /* HeartRateSmoother.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5165E6F2813F4194DE11FFBA /* HeartRateSmoother.swift */; };
 		0D88BA2A20C7B805D4BE6DDF /* RunSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 209259BDC7466920A286886A /* RunSession.swift */; };
 		18D989D72E8F140E4D947CFE /* WatchWorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50837DB0BB65557BDBBC4AB /* WatchWorkoutManager.swift */; };
@@ -23,6 +24,7 @@
 		3E90D14BDA2D45FF0B456584 /* VoiceCues.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C313DB20789C546EB040D1 /* VoiceCues.swift */; };
 		3FFF983C9206DDB858ED51F9 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 752FF15D945DEFC8C4282C40 /* Localizable.xcstrings */; };
 		40583B757C36EFCB8B0C8A3F /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D750CCDAB16028AE707EF4FF /* InfoPlist.xcstrings */; };
+		40B5A027BD34E440801219E6 /* HeartRateTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFA43F78D3ADF364FE2B530 /* HeartRateTrend.swift */; };
 		4291E747E184EDC6D085ECE4 /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D07F8FDCBAE34404EBEE09C8 /* Formatting.swift */; };
 		42E79B087A2ABE8C23A1F1E3 /* TelemetryRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */; };
 		43B7D60B893CC119A59AC4E6 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF700CD0D1E003336FDD846 /* SettingsStore.swift */; };
@@ -64,6 +66,7 @@
 		94D7764D9C8CDE68AE603B59 /* InnerPaceWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CE2437603846860437854C /* InnerPaceWatchApp.swift */; };
 		983064E1F2150C5DF0290480 /* ZoneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */; };
 		9BBA08859B8C9D4D8468CDC0 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0E10B747FFC0957437346F /* AppTheme.swift */; };
+		9F18833800B2F22495206133 /* HeartRateTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFA43F78D3ADF364FE2B530 /* HeartRateTrend.swift */; };
 		A3426938B37F76E48EA834AE /* ZoneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */; };
 		A4197E4BAF54A73A82B4DE5A /* EfficiencyTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA1D82FDAB65342DC0E25C7 /* EfficiencyTracker.swift */; };
 		A6153A01F68F5C3A3453E673 /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
@@ -163,6 +166,7 @@
 		B6E904EB0C61367EDFC02966 /* EfficiencyTrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EfficiencyTrackerTests.swift; sourceTree = "<group>"; };
 		BC2271C10B4CDED5D8EE16A6 /* CadenceSensor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadenceSensor.swift; sourceTree = "<group>"; };
 		CA361D0D0E55C804D0E39ED1 /* InnerPaceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerPaceApp.swift; sourceTree = "<group>"; };
+		CAFA43F78D3ADF364FE2B530 /* HeartRateTrend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateTrend.swift; sourceTree = "<group>"; };
 		D07F8FDCBAE34404EBEE09C8 /* Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatting.swift; sourceTree = "<group>"; };
 		D750CCDAB16028AE707EF4FF /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		D7F5E428FF9010220C36461A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -310,6 +314,7 @@
 				EFA1D82FDAB65342DC0E25C7 /* EfficiencyTracker.swift */,
 				D07F8FDCBAE34404EBEE09C8 /* Formatting.swift */,
 				5165E6F2813F4194DE11FFBA /* HeartRateSmoother.swift */,
+				CAFA43F78D3ADF364FE2B530 /* HeartRateTrend.swift */,
 				A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */,
 				752FF15D945DEFC8C4282C40 /* Localizable.xcstrings */,
 				5916193FA3CD86DE025A0B7A /* RegulatorEngine.swift */,
@@ -483,6 +488,7 @@
 				4F6F765F679E8C06123AC09C /* EfficiencyTracker.swift in Sources */,
 				8E373B39970C724DAA8FEC50 /* Formatting.swift in Sources */,
 				0C60CAD1065A16176486C40D /* HeartRateSmoother.swift in Sources */,
+				0B874C622009553A353C892C /* HeartRateTrend.swift in Sources */,
 				A6153A01F68F5C3A3453E673 /* HeartRateZone.swift in Sources */,
 				035589084B11E2CB469CFFDD /* HistoryView.swift in Sources */,
 				E9BC026649050D9C6B8B7427 /* InnerPaceApp.swift in Sources */,
@@ -518,6 +524,7 @@
 				857FB1F8CE114E636DAD5C45 /* EfficiencyTracker.swift in Sources */,
 				4291E747E184EDC6D085ECE4 /* Formatting.swift in Sources */,
 				73B55AA1F24489491C711C0A /* HeartRateSmoother.swift in Sources */,
+				9F18833800B2F22495206133 /* HeartRateTrend.swift in Sources */,
 				4A88C0BD41BFEE6EC461E58D /* HeartRateZone.swift in Sources */,
 				94D7764D9C8CDE68AE603B59 /* InnerPaceWatchApp.swift in Sources */,
 				765347ABAEBB21B2F9775B26 /* MetricsView.swift in Sources */,
@@ -552,6 +559,7 @@
 				E158C7E7E8872B3C84CC6BE5 /* Formatting.swift in Sources */,
 				86975B55FB1832498FA49517 /* HeartRateSmoother.swift in Sources */,
 				84B3ABB96FFD325F48769522 /* HeartRateSmootherTests.swift in Sources */,
+				40B5A027BD34E440801219E6 /* HeartRateTrend.swift in Sources */,
 				5EEB108EA5FBDEB7C11C06E0 /* HeartRateZone.swift in Sources */,
 				E0049CEC24E3D0F51571EE84 /* RegulatorEngine.swift in Sources */,
 				6BE11148A2324DE6188F150C /* RegulatorEngineTests.swift in Sources */,

@@ -115,6 +115,7 @@ struct AdvancedSettingsView: View {
                     Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
                 }
                 AdjustRow(title: "Включение регулятора", value: $store.settings.armSeconds, range: 0...300, unit: "с")
+                AdjustRow(title: "Прогноз пульса", value: $store.settings.predictSeconds, range: 0...120, unit: "с")
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text("Подъём от базового шага")
@@ -136,7 +137,7 @@ struct AdvancedSettingsView: View {
                 AdjustRow(title: "Сглаживание пульса", value: $smoothing, range: 0...30, unit: "с")
                 AdjustRow(title: "Интервал", value: $interval, range: 2...30, unit: "с")
                 AdjustRow(title: "Макс. шаг", value: $store.settings.maxStep, range: 1...10, unit: "уд/мин")
-                Text("Регулятор включается, когда пульс продержался в зоне подхода указанное число секунд. Подъём считается от базового шага с множителем, спуск от базового шага напрямую. Выше цели решение принимается по сырому пульсу без задержки сглаживания. Телеметрия пишется посекундно в CSV, файлы лежат в папке InnerPace в «Файлах» и в «Истории».")
+                Text("Регулятор включается, когда пульс продержался в зоне подхода указанное число секунд. Решение принимается по прогнозу: сглаженный пульс плюс тренд на указанное число секунд вперёд, потому что пульс отвечает на смену ритма с задержкой около минуты. Подъём считается от базового шага с множителем, спуск от базового шага напрямую. Выше цели решение принимается по сырому пульсу без задержки сглаживания. Телеметрия пишется посекундно в CSV, файлы лежат в папке InnerPace в «Файлах» и в «Истории».")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section {

@@ -14,7 +14,91 @@ final class RegulatorEngineTests: XCTestCase {
         s.smoothingSeconds = 0
         s.ascentFactor = 1
         s.armSeconds = 0
+        s.predictSeconds = 0
         return s
+    }
+
+    /// Секунда за секундой подаёт пульс и тикает движок; возвращает последнее решение.
+    @discardableResult
+    private func feed(_ engine: inout RegulatorEngine, from: Int, through: Int, bpm: (Int) -> Int,
+                      t0: Date) -> RegulatorEngine.Adjustment? {
+        var last: RegulatorEngine.Adjustment?
+        for second in from...through {
+            let t = t0.addingTimeInterval(TimeInterval(second))
+            engine.ingest(bpm: bpm(second), at: t)
+            if let a = engine.tick(at: t) { last = a }
+        }
+        return last
+    }
+
+    func testTrendPredictsHeartRate() {
+        var s = settings
+        s.predictSeconds = 60
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        // Пульс растёт на 6 ударов в минуту: 120 → 122 за 20 секунд.
+        feed(&engine, from: 0, through: 20, bpm: { 120 + $0 / 10 }, t0: t0)
+        XCTAssertEqual(engine.trendPerMinute, 6, accuracy: 1.5)
+        XCTAssertEqual(engine.predictedHeartRate ?? 0, 128, accuracy: 2, "через минуту ожидаем около 128")
+    }
+
+    func testRisingHeartRateStopsAscentEarly() {
+        var s = settings
+        s.holdBand = 8            // удержание со 142
+        s.predictSeconds = 60
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        // Пульс 136 и растёт на 12 ударов в минуту: прогноз 148 выше цели, ритм не растёт.
+        feed(&engine, from: 0, through: 30, bpm: { 130 + $0 / 5 }, t0: t0)
+        XCTAssertGreaterThan(engine.trendPerMinute, 9)
+        XCTAssertGreaterThan(engine.predictedHeartRate ?? 0, 147)
+        let adjustment = engine.tick(at: t0.addingTimeInterval(35))
+        XCTAssertNotEqual(adjustment?.action, .speedUp(1))
+
+        // Тот же пульс без тренда: ритм растёт по одному.
+        var flat = RegulatorEngine(settings: s)
+        flat.reset(at: t0)
+        feed(&flat, from: 0, through: 30, bpm: { _ in 136 }, t0: t0)
+        XCTAssertEqual(flat.trendPerMinute, 0, accuracy: 0.01)
+        XCTAssertEqual(flat.tick(at: t0.addingTimeInterval(35))?.action, .speedUp(1))
+    }
+
+    func testFallingHeartRateSoftensDescent() {
+        var s = settings
+        s.predictSeconds = 60
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        // Зона подхода: регулятор включён, ритм подрос.
+        feed(&engine, from: 0, through: 30, bpm: { _ in 136 }, t0: t0)
+        XCTAssertGreaterThan(engine.cadence, 180)
+        let before = engine.cadence
+        // Пульс скакнул до 160 и падает на 12 ударов в минуту до 153: сырой всё ещё выше цели 150,
+        // поэтому решение по сырому, а не по прогнозу, и спуск идёт по фактическому превышению.
+        feed(&engine, from: 31, through: 70, bpm: { 160 - ($0 - 31) / 5 }, t0: t0)
+        XCTAssertLessThan(engine.trendPerMinute, -9)
+        XCTAssertLessThan(engine.predictedHeartRate ?? 0, 145)
+        XCTAssertEqual(engine.decisionHeartRate ?? 0, 153, accuracy: 0.001, "сырой пульс выше цели побеждает прогноз")
+        XCTAssertLessThan(engine.cadence, before)
+    }
+
+    func testOverLimitNotDeclaredWhileHeartRateFalls() {
+        var engine = RegulatorEngine(settings: settings)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        XCTAssertNil(engine.tick(at: t0))
+        // Ритм на нижней границе, пульс выше цели, но падает на 12 ударов в минуту.
+        feed(&engine, from: 1, through: 25, bpm: { 165 - $0 / 5 }, t0: t0)
+        XCTAssertEqual(engine.cadence, 180)
+        XCTAssertLessThan(engine.trendPerMinute, -9)
+        XCTAssertFalse(engine.isOverLimit, "пульс сам идёт вниз, «сбавь» не нужно")
+        // Пульс перестал падать: как только тренд выровнялся, через десять секунд предел.
+        feed(&engine, from: 26, through: 40, bpm: { _ in 160 }, t0: t0)
+        XCTAssertFalse(engine.isOverLimit, "окно тренда ещё помнит спад")
+        feed(&engine, from: 41, through: 60, bpm: { _ in 160 }, t0: t0)
+        XCTAssertTrue(engine.isOverLimit)
     }
 
     func testAdjustsOnlyAfterInterval() {
@@ -202,13 +286,13 @@ final class RegulatorEngineTests: XCTestCase {
         var recorder = TelemetryRecorder()
         recorder.start(settings: settings)
         recorder.append(TelemetryRow(time: Date(timeIntervalSince1970: 0), elapsed: 1, heartRate: 140,
-                                     smoothedHeartRate: 139.5, decisionHeartRate: 139.5, metronome: 182,
+                                     smoothedHeartRate: 139.5, trendPerMinute: -1.25, decisionHeartRate: 139.5, metronome: 182,
                                      actualCadence: 178, distanceMeters: 3.2, speedMetersPerSecond: 3.1,
                                      groundContactMs: 240, verticalOscillationCm: 8.4, strideLengthMeters: 1.05,
                                      powerWatts: 250, efficiencyRecent: nil, warmup: true, decision: "a, b"))
         let csv = recorder.csv()
         XCTAssertTrue(csv.hasPrefix("# settings {"))
         XCTAssertTrue(csv.contains(TelemetryRecorder.header))
-        XCTAssertTrue(csv.contains(",140,139.5,139.5,182,178,3.2,3.10,240,8.4,1.05,250,,1,0,a; b"))
+        XCTAssertTrue(csv.contains(",140,139.5,-1.2,139.5,182,178,3.2,3.10,240,8.4,1.05,250,,1,0,a; b"))
     }
 }

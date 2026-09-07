@@ -15,6 +15,20 @@ final class RegulatorSettingsTests: XCTestCase {
         XCTAssertEqual(settings.cadenceMin, 175)
     }
 
+    func testLegacyHoldBandMigratesToNewDefault() throws {
+        let legacy = #"{"cadenceMin":175,"holdBand":3}"#
+        let migrated = try JSONDecoder().decode(RegulatorSettings.self, from: Data(legacy.utf8))
+        XCTAssertEqual(migrated.holdBand, RegulatorSettings.default.holdBand, "старая полоса 3 без версии приводится к новой")
+        XCTAssertEqual(migrated.schemaVersion, RegulatorSettings.currentSchemaVersion)
+
+        let deliberate = #"{"cadenceMin":175,"holdBand":3,"schemaVersion":2}"#
+        let kept = try JSONDecoder().decode(RegulatorSettings.self, from: Data(deliberate.utf8))
+        XCTAssertEqual(kept.holdBand, 3, "выставленное вручную после миграции не трогаем")
+
+        let other = #"{"cadenceMin":175,"holdBand":5}"#
+        XCTAssertEqual(try JSONDecoder().decode(RegulatorSettings.self, from: Data(other.utf8)).holdBand, 5)
+    }
+
     func testRoundTrip() throws {
         var settings = RegulatorSettings.default
         settings.halfTimeClick = true

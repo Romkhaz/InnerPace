@@ -7,9 +7,15 @@ import Foundation
 /// продержался в зоне подхода не меньше `armSeconds`, то есть сердце вошло
 /// в рабочий режим, и дальше работает до конца тренировки.
 ///
+/// Пульс отвечает на смену ритма с задержкой около минуты, поэтому решение
+/// принимается не по текущему пульсу, а по прогнозу: сглаженный пульс плюс тренд
+/// на `predictSeconds` вперёд. Так ритм перестаёт расти раньше, чем пульс упрётся
+/// в цель, и перестаёт падать, когда пульс уже идёт вниз.
+///
 /// Если ритм уже упёрся в нижнюю границу, а пульс всё равно выше цели дольше
-/// `overLimitDelay`, включается состояние «предел»: снижать ритм больше нечего,
-/// нужно сбавлять усилие. Состояние снимается, когда пульс вернулся под цель.
+/// `overLimitDelay` и не падает, включается состояние «предел»: снижать ритм
+/// больше нечего, нужно сбавлять усилие. Состояние снимается, когда пульс
+/// вернулся под цель.
 struct RegulatorEngine {
     struct Adjustment: Equatable {
         let heartRate: Double
@@ -27,6 +33,7 @@ struct RegulatorEngine {
 
     private var controller: CadenceController
     private var smoother: HeartRateSmoother
+    private var trend = HeartRateTrend()
     private(set) var smoothedHeartRate: Double?
     private(set) var latestHeartRate: Double?
     private(set) var lastHeartRateAt: Date?
@@ -43,6 +50,9 @@ struct RegulatorEngine {
     var overLimitDelay: TimeInterval = 10
     /// На сколько ударов пульс должен опуститься ниже цели, чтобы предел снялся.
     var overLimitHysteresis: Double = 2
+    /// Если пульс падает быстрее этого (ударов в минуту за минуту), предел не объявляем:
+    /// он сам уйдёт под цель, подсказка «сбавь» только сбила бы с толку.
+    var overLimitFallingSlope: Double = -2
 
     init(settings: RegulatorSettings) {
         self.settings = settings
@@ -56,6 +66,7 @@ struct RegulatorEngine {
     mutating func reset(at now: Date = Date()) {
         controller.reset()
         smoother = HeartRateSmoother(timeConstant: settings.smoothingSeconds)
+        trend.reset()
         smoothedHeartRate = nil
         latestHeartRate = nil
         lastAdjust = nil
@@ -68,7 +79,18 @@ struct RegulatorEngine {
     mutating func ingest(bpm: Int, at time: Date) {
         lastHeartRateAt = time
         latestHeartRate = Double(bpm)
-        smoothedHeartRate = smoother.add(Double(bpm), at: time)
+        let smoothed = smoother.add(Double(bpm), at: time)
+        smoothedHeartRate = smoothed
+        trend.add(smoothed, at: time)
+    }
+
+    /// Тренд сглаженного пульса, ударов в минуту за минуту.
+    var trendPerMinute: Double { trend.slopePerMinute }
+
+    /// Сглаженный пульс плюс тренд на `predictSeconds` вперёд.
+    var predictedHeartRate: Double? {
+        guard let smoothed = smoothedHeartRate else { return nil }
+        return smoothed + trendPerMinute * Double(settings.predictSeconds) / 60
     }
 
     func isHeartRateFresh(at now: Date) -> Bool {
@@ -76,14 +98,14 @@ struct RegulatorEngine {
         return now.timeIntervalSince(lastHeartRateAt) <= staleAfter
     }
 
-    /// Пульс, по которому принимается решение. Пока пульс ниже цели, это сглаженное
-    /// значение. Как только сырой пульс выше цели, берём его без задержки сглаживания,
+    /// Пульс, по которому принимается решение: прогноз по тренду. Как только сырой
+    /// пульс выше цели, берём его, если он выше прогноза, без задержки сглаживания,
     /// чтобы спуск ритма начинался сразу, а не когда фильтр догонит.
     var decisionHeartRate: Double? {
-        guard let smoothed = smoothedHeartRate else { return latestHeartRate }
-        guard let latest = latestHeartRate else { return smoothed }
+        guard let predicted = predictedHeartRate else { return latestHeartRate }
+        guard let latest = latestHeartRate else { return predicted }
         let target = Double(settings.targetHeartRate)
-        return latest > target ? max(smoothed, latest) : smoothed
+        return latest > target ? max(predicted, latest) : predicted
     }
 
     mutating func markPaused(at now: Date) {}
@@ -124,9 +146,11 @@ struct RegulatorEngine {
         }
     }
 
+    /// Предел считается по сглаженному пульсу без прогноза: прогноз нужен, чтобы
+    /// заранее двигать ритм, а предел объявляется по факту.
     private mutating func updateOverLimit(at now: Date) {
         let target = Double(settings.targetHeartRate)
-        guard isRegulating, isHeartRateFresh(at: now), let heartRate = decisionHeartRate else {
+        guard isRegulating, isHeartRateFresh(at: now), let heartRate = smoothedHeartRate else {
             overLimitSince = nil
             isOverLimit = false
             return
@@ -140,7 +164,7 @@ struct RegulatorEngine {
             }
             return
         }
-        if atFloor, heartRate > target {
+        if atFloor, heartRate > target, trendPerMinute > overLimitFallingSlope {
             if overLimitSince == nil { overLimitSince = now }
             if let since = overLimitSince, now.timeIntervalSince(since) >= overLimitDelay {
                 isOverLimit = true

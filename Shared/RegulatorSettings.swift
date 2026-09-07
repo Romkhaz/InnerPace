@@ -28,6 +28,12 @@ struct RegulatorSettings: Codable, Equatable {
     var ascentFactor: Double = 0.5
     /// Сколько секунд пульс должен продержаться в зоне подхода, чтобы регулятор включился.
     var armSeconds: Int = 30
+    /// Горизонт прогноза пульса, секунды. Решение принимается по пульсу, который
+    /// ожидается через это время при текущем тренде, а не по текущему. Ноль отключает прогноз.
+    var predictSeconds: Int = 60
+    /// Версия схемы настроек. Старые записи без версии приводятся к новым значениям по умолчанию,
+    /// где старое значение по умолчанию оказалось неудачным.
+    var schemaVersion: Int = RegulatorSettings.currentSchemaVersion
     /// Постоянная времени сглаживания пульса, секунды.
     var smoothingSeconds: Double = 5
     /// Щёлкать на каждый второй шаг.
@@ -43,6 +49,10 @@ struct RegulatorSettings: Codable, Equatable {
     static let telemetryForcedOn = true
     /// Потолок автоматически вычисляемой верхней границы ритма.
     static let cadenceMaxCap = 190
+    static let currentSchemaVersion = 2
+    /// Полоса удержания в настройках до версии 2. Оказалась слишком узкой: ритм рос,
+    /// пока пульс не подходил к цели вплотную, и инерция выносила его выше.
+    static let legacyHoldBand = 3
     /// Оформление: авто, светлая или тёмная.
     var theme: AppTheme = .auto
     /// Голосовые подсказки «сбавь» и «в норме».
@@ -74,12 +84,16 @@ struct RegulatorSettings: Codable, Equatable {
         heartRateMin = try c.decodeIfPresent(Int.self, forKey: .heartRateMin) ?? d.heartRateMin
         heartRateMax = try c.decodeIfPresent(Int.self, forKey: .heartRateMax) ?? d.heartRateMax
         approachPercent = try c.decodeIfPresent(Int.self, forKey: .approachPercent) ?? d.approachPercent
-        holdBand = try c.decodeIfPresent(Int.self, forKey: .holdBand) ?? d.holdBand
+        let storedVersion = try c.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
+        let storedHoldBand = try c.decodeIfPresent(Int.self, forKey: .holdBand) ?? d.holdBand
+        holdBand = storedVersion < 2 && storedHoldBand == RegulatorSettings.legacyHoldBand ? d.holdBand : storedHoldBand
+        schemaVersion = RegulatorSettings.currentSchemaVersion
         slowdownFactor = try c.decodeIfPresent(Double.self, forKey: .slowdownFactor) ?? d.slowdownFactor
         adjustInterval = try c.decodeIfPresent(TimeInterval.self, forKey: .adjustInterval) ?? d.adjustInterval
         maxStep = try c.decodeIfPresent(Int.self, forKey: .maxStep) ?? d.maxStep
         ascentFactor = try c.decodeIfPresent(Double.self, forKey: .ascentFactor) ?? d.ascentFactor
         armSeconds = try c.decodeIfPresent(Int.self, forKey: .armSeconds) ?? d.armSeconds
+        predictSeconds = try c.decodeIfPresent(Int.self, forKey: .predictSeconds) ?? d.predictSeconds
         smoothingSeconds = try c.decodeIfPresent(Double.self, forKey: .smoothingSeconds) ?? d.smoothingSeconds
         halfTimeClick = try c.decodeIfPresent(Bool.self, forKey: .halfTimeClick) ?? d.halfTimeClick
         clickVolume = try c.decodeIfPresent(Double.self, forKey: .clickVolume) ?? d.clickVolume
@@ -135,6 +149,7 @@ struct RegulatorSettings: Codable, Equatable {
         copy.maxStep = max(1, copy.maxStep)
         copy.ascentFactor = min(1, max(0.1, copy.ascentFactor))
         copy.armSeconds = min(300, max(0, copy.armSeconds))
+        copy.predictSeconds = min(120, max(0, copy.predictSeconds))
         copy.adjustInterval = max(1, copy.adjustInterval)
         copy.smoothingSeconds = max(0, copy.smoothingSeconds)
         copy.clickVolume = min(1, max(0, copy.clickVolume))

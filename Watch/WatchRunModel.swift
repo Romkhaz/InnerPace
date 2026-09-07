@@ -241,7 +241,7 @@ final class WatchRunModel {
         if settings.developerMode {
             telemetry.append(TelemetryRow(
                 time: now, elapsed: elapsed, heartRate: heartRate,
-                smoothedHeartRate: smoothedHeartRate, decisionHeartRate: engine.decisionHeartRate,
+                smoothedHeartRate: smoothedHeartRate, trendPerMinute: engine.trendPerMinute, decisionHeartRate: engine.decisionHeartRate,
                 metronome: cadence, actualCadence: actualCadence,
                 distanceMeters: workout.distanceMeters, speedMetersPerSecond: workout.speedMetersPerSecond,
                 groundContactMs: groundContactMs, verticalOscillationCm: verticalOscillationCm,

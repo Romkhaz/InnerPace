@@ -34,4 +34,18 @@ final class HeartRateSmootherTests: XCTestCase {
         XCTAssertNil(smoother.value)
         XCTAssertEqual(smoother.add(100), 100)
     }
+
+    func testTrendSlopeAndWarmup() {
+        var trend = HeartRateTrend(window: 20)
+        let t0 = Date(timeIntervalSince1970: 0)
+        trend.add(130, at: t0)
+        trend.add(131, at: t0.addingTimeInterval(5))
+        XCTAssertEqual(trend.slopePerMinute, 0, "меньше половины окна: тренда ещё нет")
+        for second in stride(from: 10, through: 40, by: 5) {
+            trend.add(130 + Double(second) * 0.2, at: t0.addingTimeInterval(TimeInterval(second)))
+        }
+        XCTAssertEqual(trend.slopePerMinute, 12, accuracy: 0.01, "0,2 удара в секунду это 12 в минуту")
+        trend.reset()
+        XCTAssertEqual(trend.slopePerMinute, 0)
+    }
 }

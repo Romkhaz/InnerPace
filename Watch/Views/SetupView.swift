@@ -95,7 +95,7 @@ struct QuickSettingsView: View {
 struct AdvancedSettingsView: View {
     @Environment(\.palette) private var palette
     enum Field: Hashable {
-        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep, voiceRepeat, arm, ascent
+        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep, voiceRepeat, arm, ascent, predict
     }
 
     @Environment(WatchRunModel.self) private var model
@@ -171,13 +171,17 @@ struct AdvancedSettingsView: View {
                                      range: 10...100, field: .ascent, focused: $focused, unit: "%")
                 }
                 HStack(spacing: 6) {
+                    CrownNumberField(title: "Прогноз", value: $store.settings.predictSeconds,
+                                     range: 0...120, field: .predict, focused: $focused, unit: "с")
                     CrownNumberField(title: "Сглажив.", value: $smoothing,
                                      range: 0...30, field: .smoothing, focused: $focused, unit: "с")
+                }
+                HStack(spacing: 6) {
                     CrownNumberField(title: "Интервал", value: $interval,
                                      range: 2...30, field: .interval, focused: $focused, unit: "с")
+                    CrownNumberField(title: "Шаг", value: $store.settings.maxStep,
+                                     range: 1...10, field: .maxStep, focused: $focused)
                 }
-                CrownNumberField(title: "Шаг", value: $store.settings.maxStep,
-                                 range: 1...10, field: .maxStep, focused: $focused)
                 Text("Телеметрия пишется посекундно в CSV и пересылается на телефон, папка InnerPace в «Файлах».")
                     .font(.caption2)
                     .foregroundStyle(palette.inkSecondary)
