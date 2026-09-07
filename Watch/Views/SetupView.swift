@@ -95,7 +95,7 @@ struct QuickSettingsView: View {
 struct AdvancedSettingsView: View {
     @Environment(\.palette) private var palette
     enum Field: Hashable {
-        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep, voiceRepeat
+        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep, voiceRepeat, arm, ascent
     }
 
     @Environment(WatchRunModel.self) private var model
@@ -103,6 +103,7 @@ struct AdvancedSettingsView: View {
     @State private var interval: Int = 5
     @State private var smoothing: Int = 5
     @State private var slowdown: Int = 3
+    @State private var ascentPercent: Int = 50
 
     var body: some View {
         @Bindable var store = model.settingsStore
@@ -154,9 +155,21 @@ struct AdvancedSettingsView: View {
                 CrownNumberField(title: "Повтор «сбавь»", value: $store.settings.voiceRepeatSeconds,
                                  range: 0...120, field: .voiceRepeat, focused: $focused, unit: "с")
                 sectionTitle("Разработчик")
-                Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
-                    .font(.caption)
-                    .foregroundStyle(palette.ink)
+                if RegulatorSettings.telemetryForcedOn {
+                    Text("Телеметрия включена в тестовых сборках")
+                        .font(.caption2)
+                        .foregroundStyle(palette.inkSecondary)
+                } else {
+                    Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
+                        .font(.caption)
+                        .foregroundStyle(palette.ink)
+                }
+                HStack(spacing: 6) {
+                    CrownNumberField(title: "Включение", value: $store.settings.armSeconds,
+                                     range: 0...300, field: .arm, focused: $focused, unit: "с")
+                    CrownNumberField(title: "Подъём", value: $ascentPercent,
+                                     range: 10...100, field: .ascent, focused: $focused, unit: "%")
+                }
                 HStack(spacing: 6) {
                     CrownNumberField(title: "Сглажив.", value: $smoothing,
                                      range: 0...30, field: .smoothing, focused: $focused, unit: "с")
@@ -179,7 +192,9 @@ struct AdvancedSettingsView: View {
             interval = Int(store.settings.adjustInterval)
             smoothing = Int(store.settings.smoothingSeconds)
             slowdown = Int(store.settings.slowdownFactor.rounded())
+            ascentPercent = Int((store.settings.ascentFactor * 100).rounded())
         }
+        .onChange(of: ascentPercent) { _, new in store.settings.ascentFactor = Double(new) / 100 }
         .onChange(of: interval) { _, new in store.settings.adjustInterval = TimeInterval(new) }
         .onChange(of: smoothing) { _, new in store.settings.smoothingSeconds = Double(new) }
         .onChange(of: slowdown) { _, new in store.settings.slowdownFactor = Double(new) }

@@ -35,9 +35,12 @@ struct ReportView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(palette.orange)
+                    .listRowBackground(palette.card)
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(palette.background.ignoresSafeArea())
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
         .navigationTitle(Text(summary.date, format: .dateTime.day().month().hour().minute()))
@@ -46,15 +49,18 @@ struct ReportView: View {
     private func row(_ title: LocalizedStringKey, _ value: String, unit: LocalizedStringKey? = nil) -> some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
+                .foregroundStyle(palette.ink)
             Spacer()
             Text(value)
                 .font(.body.weight(.semibold).monospacedDigit())
+                .foregroundStyle(palette.ink)
             if let unit {
                 Text(unit)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(palette.inkSecondary)
             }
         }
+        .listRowBackground(palette.card)
     }
 }
 

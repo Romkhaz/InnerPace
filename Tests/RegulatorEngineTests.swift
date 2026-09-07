@@ -7,11 +7,13 @@ final class RegulatorEngineTests: XCTestCase {
         s.cadenceMax = 200
         s.heartRateMin = 130
         s.heartRateMax = 150
-        s.approachPercent = 0
-        s.holdBand = 3
+        s.approachPercent = 10   // зона подхода и включение регулятора с 135
+        s.holdBand = 3           // удержание со 147
         s.slowdownFactor = 1
         s.adjustInterval = 5
         s.smoothingSeconds = 0
+        s.ascentFactor = 1
+        s.armSeconds = 0
         return s
     }
 
@@ -20,19 +22,19 @@ final class RegulatorEngineTests: XCTestCase {
         let t0 = Date(timeIntervalSince1970: 1_000)
         engine.reset(at: t0)
         XCTAssertEqual(engine.cadence, 180, "старт с нижней границы")
-        engine.ingest(bpm: 130, at: t0)
+        engine.ingest(bpm: 136, at: t0)
         XCTAssertNil(engine.tick(at: t0))
         XCTAssertNil(engine.tick(at: t0.addingTimeInterval(4)))
         let adjustment = engine.tick(at: t0.addingTimeInterval(5))
-        XCTAssertEqual(adjustment?.action, .speedUp(4))
-        XCTAssertEqual(engine.cadence, 184)
+        XCTAssertEqual(adjustment?.action, .speedUp(1), "в зоне подхода по одному удару")
+        XCTAssertEqual(engine.cadence, 181)
     }
 
     func testFreezesWhenHeartRateIsStale() {
         var engine = RegulatorEngine(settings: settings)
         let t0 = Date(timeIntervalSince1970: 1_000)
         engine.reset(at: t0)
-        engine.ingest(bpm: 120, at: t0)
+        engine.ingest(bpm: 136, at: t0)
         XCTAssertNil(engine.tick(at: t0))
         XCTAssertNil(engine.tick(at: t0.addingTimeInterval(30)))
         XCTAssertEqual(engine.cadence, 180)
@@ -45,7 +47,7 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertNil(engine.tick(at: t0))
         engine.markPaused(at: t0.addingTimeInterval(30))
         engine.markResumed(at: t0.addingTimeInterval(60))
-        engine.ingest(bpm: 120, at: t0.addingTimeInterval(61))
+        engine.ingest(bpm: 136, at: t0.addingTimeInterval(61))
         XCTAssertNil(engine.tick(at: t0.addingTimeInterval(62)))
         XCTAssertNotNil(engine.tick(at: t0.addingTimeInterval(65)))
     }
@@ -59,28 +61,42 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertEqual(engine.cadence, 195)
     }
 
-    func testRegulationStartsOnceHeartRateReachesZoneFloor() {
-        var engine = RegulatorEngine(settings: settings)
+    func testRegulationArmsAfterHoldingInApproachZone() {
+        var s = settings
+        s.armSeconds = 30
+        var engine = RegulatorEngine(settings: s)
         let t0 = Date(timeIntervalSince1970: 1_000)
         engine.reset(at: t0)
         XCTAssertEqual(engine.cadence, 180)
-        XCTAssertFalse(engine.isRegulating)
         XCTAssertNil(engine.tick(at: t0))
 
-        // Пульс ещё не дошёл до нижней границы зоны: ритм стоит на месте.
-        engine.ingest(bpm: 110, at: t0.addingTimeInterval(5))
-        XCTAssertEqual(engine.tick(at: t0.addingTimeInterval(5))?.action, .hold)
-        engine.ingest(bpm: 125, at: t0.addingTimeInterval(10))
-        XCTAssertEqual(engine.tick(at: t0.addingTimeInterval(10))?.action, .hold)
-        XCTAssertEqual(engine.cadence, 180)
+        // Ниже зоны подхода: ждём, сколько бы ни прошло времени.
+        for second in 1...60 {
+            engine.ingest(bpm: 128, at: t0.addingTimeInterval(TimeInterval(second)))
+            _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second)))
+        }
         XCTAssertFalse(engine.isRegulating)
+        XCTAssertEqual(engine.cadence, 180)
 
-        // Дошёл до 130: регулятор включается и с этого момента работает всегда.
-        engine.ingest(bpm: 130, at: t0.addingTimeInterval(15))
-        XCTAssertEqual(engine.tick(at: t0.addingTimeInterval(15))?.action, .speedUp(4))
+        // Вошёл в зону подхода: включение только после 30 секунд подряд.
+        for second in 61...89 {
+            engine.ingest(bpm: 136, at: t0.addingTimeInterval(TimeInterval(second)))
+            _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second)))
+        }
+        XCTAssertFalse(engine.isRegulating, "29 секунд ещё мало")
+        // Провал ниже зоны сбрасывает отсчёт.
+        engine.ingest(bpm: 133, at: t0.addingTimeInterval(90))
+        _ = engine.tick(at: t0.addingTimeInterval(90))
+        for second in 91...126 {
+            engine.ingest(bpm: 136, at: t0.addingTimeInterval(TimeInterval(second)))
+            _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second)))
+        }
         XCTAssertTrue(engine.isRegulating)
-        engine.ingest(bpm: 110, at: t0.addingTimeInterval(20))
-        XCTAssertEqual(engine.tick(at: t0.addingTimeInterval(20))?.action, .speedUp(4), "после включения пульс ниже границы уже не выключает регулятор")
+        XCTAssertGreaterThan(engine.cadence, 180, "в зоне подхода ритм растёт по одному")
+
+        // После включения пульс ниже зоны уже не выключает регулятор.
+        engine.ingest(bpm: 110, at: t0.addingTimeInterval(130))
+        XCTAssertEqual(engine.tick(at: t0.addingTimeInterval(130))?.action, .speedUp(4))
     }
 
     func testResetDisarmsRegulation() {
@@ -105,13 +121,14 @@ final class RegulatorEngineTests: XCTestCase {
         engine.ingest(bpm: 135, at: t0)
         XCTAssertNil(engine.tick(at: t0))
         for second in 1...5 { _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second))) }
-        XCTAssertEqual(engine.cadence, 183)
+        XCTAssertEqual(engine.cadence, 181)
         // Пульс прыгнул выше цели: сглаженный ещё около 136, решение принимается по сырому 160.
         engine.ingest(bpm: 160, at: t0.addingTimeInterval(6))
         XCTAssertLessThan(engine.smoothedHeartRate ?? 0, 140)
         XCTAssertEqual(engine.decisionHeartRate ?? 0, 160, accuracy: 0.001)
         let adjustment = engine.tick(at: t0.addingTimeInterval(10))
-        XCTAssertEqual(adjustment?.action, .slowDown(2))
+        XCTAssertEqual(adjustment?.action, .slowDown(1), "с 181 до нижней границы 180 только один шаг")
+        XCTAssertEqual(engine.cadence, 180)
     }
 
     func testOverLimitArmsAfterDelayAtFloorAndClearsBelowTarget() {

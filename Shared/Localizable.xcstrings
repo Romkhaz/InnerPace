@@ -172,6 +172,26 @@
         }
       }
     },
+    "Включение": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arming"
+          }
+        }
+      }
+    },
+    "Включение регулятора": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regulator arming"
+          }
+        }
+      }
+    },
     "Время": {
       "localizations": {
         "en": {
@@ -188,16 +208,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Time, min"
-          }
-        }
-      }
-    },
-    "Выше цели решение принимается по сырому пульсу без задержки сглаживания. Телеметрия пишется посекундно в CSV, файлы лежат в папке InnerPace в «Файлах» и в «Истории».": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Above the target the decision uses the raw heart rate with no smoothing delay. Telemetry is written per second to CSV; the files live in the InnerPace folder in Files and in History."
           }
         }
       }
@@ -602,6 +612,26 @@
         }
       }
     },
+    "Подъём": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ascent"
+          }
+        }
+      }
+    },
+    "Подъём от базового шага": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ascent from base step"
+          }
+        }
+      }
+    },
     "Поиск пульсометра…": {
       "localizations": {
         "en": {
@@ -758,6 +788,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The regulator steers heart rate toward this target. The beat slows its rise from %1$lld and stops rising at %2$lld."
+          }
+        }
+      }
+    },
+    "Регулятор включается, когда пульс продержался в зоне подхода указанное число секунд. Подъём считается от базового шага с множителем, спуск от базового шага напрямую. Выше цели решение принимается по сырому пульсу без задержки сглаживания. Телеметрия пишется посекундно в CSV, файлы лежат в папке InnerPace в «Файлах» и в «Истории».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The regulator arms once heart rate has stayed in the approach zone for the given number of seconds. Ascent is the base step times the multiplier, descent uses the base step directly. Above the target the decision uses raw heart rate without smoothing lag. Telemetry is written per second to CSV; files live in the InnerPace folder in Files and in History."
           }
         }
       }
@@ -952,12 +992,12 @@
         }
       }
     },
-    "Старт с нижней границы ритма. Регулятор включается, когда пульс дойдёт до нижней границы зоны, и дальше работает всю тренировку: в зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт, выше цели падает быстрее, чем рос.": {
+    "Старт с нижней границы ритма. Регулятор включается, когда пульс продержался в зоне подхода полминуты, и дальше работает всю тренировку: в зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт, выше цели падает быстрее, чем рос.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Starts at the lower beat bound. The regulator switches on once heart rate reaches the lower bound of the zone and stays on for the whole run: in the approach zone the beat rises by one per interval, in the hold band it holds, above the target it drops faster than it rose."
+            "value": "Starts at the lower beat bound. The regulator arms once heart rate has stayed in the approach zone for half a minute and stays on for the whole run: in the approach zone the beat rises by one per interval, in the hold band it holds, above the target it drops faster than it rose."
           }
         }
       }
@@ -1008,6 +1048,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Telemetry to file"
+          }
+        }
+      }
+    },
+    "Телеметрия включена в тестовых сборках": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetry is on in test builds"
           }
         }
       }

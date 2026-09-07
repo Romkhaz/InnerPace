@@ -4,8 +4,9 @@ import Foundation
 struct RegulatorSettings: Codable, Equatable {
     /// Нижняя граница ритма, ударов в минуту. Основная настройка, с неё начинается забег.
     var cadenceMin: Int = 180
-    /// Верхняя граница ритма. По умолчанию считается от нижней плюс `cadenceSpanPercent`.
-    var cadenceMax: Int = 207
+    /// Верхняя граница ритма. По умолчанию считается от нижней плюс `cadenceSpanPercent`,
+    /// но не выше `cadenceMaxCap`; вручную можно поставить любую.
+    var cadenceMax: Int = 190
     /// На сколько процентов верхняя граница ритма выше нижней, когда считается автоматически.
     var cadenceSpanPercent: Int = 15
     /// Нижняя граница зоны пульса. Задаёт масштаб шага регулятора и подсветку.
@@ -20,8 +21,13 @@ struct RegulatorSettings: Codable, Equatable {
     var slowdownFactor: Double = 3
     /// Сколько секунд между двумя подстройками ритма.
     var adjustInterval: TimeInterval = 5
-    /// Максимальное изменение ритма за одну подстройку при разгоне.
+    /// Базовый максимальный шаг подстройки. Спуск считается от него напрямую,
+    /// подъём умножается на `ascentFactor`.
     var maxStep: Int = 4
+    /// Во сколько раз подъём медленнее базового шага. 0,5 значит вдвое медленнее.
+    var ascentFactor: Double = 0.5
+    /// Сколько секунд пульс должен продержаться в зоне подхода, чтобы регулятор включился.
+    var armSeconds: Int = 30
     /// Постоянная времени сглаживания пульса, секунды.
     var smoothingSeconds: Double = 5
     /// Щёлкать на каждый второй шаг.
@@ -29,7 +35,14 @@ struct RegulatorSettings: Codable, Equatable {
     /// Громкость щелчка, от 0 до 1.
     var clickVolume: Double = 0.8
     /// Режим разработчика: посекундная телеметрия пишется в файл.
-    var developerMode: Bool = false
+    /// В тестовых сборках включён принудительно, см. `telemetryForcedOn`.
+    var developerMode: Bool = true
+
+    /// Пока идёт тестирование, телеметрия включена всегда. Перед публикацией в App Store
+    /// поставить false: тогда заработает переключатель в настройках.
+    static let telemetryForcedOn = true
+    /// Потолок автоматически вычисляемой верхней границы ритма.
+    static let cadenceMaxCap = 190
     /// Оформление: авто, светлая или тёмная.
     var theme: AppTheme = .auto
     /// Голосовые подсказки «сбавь» и «в норме».
@@ -49,8 +62,15 @@ struct RegulatorSettings: Codable, Equatable {
         let d = RegulatorSettings()
         cadenceMin = try c.decodeIfPresent(Int.self, forKey: .cadenceMin) ?? d.cadenceMin
         cadenceSpanPercent = try c.decodeIfPresent(Int.self, forKey: .cadenceSpanPercent) ?? d.cadenceSpanPercent
-        cadenceMax = try c.decodeIfPresent(Int.self, forKey: .cadenceMax)
-            ?? RegulatorSettings.derivedCadenceMax(from: cadenceMin, spanPercent: cadenceSpanPercent)
+        let storedMax = try c.decodeIfPresent(Int.self, forKey: .cadenceMax)
+        let uncapped = Int((Double(cadenceMin) * (1 + Double(cadenceSpanPercent) / 100)).rounded())
+        // Старые сохранённые настройки с автоматическим потолком выше 190 приводим к новому правилу;
+        // значение, выставленное вручную, не трогаем.
+        if let storedMax, storedMax != uncapped {
+            cadenceMax = storedMax
+        } else {
+            cadenceMax = RegulatorSettings.derivedCadenceMax(from: cadenceMin, spanPercent: cadenceSpanPercent)
+        }
         heartRateMin = try c.decodeIfPresent(Int.self, forKey: .heartRateMin) ?? d.heartRateMin
         heartRateMax = try c.decodeIfPresent(Int.self, forKey: .heartRateMax) ?? d.heartRateMax
         approachPercent = try c.decodeIfPresent(Int.self, forKey: .approachPercent) ?? d.approachPercent
@@ -58,10 +78,14 @@ struct RegulatorSettings: Codable, Equatable {
         slowdownFactor = try c.decodeIfPresent(Double.self, forKey: .slowdownFactor) ?? d.slowdownFactor
         adjustInterval = try c.decodeIfPresent(TimeInterval.self, forKey: .adjustInterval) ?? d.adjustInterval
         maxStep = try c.decodeIfPresent(Int.self, forKey: .maxStep) ?? d.maxStep
+        ascentFactor = try c.decodeIfPresent(Double.self, forKey: .ascentFactor) ?? d.ascentFactor
+        armSeconds = try c.decodeIfPresent(Int.self, forKey: .armSeconds) ?? d.armSeconds
         smoothingSeconds = try c.decodeIfPresent(Double.self, forKey: .smoothingSeconds) ?? d.smoothingSeconds
         halfTimeClick = try c.decodeIfPresent(Bool.self, forKey: .halfTimeClick) ?? d.halfTimeClick
         clickVolume = try c.decodeIfPresent(Double.self, forKey: .clickVolume) ?? d.clickVolume
-        developerMode = try c.decodeIfPresent(Bool.self, forKey: .developerMode) ?? d.developerMode
+        developerMode = RegulatorSettings.telemetryForcedOn
+            ? true
+            : (try c.decodeIfPresent(Bool.self, forKey: .developerMode) ?? d.developerMode)
         theme = try c.decodeIfPresent(AppTheme.self, forKey: .theme) ?? d.theme
         voiceCues = try c.decodeIfPresent(Bool.self, forKey: .voiceCues) ?? d.voiceCues
         voiceRepeatSeconds = try c.decodeIfPresent(Int.self, forKey: .voiceRepeatSeconds) ?? d.voiceRepeatSeconds
@@ -82,7 +106,8 @@ struct RegulatorSettings: Codable, Equatable {
     }
 
     static func derivedCadenceMax(from cadenceMin: Int, spanPercent: Int) -> Int {
-        Int((Double(cadenceMin) * (1 + Double(spanPercent) / 100)).rounded())
+        let uncapped = Int((Double(cadenceMin) * (1 + Double(spanPercent) / 100)).rounded())
+        return max(cadenceMin + 1, min(uncapped, cadenceMaxCap))
     }
 
     /// Меняет нижнюю границу ритма и пересчитывает верхнюю по проценту.
@@ -108,6 +133,8 @@ struct RegulatorSettings: Codable, Equatable {
         copy.holdBand = max(0, copy.holdBand)
         copy.slowdownFactor = min(10, max(1, copy.slowdownFactor))
         copy.maxStep = max(1, copy.maxStep)
+        copy.ascentFactor = min(1, max(0.1, copy.ascentFactor))
+        copy.armSeconds = min(300, max(0, copy.armSeconds))
         copy.adjustInterval = max(1, copy.adjustInterval)
         copy.smoothingSeconds = max(0, copy.smoothingSeconds)
         copy.clickVolume = min(1, max(0, copy.clickVolume))

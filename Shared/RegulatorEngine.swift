@@ -4,8 +4,8 @@ import Foundation
 /// решает, куда двигать ритм. Чистая логика без таймеров и звука.
 ///
 /// Старт всегда с нижней границы ритма. Регулятор включается, когда пульс
-/// впервые дошёл до нижней границы зоны, то есть сердце вошло в рабочий режим,
-/// и дальше работает до конца тренировки.
+/// продержался в зоне подхода не меньше `armSeconds`, то есть сердце вошло
+/// в рабочий режим, и дальше работает до конца тренировки.
 ///
 /// Если ритм уже упёрся в нижнюю границу, а пульс всё равно выше цели дольше
 /// `overLimitDelay`, включается состояние «предел»: снижать ритм больше нечего,
@@ -33,6 +33,7 @@ struct RegulatorEngine {
     private(set) var isRegulating = false
     private(set) var isOverLimit = false
     private var overLimitSince: Date?
+    private var armingSince: Date?
     private var lastAdjust: Date?
 
     /// Сколько секунд без свежего пульса, после чего ритм замораживаем.
@@ -61,6 +62,7 @@ struct RegulatorEngine {
         isRegulating = false
         isOverLimit = false
         overLimitSince = nil
+        armingSince = nil
     }
 
     mutating func ingest(bpm: Int, at time: Date) {
@@ -93,20 +95,33 @@ struct RegulatorEngine {
 
     /// Вызывается раз в секунду. Возвращает решение, если подошло время подстройки.
     mutating func tick(at now: Date) -> Adjustment? {
+        updateArming(at: now)
         updateOverLimit(at: now)
         if lastAdjust == nil { lastAdjust = now }
         guard let lastAdjust, now.timeIntervalSince(lastAdjust) >= settings.adjustInterval else { return nil }
         self.lastAdjust = now
         guard let heartRate = decisionHeartRate, isHeartRateFresh(at: now) else { return nil }
-        if !isRegulating {
-            guard heartRate >= Double(settings.heartRateMin) else {
-                return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: .hold)
-            }
-            isRegulating = true
+        guard isRegulating else {
+            return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: .hold)
         }
         let action = controller.adjust(forHeartRate: heartRate)
         updateOverLimit(at: now)
         return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: action)
+    }
+
+    /// Регулятор включается, когда сглаженный пульс продержался в зоне подхода
+    /// (от `approachHeartRate`) не меньше `armSeconds` подряд.
+    private mutating func updateArming(at now: Date) {
+        guard !isRegulating else { return }
+        guard isHeartRateFresh(at: now), let heartRate = smoothedHeartRate,
+              heartRate >= settings.approachHeartRate else {
+            armingSince = nil
+            return
+        }
+        if armingSince == nil { armingSince = now }
+        if let since = armingSince, now.timeIntervalSince(since) >= TimeInterval(settings.armSeconds) {
+            isRegulating = true
+        }
     }
 
     private mutating func updateOverLimit(at now: Date) {

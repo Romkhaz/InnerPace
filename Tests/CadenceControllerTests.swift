@@ -12,6 +12,7 @@ final class CadenceControllerTests: XCTestCase {
         s.approachPercent = 0
         s.slowdownFactor = 1
         s.maxStep = 4
+        s.ascentFactor = 1
         return s
     }
 
@@ -107,10 +108,24 @@ final class CadenceControllerTests: XCTestCase {
         XCTAssertEqual(controller.cadence, 180)
     }
 
+    func testAscentFactorHalvesClimb() {
+        var s = plain
+        s.ascentFactor = 0.5
+        var controller = CadenceController(settings: s)
+        XCTAssertEqual(controller.adjust(forHeartRate: 130), .speedUp(2), "вдвое медленнее: максимум 2 вместо 4")
+        XCTAssertEqual(controller.adjust(forHeartRate: 140), .speedUp(1))
+        controller.setCadence(200)
+        XCTAssertEqual(controller.adjust(forHeartRate: 175), .slowDown(4), "спуск от базового шага, без множителя подъёма")
+    }
+
     func testDerivedCadenceMaxAndZoneWidth() {
         var s = RegulatorSettings.default
         s.setCadenceMinDerivingMax(180)
-        XCTAssertEqual(s.cadenceMax, 207)
+        XCTAssertEqual(s.cadenceMax, 190, "207 по проценту, но потолок 190")
+        s.setCadenceMinDerivingMax(160)
+        XCTAssertEqual(s.cadenceMax, 184)
+        s.setCadenceMinDerivingMax(195)
+        XCTAssertEqual(s.cadenceMax, 196, "выше потолка верхняя граница хотя бы на единицу больше нижней")
         s.setTargetHeartRateKeepingZoneWidth(160)
         XCTAssertEqual(s.heartRateMax, 160)
         XCTAssertEqual(s.heartRateMin, 140)

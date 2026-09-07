@@ -83,7 +83,7 @@ struct AdvancedSettingsView: View {
                           range: 40...(settings.heartRateMax - 1))
                 AdjustRow(title: "Зона подхода", value: $store.settings.approachPercent, range: 0...30, unit: "%")
                 AdjustRow(title: "Полоса удержания", value: $store.settings.holdBand, range: 0...20)
-                Text("Старт с нижней границы ритма. Регулятор включается, когда пульс дойдёт до нижней границы зоны, и дальше работает всю тренировку: в зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт, выше цели падает быстрее, чем рос.")
+                Text("Старт с нижней границы ритма. Регулятор включается, когда пульс продержался в зоне подхода полминуты, и дальше работает всю тренировку: в зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт, выше цели падает быстрее, чем рос.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Звук") {
@@ -108,7 +108,22 @@ struct AdvancedSettingsView: View {
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Разработчик") {
-                Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
+                if RegulatorSettings.telemetryForcedOn {
+                    Label("Телеметрия включена в тестовых сборках", systemImage: "waveform.path.ecg")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Toggle("Телеметрия в файл", isOn: $store.settings.developerMode)
+                }
+                AdjustRow(title: "Включение регулятора", value: $store.settings.armSeconds, range: 0...300, unit: "с")
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Подъём от базового шага")
+                        Spacer()
+                        Text("×\(settings.ascentFactor.formatted(.number.precision(.fractionLength(2))))")
+                            .font(.body.weight(.semibold).monospacedDigit())
+                    }
+                    Slider(value: $store.settings.ascentFactor, in: 0.1...1, step: 0.05)
+                }
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text("Спуск быстрее подъёма")
@@ -121,7 +136,7 @@ struct AdvancedSettingsView: View {
                 AdjustRow(title: "Сглаживание пульса", value: $smoothing, range: 0...30, unit: "с")
                 AdjustRow(title: "Интервал", value: $interval, range: 2...30, unit: "с")
                 AdjustRow(title: "Макс. шаг", value: $store.settings.maxStep, range: 1...10, unit: "уд/мин")
-                Text("Выше цели решение принимается по сырому пульсу без задержки сглаживания. Телеметрия пишется посекундно в CSV, файлы лежат в папке InnerPace в «Файлах» и в «Истории».")
+                Text("Регулятор включается, когда пульс продержался в зоне подхода указанное число секунд. Подъём считается от базового шага с множителем, спуск от базового шага напрямую. Выше цели решение принимается по сырому пульсу без задержки сглаживания. Телеметрия пишется посекундно в CSV, файлы лежат в папке InnerPace в «Файлах» и в «Истории».")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section {

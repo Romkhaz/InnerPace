@@ -7,8 +7,9 @@ import Foundation
 /// - зона подхода (за `approachPercent` до цели): ритм растёт по одному шагу
 ///   за интервал, чтобы инерция пульса не вынесла его за цель;
 /// - полоса удержания (`holdBand` под целью): ритм не меняется;
-/// - выше цели: ритм падает, в `slowdownFactor` раз быстрее, чем рос,
+/// - выше цели: ритм падает, в `slowdownFactor` раз быстрее базового шага,
 ///   и шаг округляется вверх, чтобы даже малое превышение давало отклик.
+/// Подъём считается от базового шага, умноженного на `ascentFactor`.
 struct CadenceController {
     enum Action: Equatable {
         case speedUp(Int)
@@ -53,8 +54,10 @@ struct CadenceController {
         if heartRate >= settings.approachHeartRate {
             return move(by: 1)
         }
-        let raw = (target - heartRate) * gain
-        let step = min(settings.maxStep, max(1, Int(raw.rounded())))
+        let ascent = min(1, max(0.1, settings.ascentFactor))
+        let maxUp = max(1, Int((Double(settings.maxStep) * ascent).rounded()))
+        let raw = (target - heartRate) * gain * ascent
+        let step = min(maxUp, max(1, Int(raw.rounded())))
         return move(by: step)
     }
 
