@@ -54,6 +54,8 @@ struct ResponseEstimate: Codable, Equatable {
     var fit: Double
     /// Разброс сырого пульса вокруг сглаженного.
     var noise: Double
+    /// Оценка получена по пробе отклика, а не по всей записи.
+    var fromProbe: Bool = false
 
     /// Время до половины отклика: то, на сколько вперёд имеет смысл прогноз.
     var lagSeconds: Double { delaySeconds + timeConstant * 0.69 }
@@ -61,6 +63,8 @@ struct ResponseEstimate: Codable, Equatable {
     static let minimumSeconds = 900
     static let minimumCadenceSpread = 1.5
     static let minimumFit = 0.1
+    /// В окне пробы ступенька чистая, поэтому и требование к модели строже.
+    static let minimumProbeFit = 0.3
 }
 
 enum RunAnalyzer {
@@ -110,52 +114,67 @@ enum RunAnalyzer {
         return assessment
     }
 
-    /// Подбор модели отклика перебором. Нужна вариация ритма: если он весь забег стоял
-    /// на границе, оценить отклик не по чему. На часах перебор занимает доли секунды.
+    /// Оценка отклика. Если в записи была проба, модель подбирается по её окну:
+    /// 20 с до, сама проба и 60 с после, там ступенька ритма чистая. Иначе по всей
+    /// записи после включения, где вариации ритма может и не хватить.
     static func estimateResponse(rows: [TelemetryRow], settings: RegulatorSettings, date: Date) -> ResponseEstimate? {
+        let noise = standardDeviation(rows.compactMap { r -> Double? in
+            guard let hr = r.heartRate, let s = r.smoothedHeartRate else { return nil }
+            return Double(hr) - s
+        })
+        if let first = rows.firstIndex(where: \.probe), let last = rows.lastIndex(where: \.probe) {
+            let window = Array(rows[max(0, first - 20)...min(rows.count - 1, last + 60)]).filter { $0.heartRate != nil }
+            if window.count >= 60, let fit = fitModel(cad: window.map { Double($0.metronome) },
+                                                      hr: window.map { Double($0.heartRate ?? 0) }),
+               fit.fit >= ResponseEstimate.minimumProbeFit {
+                return ResponseEstimate(date: date, delaySeconds: fit.delay, timeConstant: fit.tau,
+                                        gainPerStep: fit.gain, fit: fit.fit, noise: noise, fromProbe: true)
+            }
+        }
         let reg = rows.filter { !$0.warmup && $0.heartRate != nil }
         guard reg.count >= ResponseEstimate.minimumSeconds else { return nil }
         let cad = reg.map { Double($0.metronome) }
-        let hr = reg.map { Double($0.heartRate ?? 0) }
-        guard standardDeviation(cad) >= ResponseEstimate.minimumCadenceSpread else { return nil }
-        let variance = standardDeviation(hr) * standardDeviation(hr)
-        guard variance > 0 else { return nil }
+        guard standardDeviation(cad) >= ResponseEstimate.minimumCadenceSpread,
+              let fit = fitModel(cad: cad, hr: reg.map { Double($0.heartRate ?? 0) }),
+              fit.fit >= ResponseEstimate.minimumFit else { return nil }
+        return ResponseEstimate(date: date, delaySeconds: fit.delay, timeConstant: fit.tau,
+                                gainPerStep: fit.gain, fit: fit.fit, noise: noise, fromProbe: false)
+    }
 
-        let meanCad = mean(cad)
+    /// Перебор модели: инерционное звено с задержкой на отклонении ритма от среднего,
+    /// уровень подбирается по среднему остатку. На часах занимает доли секунды.
+    static func fitModel(cad: [Double], hr: [Double]) -> (delay: Double, tau: Double, gain: Double, fit: Double)? {
+        let n = min(cad.count, hr.count)
+        guard n > 30 else { return nil }
+        let variance = standardDeviation(Array(hr[0..<n])) * standardDeviation(Array(hr[0..<n]))
+        guard variance > 0 else { return nil }
+        let meanCad = mean(Array(cad[0..<n]))
         var best: (error: Double, delay: Int, tau: Double, gain: Double)? = nil
         for delay in stride(from: 10, through: 90, by: 10) {
             for tau in [10.0, 20, 30, 45, 60, 90] {
                 for gain in stride(from: 0.2, through: 1.4, by: 0.15) {
-                    // Отклик на отклонение ритма от среднего; уровень подбирается по среднему остатку.
-                    var h = 0.0
-                    var response = [Double](repeating: 0, count: cad.count)
-                    for t in 0..<cad.count {
+                    var h = gain * (cad[0] - meanCad)
+                    var response = [Double](repeating: 0, count: n)
+                    for t in 0..<n {
                         let input = gain * (cad[max(0, t - delay)] - meanCad)
                         h += (input - h) / tau
                         response[t] = h
                     }
                     var offset = 0.0
-                    for t in 0..<cad.count { offset += hr[t] - response[t] }
-                    offset /= Double(cad.count)
+                    for t in 0..<n { offset += hr[t] - response[t] }
+                    offset /= Double(n)
                     var error = 0.0
-                    for t in 0..<cad.count {
+                    for t in 0..<n {
                         let e = hr[t] - response[t] - offset
                         error += e * e
                     }
-                    error /= Double(cad.count)
+                    error /= Double(n)
                     if best == nil || error < best!.error { best = (error, delay, tau, gain) }
                 }
             }
         }
         guard let best else { return nil }
-        let fit = 1 - best.error / variance
-        guard fit >= ResponseEstimate.minimumFit else { return nil }
-        let noise = standardDeviation(reg.compactMap { r -> Double? in
-            guard let hr = r.heartRate, let s = r.smoothedHeartRate else { return nil }
-            return Double(hr) - s
-        })
-        return ResponseEstimate(date: date, delaySeconds: Double(best.delay), timeConstant: best.tau,
-                                gainPerStep: best.gain, fit: fit, noise: noise)
+        return (Double(best.delay), best.tau, best.gain, 1 - best.error / variance)
     }
 
     // MARK: - Статистика

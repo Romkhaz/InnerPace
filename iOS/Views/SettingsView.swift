@@ -117,6 +117,9 @@ struct AdvancedSettingsView: View {
                 }
                 AdjustRow(title: "Включение регулятора", value: $store.settings.armSeconds, range: 0...300, unit: "с")
                 AdjustRow(title: "Прогноз пульса", value: $store.settings.predictSeconds, range: 0...120, unit: "с")
+                Toggle("Проба отклика", isOn: $store.settings.responseProbe)
+                Text("Раз за пробежку, когда пульс минуту ровно держится в полосе удержания, ритм поднимается на \(RegulatorSettings.probeStep) на \(Int(RegulatorSettings.probeSeconds)) с. По отклику пульса считается профиль бегуна. Когда профиль набран, проба выключается сама.")
+                    .font(.footnote).foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text("Подъём от базового шага")

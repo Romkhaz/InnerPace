@@ -11,11 +11,44 @@ final class RunAnalysisTests: XCTestCase {
         return s
     }
 
-    private func row(_ second: Int, hr: Int, metronome: Int, warmup: Bool = false, overLimit: Bool = false) -> TelemetryRow {
+    private func row(_ second: Int, hr: Int, metronome: Int, warmup: Bool = false, overLimit: Bool = false, probe: Bool = false) -> TelemetryRow {
         TelemetryRow(time: Date(timeIntervalSince1970: TimeInterval(second)), elapsed: TimeInterval(second), heartRate: hr,
                      smoothedHeartRate: Double(hr), decisionHeartRate: Double(hr), metronome: metronome, actualCadence: nil,
                      distanceMeters: 0, speedMetersPerSecond: nil, groundContactMs: nil, verticalOscillationCm: nil,
-                     strideLengthMeters: nil, powerWatts: nil, efficiencyRecent: nil, warmup: warmup, overLimit: overLimit)
+                     strideLengthMeters: nil, powerWatts: nil, efficiencyRecent: nil, warmup: warmup, overLimit: overLimit, probe: probe)
+    }
+
+    /// Пробежка с ровным пульсом и одной пробой: ритм +8 на 90 с, отклик с задержкой 40 с
+    /// и постоянной времени 20 с, 0,7 удара на шаг. Вне пробы ритм стоит, пульс шумит.
+    private func probeRun() -> [TelemetryRow] {
+        var rows: [TelemetryRow] = []
+        var hr = 140.0
+        var cadences: [Int] = []
+        for s in 0..<2400 {
+            let probe = (600..<690).contains(s)
+            let cad = probe ? 188 : 180
+            cadences.append(cad)
+            let steady = 14 + 0.7 * Double(cadences[max(0, s - 40)])
+            hr += (steady - hr) / 20
+            let noise = Double((s * 7919) % 5) - 2   // детерминированный шум ±2
+            rows.append(row(s, hr: Int((hr + noise).rounded()), metronome: cad, probe: probe))
+        }
+        return rows
+    }
+
+    func testProbeWindowGivesEstimateWhenWholeRunDoesNot() {
+        let rows = probeRun()
+        let estimate = RunAnalyzer.estimateResponse(rows: rows, settings: settings, date: Date())
+        XCTAssertNotNil(estimate)
+        XCTAssertEqual(estimate?.fromProbe, true)
+        XCTAssertEqual(estimate?.delaySeconds ?? 0, 40, accuracy: 10)
+        XCTAssertEqual(estimate?.gainPerStep ?? 0, 0.7, accuracy: 0.2)
+        XCTAssertGreaterThan(estimate?.fit ?? 0, 0.3)
+
+        let withoutFlag = rows.map { r -> TelemetryRow in var c = r; c.probe = false; return c }
+        let whole = RunAnalyzer.estimateResponse(rows: withoutFlag, settings: settings, date: Date())
+        XCTAssertNotEqual(whole?.fromProbe, true)
+        XCTAssertLessThan(whole?.fit ?? 0, estimate?.fit ?? 0, "по всей записи модель объясняет меньше, чем по окну пробы")
     }
 
     func testShortRunIsInsufficient() {
@@ -97,7 +130,7 @@ final class RunAnalysisTests: XCTestCase {
 
     func testProfileNeedsThreeRunsAndSuggestsOnlyNotableChanges() {
         func estimate(lag: Double, noise: Double = 2) -> ResponseEstimate {
-            ResponseEstimate(date: Date(), delaySeconds: lag - 14, timeConstant: 20, gainPerStep: 0.7, fit: 0.5, noise: noise)
+            ResponseEstimate(date: Date(), delaySeconds: lag - 14, timeConstant: 20, gainPerStep: 0.7, fit: 0.5, noise: noise, fromProbe: true)
         }
         XCTAssertNil(ProfileRecommendation.make(from: [estimate(lag: 40), estimate(lag: 45)], settings: settings))
         let close = ProfileRecommendation.make(from: [estimate(lag: 55), estimate(lag: 60), estimate(lag: 65)], settings: settings)

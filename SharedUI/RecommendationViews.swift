@@ -49,10 +49,12 @@ enum RecommendationText {
         return String(localized: "Предлагаю: ") + parts.joined(separator: ", ")
     }
 
-    static func profilePending(runs: Int, lastEstimated: Bool) -> String {
+    static func profilePending(runs: Int, lastEstimated: Bool, probeEnabled: Bool) -> String {
         var text = String(localized: "Профиль появится после \(ProfileRecommendation.minimumRuns) пробежек, где удалось оценить отклик пульса на ритм, пока \(runs).")
         if !lastEstimated {
-            text += " " + String(localized: "В этой пробежке отклик не виден: чем ровнее регулятор держит пульс, тем меньше в записи связи ритма с пульсом.")
+            text += " " + (probeEnabled
+                ? String(localized: "В этой пробежке проба отклика не состоялась: для неё пульс должен минуту ровно держаться в полосе удержания.")
+                : String(localized: "В этой пробежке отклик не виден. Включите пробу отклика в дополнительных настройках."))
         }
         return text
     }

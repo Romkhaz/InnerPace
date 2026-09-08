@@ -185,6 +185,9 @@ struct AdvancedSettingsView: View {
                     CrownNumberField(title: "Подъём", value: $ascentPercent,
                                      range: 10...100, field: .ascent, focused: $focused, unit: "%")
                 }
+                Toggle("Проба отклика", isOn: $store.settings.responseProbe)
+                    .font(.caption)
+                    .foregroundStyle(palette.ink)
                 HStack(spacing: 6) {
                     CrownNumberField(title: "Прогноз", value: $store.settings.predictSeconds,
                                      range: 0...120, field: .predict, focused: $focused, unit: "с")

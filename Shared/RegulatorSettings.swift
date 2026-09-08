@@ -31,6 +31,9 @@ struct RegulatorSettings: Codable, Equatable {
     /// Горизонт прогноза пульса, секунды. Решение принимается по пульсу, который
     /// ожидается через это время при текущем тренде, а не по текущему. Ноль отключает прогноз.
     var predictSeconds: Int = 60
+    /// Проба отклика: раз за пробежку ритм на `probeSeconds` поднимается на `probeStep`,
+    /// чтобы измерить задержку и чувствительность пульса. Отключается сама, когда профиль набран.
+    var responseProbe: Bool = true
     /// Версия схемы настроек. Старые записи без версии приводятся к новым значениям по умолчанию,
     /// где старое значение по умолчанию оказалось неудачным.
     var schemaVersion: Int = RegulatorSettings.currentSchemaVersion
@@ -50,6 +53,10 @@ struct RegulatorSettings: Codable, Equatable {
     /// Потолок автоматически вычисляемой верхней границы ритма.
     static let cadenceMaxCap = 190
     static let currentSchemaVersion = 2
+    static let probeStep = 8
+    static let probeSeconds: TimeInterval = 90
+    /// Сколько секунд пульс должен ровно держаться в полосе удержания перед пробой.
+    static let probeReadySeconds: TimeInterval = 60
     /// Полоса удержания в настройках до версии 2. Оказалась слишком узкой: ритм рос,
     /// пока пульс не подходил к цели вплотную, и инерция выносила его выше.
     static let legacyHoldBand = 3
@@ -94,6 +101,7 @@ struct RegulatorSettings: Codable, Equatable {
         ascentFactor = try c.decodeIfPresent(Double.self, forKey: .ascentFactor) ?? d.ascentFactor
         armSeconds = try c.decodeIfPresent(Int.self, forKey: .armSeconds) ?? d.armSeconds
         predictSeconds = try c.decodeIfPresent(Int.self, forKey: .predictSeconds) ?? d.predictSeconds
+        responseProbe = try c.decodeIfPresent(Bool.self, forKey: .responseProbe) ?? d.responseProbe
         smoothingSeconds = try c.decodeIfPresent(Double.self, forKey: .smoothingSeconds) ?? d.smoothingSeconds
         halfTimeClick = try c.decodeIfPresent(Bool.self, forKey: .halfTimeClick) ?? d.halfTimeClick
         clickVolume = try c.decodeIfPresent(Double.self, forKey: .clickVolume) ?? d.clickVolume

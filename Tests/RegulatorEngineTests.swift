@@ -283,6 +283,83 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertEqual(engine.cadence, 180)
     }
 
+    func testProbeRunsOnceAfterSteadyBandAndRestoresCadence() {
+        var s = settings
+        s.holdBand = 8            // полоса 142–150
+        var engine = RegulatorEngine(settings: s)
+        engine.probeEnabled = true
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        // Зона подхода: регулятор включён, ритм подрос до ~186.
+        feed(&engine, from: 0, through: 30, bpm: { _ in 136 }, t0: t0)
+        let before = engine.cadence
+        XCTAssertGreaterThan(before, 180)
+        // Пульс ровно в полосе: когда окно тренда забыло скачок (20 с) и прошла минута, проба, ритм +8.
+        var started: Int?
+        var startLine: String?
+        for second in 31...130 {
+            let t = t0.addingTimeInterval(TimeInterval(second))
+            engine.ingest(bpm: 145, at: t)
+            if let a = engine.tick(at: t), a.probe == .started {
+                started = second
+                startLine = a.logLine
+                XCTAssertEqual(a.action, .speedUp(8))
+            }
+        }
+        XCTAssertEqual(started ?? 0, 111, accuracy: 3, "20 с окна тренда плюс минута в полосе")
+        XCTAssertTrue(engine.isProbing)
+        XCTAssertEqual(engine.cadence, before + 8)
+        XCTAssertEqual(startLine, "Проба отклика: ритм \(before + 8) на 90 с")
+        // Во время пробы регулятор молчит, даже если пульс низкий.
+        var finished: Int?
+        for second in 131...230 where finished == nil {
+            let t = t0.addingTimeInterval(TimeInterval(second))
+            engine.ingest(bpm: 138, at: t)
+            if let a = engine.tick(at: t) {
+                XCTAssertNotNil(a.probe, "во время пробы других решений нет")
+                if a.probe == .finished { finished = second; XCTAssertEqual(a.cadence, before) }
+            }
+        }
+        XCTAssertEqual(finished ?? 0, (started ?? 0) + 90, accuracy: 1)
+        XCTAssertFalse(engine.isProbing)
+        XCTAssertEqual(engine.cadence, before)
+        // Второй раз за тренировку проба не начинается.
+        feed(&engine, from: (finished ?? 230) + 1, through: 430, bpm: { _ in 145 }, t0: t0)
+        XCTAssertFalse(engine.isProbing)
+        XCTAssertEqual(engine.cadence, before, "в полосе удержания ритм не меняется")
+    }
+
+    func testProbeAbortsWhenHeartRateOvershoots() {
+        var s = settings
+        s.holdBand = 8
+        var engine = RegulatorEngine(settings: s)
+        engine.probeEnabled = true
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        feed(&engine, from: 0, through: 30, bpm: { _ in 136 }, t0: t0)
+        let before = engine.cadence
+        feed(&engine, from: 31, through: 120, bpm: { _ in 145 }, t0: t0)
+        XCTAssertTrue(engine.isProbing)
+        engine.ingest(bpm: 157, at: t0.addingTimeInterval(121))
+        let a = engine.tick(at: t0.addingTimeInterval(121))
+        XCTAssertEqual(a?.probe, .aborted)
+        XCTAssertEqual(a?.cadence, before)
+        XCTAssertFalse(engine.isProbing)
+        feed(&engine, from: 122, through: 135, bpm: { _ in 157 }, t0: t0)
+        XCTAssertLessThan(engine.cadence, before, "выше цели регулятор снова снижает ритм")
+    }
+
+    func testProbeDisabledByDefault() {
+        var s = settings
+        s.holdBand = 8
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        feed(&engine, from: 0, through: 30, bpm: { _ in 136 }, t0: t0)
+        feed(&engine, from: 31, through: 200, bpm: { _ in 145 }, t0: t0)
+        XCTAssertFalse(engine.isProbing)
+    }
+
     func testLogLine() {
         let up = RegulatorEngine.Adjustment(heartRate: 140.4, measuredHeartRate: 140.2, cadence: 186, action: .speedUp(2))
         XCTAssertEqual(up.logLine, "Пульс 140 → ритм 186 (+2)")
@@ -310,6 +387,6 @@ final class RegulatorEngineTests: XCTestCase {
         let csv = recorder.csv()
         XCTAssertTrue(csv.hasPrefix("# settings {"))
         XCTAssertTrue(csv.contains(TelemetryRecorder.header))
-        XCTAssertTrue(csv.contains(",140,139.5,-1.2,139.5,182,178,3.2,3.10,240,8.4,1.05,250,,1,0,a; b"))
+        XCTAssertTrue(csv.contains(",140,139.5,-1.2,139.5,182,178,3.2,3.10,240,8.4,1.05,250,,1,0,0,a; b"))
     }
 }

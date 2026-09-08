@@ -81,6 +81,7 @@ final class WatchRunModel {
         let now = Date()
         engine.settings = settings
         engine.reset(at: now)
+        engine.probeEnabled = settings.responseProbe
         cadence = engine.cadence
         efficiency.reset()
         telemetry.start(settings: settings)
@@ -164,6 +165,11 @@ final class WatchRunModel {
 
         let date = startDate ?? Date()
         let response = RunAnalyzer.estimateResponse(rows: telemetry.rows, settings: settings, date: date)
+        // Профиль набран: проба больше не нужна, пока её не включат снова.
+        if response != nil, settings.responseProbe,
+           store.workouts.filter({ $0.response != nil }).count + 1 >= ProfileRecommendation.minimumRuns {
+            settingsStore.settings.responseProbe = false
+        }
         let summary = WorkoutSummary(
             date: date,
             duration: finalElapsed,
@@ -252,7 +258,7 @@ final class WatchRunModel {
                 distanceMeters: workout.distanceMeters, speedMetersPerSecond: workout.speedMetersPerSecond,
                 groundContactMs: groundContactMs, verticalOscillationCm: verticalOscillationCm,
                 strideLengthMeters: workout.strideLengthMeters, powerWatts: workout.powerWatts,
-                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, decision: decision
+                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, probe: engine.isProbing, decision: decision
             ))
         }
     }

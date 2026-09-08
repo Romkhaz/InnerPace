@@ -182,12 +182,22 @@
         }
       }
     },
-    "В этой пробежке отклик не виден: чем ровнее регулятор держит пульс, тем меньше в записи связи ритма с пульсом.": {
+    "В этой пробежке отклик не виден. Включите пробу отклика в дополнительных настройках.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No response is visible in this run: the steadier the regulator holds heart rate, the less the record links cadence to heart rate."
+            "value": "No response is visible in this run. Turn on the response probe in advanced settings."
+          }
+        }
+      }
+    },
+    "В этой пробежке проба отклика не состоялась: для неё пульс должен минуту ровно держаться в полосе удержания.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The response probe did not happen in this run: it needs heart rate to hold steady in the hold band for a minute."
           }
         }
       }
@@ -852,6 +862,46 @@
         }
       }
     },
+    "Проба окончена: ритм %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probe finished: beat %lld"
+          }
+        }
+      }
+    },
+    "Проба отклика": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Response probe"
+          }
+        }
+      }
+    },
+    "Проба отклика: ритм %lld на %lld с": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Response probe: beat %1$lld for %2$lld s"
+          }
+        }
+      }
+    },
+    "Проба прервана, пульс %lld: ритм %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probe aborted, HR %1$lld: beat %2$lld"
+          }
+        }
+      }
+    },
     "Проверить звук": {
       "localizations": {
         "en": {
@@ -978,6 +1028,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Heart-rate sensor"
+          }
+        }
+      }
+    },
+    "Раз за пробежку, когда пульс минуту ровно держится в полосе удержания, ритм поднимается на %lld на %lld с. По отклику пульса считается профиль бегуна. Когда профиль набран, проба выключается сама.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Once per run, when heart rate has held steady in the hold band for a minute, the beat rises by %1$lld for %2$lld s. The heart-rate response builds the runner profile. Once the profile is complete the probe switches itself off."
           }
         }
       }

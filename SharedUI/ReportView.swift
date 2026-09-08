@@ -109,7 +109,8 @@ struct ReportView: View {
                 }
             } else {
                 Text(RecommendationText.profilePending(runs: history.filter { $0.response != nil }.count,
-                                                       lastEstimated: summary.response != nil))
+                                                       lastEstimated: summary.response != nil,
+                                                       probeEnabled: settings.responseProbe))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .listRowBackground(palette.card)
