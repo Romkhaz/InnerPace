@@ -21,6 +21,10 @@ struct RegulatorEngine {
         case started, finished, aborted
     }
 
+    enum Event: Equatable {
+        case warmupEnded, cooldownStarted, cooldownStep
+    }
+
     struct Adjustment: Equatable {
         /// Пульс, по которому принято решение: прогноз или сырой выше цели.
         let heartRate: Double
@@ -32,6 +36,7 @@ struct RegulatorEngine {
         var probe: ProbePhase? = nil
         /// Остановка: регулятор начал заново, как в начале тренировки.
         var restarted = false
+        var event: Event? = nil
     }
 
     var settings: RegulatorSettings {
@@ -56,6 +61,12 @@ struct RegulatorEngine {
     /// Проба отклика: разрешена ли в этой тренировке. Ставится моделью на старте.
     var probeEnabled = false
     private(set) var isProbing = false
+    private(set) var isCoolingDown = false
+    private var startedAt: Date?
+    private var pausedAt: Date?
+    private var pausedTotal: TimeInterval = 0
+    private var warmupAnnounced = false
+    private var lastCooldownStep: Date?
     private var probeDone = false
     private var probeStartedAt: Date?
     private var probeRestoreCadence = 0
@@ -91,8 +102,50 @@ struct RegulatorEngine {
 
     var cadence: Int { controller.cadence }
 
+    /// Время тренировки без пауз.
+    func activeSeconds(at now: Date) -> TimeInterval {
+        guard let startedAt else { return 0 }
+        let pausedNow = pausedAt.map { now.timeIntervalSince($0) } ?? 0
+        return max(0, now.timeIntervalSince(startedAt) - pausedTotal - pausedNow)
+    }
+
+    func isWarmingUp(at now: Date) -> Bool {
+        settings.warmupSeconds > 0 && activeSeconds(at: now) < TimeInterval(settings.warmupSeconds)
+    }
+
+    /// Фаза для телеметрии и интерфейса.
+    func phase(at now: Date) -> RunPhase {
+        if isCoolingDown { return .cooldown }
+        if isProbing { return .probe }
+        if isRegulating { return .run }
+        return isWarmingUp(at: now) ? .warmup : .waiting
+    }
+
+    /// Заминка: регулятор выключается, ритм плавно снижается до нижней границы минус `cooldownDrop`.
+    mutating func beginCooldown(at now: Date) -> Adjustment? {
+        guard !isCoolingDown else { return nil }
+        if isProbing { cancelProbe() }
+        isCoolingDown = true
+        isRegulating = false
+        isOverLimit = false
+        overLimitSince = nil
+        armingSince = nil
+        lastCooldownStep = now
+        let decided = decisionHeartRate ?? 0
+        return Adjustment(heartRate: decided, measuredHeartRate: smoothedHeartRate ?? decided, cadence: controller.cadence,
+                          action: .hold, event: .cooldownStarted)
+    }
+
+    var cooldownFloor: Int { max(100, settings.cadenceMin - RegulatorSettings.cooldownDrop) }
+
     /// Начало тренировки: ритм на нижнюю границу, история пульса забыта, регулятор ждёт пульса.
     mutating func reset(at now: Date = Date()) {
+        startedAt = now
+        pausedAt = nil
+        pausedTotal = 0
+        warmupAnnounced = settings.warmupSeconds == 0
+        isCoolingDown = false
+        lastCooldownStep = nil
         controller.reset()
         smoother = HeartRateSmoother(timeConstant: settings.smoothingSeconds)
         trend.reset()
@@ -190,6 +243,7 @@ struct RegulatorEngine {
     /// Пауза отменяет пробу: её окно уже испорчено. Возвращает true, если проба была отменена.
     @discardableResult
     mutating func markPaused(at now: Date) -> Bool {
+        if pausedAt == nil { pausedAt = now }
         guard isProbing else { return false }
         cancelProbe()
         return true
@@ -197,6 +251,8 @@ struct RegulatorEngine {
 
     /// После паузы первая подстройка случится не сразу, а через полный интервал.
     mutating func markResumed(at now: Date) {
+        if let pausedAt { pausedTotal += now.timeIntervalSince(pausedAt) }
+        pausedAt = nil
         lastAdjust = now
     }
 
@@ -205,6 +261,13 @@ struct RegulatorEngine {
         updateArming(at: now)
         updateOverLimit(at: now)
         if lastAdjust == nil { lastAdjust = now }
+        if isCoolingDown { return cooldownStep(at: now) }
+        if !warmupAnnounced, !isWarmingUp(at: now) {
+            warmupAnnounced = true
+            let decided = decisionHeartRate ?? 0
+            return Adjustment(heartRate: decided, measuredHeartRate: smoothedHeartRate ?? decided, cadence: controller.cadence,
+                              action: .hold, event: .warmupEnded)
+        }
         if pendingRestart { return restart(at: now) }
         if let probe = updateProbe(at: now) { return probe }
         if isProbing { return nil }
@@ -218,6 +281,19 @@ struct RegulatorEngine {
         let action = controller.adjust(forHeartRate: heartRate)
         updateOverLimit(at: now)
         return Adjustment(heartRate: heartRate, measuredHeartRate: measured, cadence: controller.cadence, action: action)
+    }
+
+    private mutating func cooldownStep(at now: Date) -> Adjustment? {
+        guard controller.cadence > cooldownFloor,
+              let last = lastCooldownStep, now.timeIntervalSince(last) >= RegulatorSettings.cooldownStepSeconds else { return nil }
+        lastCooldownStep = now
+        // Контроллер зажат нижней границей, поэтому ниже неё ставим напрямую.
+        let next = controller.cadence - 1
+        controller.setCadence(max(settings.cadenceMin, next))
+        if next < settings.cadenceMin { controller.forceCadence(next) }
+        let decided = decisionHeartRate ?? 0
+        return Adjustment(heartRate: decided, measuredHeartRate: smoothedHeartRate ?? decided, cadence: controller.cadence,
+                          action: .slowDown(1), event: .cooldownStep)
     }
 
     /// Проба отклика: когда пульс минуту ровно держится в полосе удержания, ритм поднимается
@@ -261,7 +337,7 @@ struct RegulatorEngine {
     /// Регулятор включается, когда сглаженный пульс продержался в зоне подхода
     /// (от `approachHeartRate`) не меньше `armSeconds` подряд.
     private mutating func updateArming(at now: Date) {
-        guard !isRegulating else { return }
+        guard !isRegulating, !isCoolingDown, !isWarmingUp(at: now) else { return }
         guard isHeartRateFresh(at: now), let heartRate = smoothedHeartRate,
               heartRate >= settings.approachHeartRate else {
             armingSince = nil
@@ -276,8 +352,9 @@ struct RegulatorEngine {
     /// Предел считается по сглаженному пульсу без прогноза: прогноз нужен, чтобы
     /// заранее двигать ритм, а предел объявляется по факту.
     private mutating func updateOverLimit(at now: Date) {
-        let target = Double(settings.targetHeartRate)
-        guard isRegulating, isHeartRateFresh(at: now), let heartRate = smoothedHeartRate else {
+        let warming = isWarmingUp(at: now)
+        let target = Double(settings.targetHeartRate) - (warming ? Double(RegulatorSettings.warmupMargin) : 0)
+        guard isRegulating || warming, !isCoolingDown, isHeartRateFresh(at: now), let heartRate = smoothedHeartRate else {
             overLimitSince = nil
             isOverLimit = false
             return
@@ -309,6 +386,12 @@ extension RegulatorEngine.Adjustment {
         let measured = Int(measuredHeartRate.rounded())
         let decided = Int(heartRate.rounded())
         if restarted { return String(localized: "Остановка: ритм \(cadence), регулятор ждёт пульса") }
+        switch event {
+        case .warmupEnded: return String(localized: "Разминка окончена, регулятор включится по пульсу")
+        case .cooldownStarted: return String(localized: "Заминка: ритм плавно вниз")
+        case .cooldownStep: return nil
+        case nil: break
+        }
         switch probe {
         case .started: return String(localized: "Проба отклика: ритм \(cadence) на \(Int(RegulatorSettings.probeSeconds)) с")
         case .finished: return String(localized: "Проба окончена: ритм \(cadence)")

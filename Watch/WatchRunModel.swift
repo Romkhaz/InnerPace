@@ -11,6 +11,7 @@ final class WatchRunModel {
     }
 
     let settingsStore = SettingsStore()
+    let health = HealthProfile()
     let workout = WatchWorkoutManager()
     let metronome = Metronome()
     let pedometer = CadenceSensor()
@@ -82,6 +83,10 @@ final class WatchRunModel {
         engine.settings = settings
         engine.reset(at: now)
         engine.probeEnabled = settings.responseProbe
+        Task { [health, settingsStore] in
+            await health.refresh()
+            await health.apply(to: settingsStore)
+        }
         cadence = engine.cadence
         efficiency.reset()
         telemetry.start(settings: settings)
@@ -187,7 +192,8 @@ final class WatchRunModel {
             averageVerticalOscillationCm: averageOscillation,
             source: .watch,
             assessment: RunAnalyzer.assessEffort(rows: telemetry.rows, settings: settings, response: response),
-            response: response
+            response: response,
+            economy: RunAnalyzer.economy(rows: telemetry.rows, restingHeartRate: settings.restingHeartRate)
         )
         store.add(summary)
         sync.send(summary)
@@ -198,6 +204,16 @@ final class WatchRunModel {
         elapsed = finalElapsed
         phase = .report
     }
+
+    /// Заминка: регулятор выключается, ритм плавно снижается. Стоп по-прежнему вручную.
+    func beginCooldown() {
+        guard phase == .running || phase == .paused, let adjustment = engine.beginCooldown(at: Date()) else { return }
+        cadence = adjustment.cadence
+        metronome.warning = false
+        if let line = adjustment.logLine { lastDecision = line }
+    }
+
+    var isCoolingDown: Bool { engine.isCoolingDown }
 
     func dismissReport() {
         report = nil
@@ -264,7 +280,8 @@ final class WatchRunModel {
                 distanceMeters: workout.distanceMeters, speedMetersPerSecond: workout.speedMetersPerSecond,
                 groundContactMs: groundContactMs, verticalOscillationCm: verticalOscillationCm,
                 strideLengthMeters: workout.strideLengthMeters, powerWatts: workout.powerWatts,
-                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, probe: engine.isProbing, decision: decision
+                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, probe: engine.isProbing,
+                phase: engine.phase(at: now), decision: decision
             ))
         }
     }

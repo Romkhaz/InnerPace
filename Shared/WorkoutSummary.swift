@@ -24,6 +24,8 @@ struct WorkoutSummary: Codable, Identifiable, Equatable {
     var assessment: EffortAssessment? = nil
     /// Оценка отклика пульса на ритм, идёт в профиль бегуна.
     var response: ResponseEstimate? = nil
+    /// Экономичность: метры на удар сверх покоя, расхождение половин, дрейф.
+    var economy: EconomyReport? = nil
 
     var averagePaceSecondsPerKm: Double? {
         guard distanceMeters > 50, duration > 0 else { return nil }

@@ -15,6 +15,7 @@ final class RegulatorEngineTests: XCTestCase {
         s.ascentFactor = 1
         s.armSeconds = 0
         s.predictSeconds = 0
+        s.warmupSeconds = 0
         return s
     }
 
@@ -440,6 +441,65 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertFalse(engine.isProbing)
     }
 
+    func testWarmupHoldsCadenceAndWarnsAgainstLoweredTarget() {
+        var s = settings
+        s.warmupSeconds = 120
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        XCTAssertEqual(engine.phase(at: t0), .warmup)
+        // Пульс уже в зоне подхода, но разминка не даёт регулятору включиться.
+        feed(&engine, from: 0, through: 100, bpm: { _ in 142 }, t0: t0)
+        XCTAssertFalse(engine.isRegulating)
+        XCTAssertEqual(engine.cadence, 180)
+        // На разминке предел считается от цели минус 10: пульс 142 при цели 150 даёт «сбавь».
+        XCTAssertTrue(engine.isOverLimit, "142 выше 140, ритм на нижней границе")
+        // Пауза не идёт в зачёт разминки.
+        engine.markPaused(at: t0.addingTimeInterval(101))
+        engine.markResumed(at: t0.addingTimeInterval(161))
+        XCTAssertTrue(engine.isWarmingUp(at: t0.addingTimeInterval(170)))
+        // Разминка кончилась: событие в журнале, дальше включение по пульсу.
+        var ended: RegulatorEngine.Adjustment?
+        for second in 162...200 {
+            let t = t0.addingTimeInterval(TimeInterval(second))
+            engine.ingest(bpm: 136, at: t)
+            if let a = engine.tick(at: t), a.event == .warmupEnded { ended = a }
+        }
+        XCTAssertEqual(ended?.logLine, "Разминка окончена, регулятор включится по пульсу")
+        XCTAssertTrue(engine.isRegulating)
+        XCTAssertEqual(engine.phase(at: t0.addingTimeInterval(200)), .run)
+    }
+
+    func testCooldownLowersCadenceGradually() {
+        var s = settings
+        s.holdBand = 8
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        feed(&engine, from: 0, through: 30, bpm: { _ in 136 }, t0: t0)
+        XCTAssertGreaterThan(engine.cadence, 180)
+        let started = engine.beginCooldown(at: t0.addingTimeInterval(31))
+        XCTAssertEqual(started?.logLine, "Заминка: ритм плавно вниз")
+        XCTAssertTrue(engine.isCoolingDown)
+        XCTAssertFalse(engine.isRegulating)
+        XCTAssertNil(engine.beginCooldown(at: t0.addingTimeInterval(32)), "второй раз не начинается")
+        // Раз в 10 секунд на единицу, пульс не важен, ниже нижней границы можно до 165.
+        var steps = 0
+        for second in 32...400 {
+            let t = t0.addingTimeInterval(TimeInterval(second))
+            engine.ingest(bpm: 120, at: t)
+            if let a = engine.tick(at: t) {
+                XCTAssertEqual(a.event, .cooldownStep)
+                XCTAssertNil(a.logLine, "шаги заминки журнал не засоряют")
+                steps += 1
+            }
+        }
+        XCTAssertEqual(engine.cadence, 165)
+        XCTAssertEqual(engine.phase(at: t0.addingTimeInterval(400)), .cooldown)
+        XCTAssertGreaterThan(steps, 15)
+        XCTAssertFalse(engine.isOverLimit)
+    }
+
     func testLogLine() {
         let up = RegulatorEngine.Adjustment(heartRate: 140.4, measuredHeartRate: 140.2, cadence: 186, action: .speedUp(2))
         XCTAssertEqual(up.logLine, "Пульс 140 → ритм 186 (+2)")
@@ -467,6 +527,6 @@ final class RegulatorEngineTests: XCTestCase {
         let csv = recorder.csv()
         XCTAssertTrue(csv.hasPrefix("# settings {"))
         XCTAssertTrue(csv.contains(TelemetryRecorder.header))
-        XCTAssertTrue(csv.contains(",140,139.5,-1.2,139.5,182,178,,3.2,3.10,240,8.4,1.05,250,,1,0,0,a; b"))
+        XCTAssertTrue(csv.contains(",140,139.5,-1.2,139.5,182,178,,3.2,3.10,240,8.4,1.05,250,,1,0,0,run,a; b"))
     }
 }

@@ -142,6 +142,40 @@ final class RunAnalysisTests: XCTestCase {
         XCTAssertEqual(a.regulatedSeconds, 0)
     }
 
+    func testEconomyReport() {
+        // 40 минут: скорость 2,8 м/с, пульс 140 в первой половине и 147 во второй при том же темпе.
+        var rows: [TelemetryRow] = []
+        for s in 0..<2400 {
+            var r = row(s, hr: s < 1200 ? 140 : 147, metronome: 180, actual: 180)
+            r.speedMetersPerSecond = 2.8
+            r.distanceMeters = 2.8 * Double(s)
+            r.phase = .run
+            rows.append(r)
+        }
+        let e = RunAnalyzer.economy(rows: rows, restingHeartRate: 60)
+        XCTAssertNotNil(e)
+        // Средний пульс сверх покоя 83,5: 2,8 м/с × 60 / 83,5 ≈ 2,0 м/удар.
+        XCTAssertEqual(e?.metersPerBeatAboveRest ?? 0, 2.0, accuracy: 0.05)
+        XCTAssertEqual(e?.decouplingPercent ?? 0, 8.75, accuracy: 0.3, "80 к 87 ударам сверх покоя")
+        XCTAssertGreaterThan(e?.driftBeatsPerHour ?? 0, 5)
+
+        var short = rows
+        short.removeLast(1300)
+        XCTAssertNil(RunAnalyzer.economy(rows: short, restingHeartRate: 60), "меньше 20 минут не считаем")
+        var warm = rows
+        for i in warm.indices { warm[i].phase = .warmup }
+        XCTAssertNil(RunAnalyzer.economy(rows: warm, restingHeartRate: 60), "разминка не в счёт")
+    }
+
+    func testKarvonenZones() {
+        let z = HeartRateZones.karvonen(age: 40, restingHeartRate: 60)
+        XCTAssertEqual(z.maxHeartRate, 180)
+        XCTAssertEqual(z.zone2Low, 132)
+        XCTAssertEqual(z.zone2High, 144)
+        XCTAssertEqual(z.target, 145)
+        XCTAssertEqual(z.lower, 128)
+    }
+
     func testBalancedRun() {
         let rows = (0..<2000).map { row($0, hr: 134 + $0 % 5, metronome: 180 + ($0 / 60) % 6) }
         let a = RunAnalyzer.assessEffort(rows: rows, settings: settings)

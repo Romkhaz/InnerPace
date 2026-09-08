@@ -262,6 +262,46 @@
         }
       }
     },
+    "Во второй половине пульс заметно выше при том же темпе: нагрузка выше аэробной для этой дистанции, стоит бежать медленнее или короче.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart rate was clearly higher in the second half at the same pace: load above aerobic for this distance; run slower or shorter."
+          }
+        }
+      }
+    },
+    "Во второй половине пульс подрос при том же темпе: нагрузка на грани аэробной, либо жара или обезвоживание.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart rate crept up in the second half at the same pace: load at the aerobic edge, or heat and dehydration."
+          }
+        }
+      }
+    },
+    "Возраст": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Age"
+          }
+        }
+      }
+    },
+    "Возраст и пульс покоя берутся из Здоровья, если там есть. На разминке ритм стоит на нижней границе, а «сбавь» звучит, если пульс выше цели минус %lld. Кнопка «Заминка» на бегу плавно снижает ритм.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Age and resting heart rate come from Health when available. During warm-up the beat stays on its floor, and 'ease off' sounds if heart rate exceeds the target minus %lld. The Cool-down button during the run lowers the beat gradually."
+          }
+        }
+      }
+    },
     "Время": {
       "localizations": {
         "en": {
@@ -362,6 +402,16 @@
         }
       }
     },
+    "Дрейф пульса": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heart-rate drift"
+          }
+        }
+      }
+    },
     "Есть запас: пульс %lld % времени в полосе удержания и почти не поднимался выше цели. Можно бежать быстрее, оставаясь в зоне: поднимите минимальный ритм.": {
       "localizations": {
         "en": {
@@ -398,6 +448,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Forget sensor"
+          }
+        }
+      }
+    },
+    "Заминка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cool-down"
+          }
+        }
+      }
+    },
+    "Заминка идёт": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cooling down"
+          }
+        }
+      }
+    },
+    "Заминка: ритм плавно вниз": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cool-down: beat easing down"
           }
         }
       }
@@ -452,12 +532,32 @@
         }
       }
     },
+    "Зона 2: %lld–%lld, максимум %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone 2: %1$lld–%2$lld, maximum %3$lld"
+          }
+        }
+      }
+    },
     "Зона подхода": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Approach zone"
+          }
+        }
+      }
+    },
+    "Зоны и разминка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zones and warm-up"
           }
         }
       }
@@ -548,6 +648,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Route: GPS produced no points"
+          }
+        }
+      }
+    },
+    "Метров на удар сверх покоя": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metres per beat above rest"
+          }
+        }
+      }
+    },
+    "Метры на удар сверх пульса покоя: чем больше, тем экономичнее бег. Сравнивайте между пробежками на одном пульсе.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metres per beat above resting heart rate: the more, the more economical the run. Compare across runs at the same heart rate."
           }
         }
       }
@@ -702,6 +822,16 @@
         }
       }
     },
+    "По Карвонену для возраста %lld и пульса покоя %lld: максимум %lld, вторая зона %lld–%lld. Для регулятора подходит цель %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "By Karvonen for age %1$lld and resting heart rate %2$lld: maximum %3$lld, zone 2 is %4$lld–%5$lld. A target of %6$lld suits the regulator."
+          }
+        }
+      }
+    },
     "Повтор «сбавь»": {
       "localizations": {
         "en": {
@@ -802,6 +932,16 @@
         }
       }
     },
+    "Покой": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest"
+          }
+        }
+      }
+    },
     "Полоса удержания": {
       "localizations": {
         "en": {
@@ -818,6 +958,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Last run"
+          }
+        }
+      }
+    },
+    "Поставить цель %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set target %lld"
           }
         }
       }
@@ -1042,6 +1192,16 @@
         }
       }
     },
+    "Пульс покоя": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resting heart rate"
+          }
+        }
+      }
+    },
     "Пульсометр": {
       "localizations": {
         "en": {
@@ -1062,12 +1222,42 @@
         }
       }
     },
+    "Разминка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm-up"
+          }
+        }
+      }
+    },
+    "Разминка окончена, регулятор включится по пульсу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm-up over, the regulator will arm on heart rate"
+          }
+        }
+      }
+    },
     "Разработчик": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Developer"
+          }
+        }
+      }
+    },
+    "Расхождение половин": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Half-split decoupling"
           }
         }
       }
@@ -1412,6 +1602,16 @@
         }
       }
     },
+    "Темп и пульс во второй половине держались, как в первой: нагрузка аэробная, в самый раз.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pace and heart rate held in the second half as in the first: aerobic load, just right."
+          }
+        }
+      }
+    },
     "Темп подстройки": {
       "localizations": {
         "en": {
@@ -1512,6 +1712,16 @@
         }
       }
     },
+    "Цель %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target %lld"
+          }
+        }
+      }
+    },
     "Цель выше %lld: пульс вряд ли дойдёт до зоны подхода, и регулятор не включится.": {
       "localizations": {
         "en": {
@@ -1548,6 +1758,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Click on every other step"
+          }
+        }
+      }
+    },
+    "Экономичность": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Economy"
+          }
+        }
+      }
+    },
+    "Экономичность по пробежкам, м/удар сверх покоя": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Economy across runs, m per beat above rest"
           }
         }
       }
@@ -1658,6 +1888,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "paused"
+          }
+        }
+      }
+    },
+    "покой %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rest %lld"
           }
         }
       }
@@ -1868,6 +2108,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "spm"
+          }
+        }
+      }
+    },
+    "уд/ч": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bpm/h"
           }
         }
       }

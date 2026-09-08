@@ -43,6 +43,25 @@ struct HistoryView: View {
                     }
                 }
             }
+            let economies = session.store.workouts.compactMap { w -> (Date, Double)? in
+                guard let e = w.economy?.metersPerBeatAboveRest else { return nil }
+                return (w.date, e)
+            }
+            if economies.count >= 2 {
+                Section("Экономичность по пробежкам, м/удар сверх покоя") {
+                    Chart {
+                        ForEach(economies, id: \.0) { item in
+                            LineMark(x: .value("Дата", item.0), y: .value("м/удар", item.1))
+                                .foregroundStyle(palette.orange)
+                                .interpolationMethod(.monotone)
+                            PointMark(x: .value("Дата", item.0), y: .value("м/удар", item.1))
+                                .foregroundStyle(palette.coral)
+                        }
+                    }
+                    .frame(height: 180)
+                    .padding(.vertical, 8)
+                }
+            }
             Section("График последней пробежки") {
                 if session.samples.count < 2 {
                     Text("Нет данных за пробежку")

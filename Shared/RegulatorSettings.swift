@@ -34,6 +34,12 @@ struct RegulatorSettings: Codable, Equatable {
     /// Проба отклика: раз за пробежку ритм на `probeSeconds` поднимается на `probeStep`,
     /// чтобы измерить задержку и чувствительность пульса. Отключается сама, когда профиль набран.
     var responseProbe: Bool = true
+    /// Разминка, секунды: ритм стоит на нижней границе, регулятор не включается,
+    /// а предел считается от цели минус `warmupMargin`. Ноль отключает.
+    var warmupSeconds: Int = 480
+    /// Возраст и пульс покоя для зон по Карвонену. Если Здоровье даёт свои значения, они главнее.
+    var age: Int = 40
+    var restingHeartRate: Int = 60
     /// Версия схемы настроек. Старые записи без версии приводятся к новым значениям по умолчанию,
     /// где старое значение по умолчанию оказалось неудачным.
     var schemaVersion: Int = RegulatorSettings.currentSchemaVersion
@@ -60,6 +66,11 @@ struct RegulatorSettings: Codable, Equatable {
     static let lowTargetWarning = 100
     /// Цель выше этого почти наверняка ошибка: регулятор, скорее всего, не включится.
     static let highTargetWarning = 190
+    /// На сколько ниже цели должен оставаться пульс на разминке.
+    static let warmupMargin = 10
+    /// Заминка: ритм снижается на единицу раз в столько секунд до нижней границы минус `cooldownDrop`.
+    static let cooldownStepSeconds: TimeInterval = 10
+    static let cooldownDrop = 15
     static let probeStep = 8
     static let probeSeconds: TimeInterval = 90
     /// Сколько секунд пульс должен ровно держаться в полосе удержания перед пробой.
@@ -109,6 +120,9 @@ struct RegulatorSettings: Codable, Equatable {
         armSeconds = try c.decodeIfPresent(Int.self, forKey: .armSeconds) ?? d.armSeconds
         predictSeconds = try c.decodeIfPresent(Int.self, forKey: .predictSeconds) ?? d.predictSeconds
         responseProbe = try c.decodeIfPresent(Bool.self, forKey: .responseProbe) ?? d.responseProbe
+        warmupSeconds = try c.decodeIfPresent(Int.self, forKey: .warmupSeconds) ?? d.warmupSeconds
+        age = try c.decodeIfPresent(Int.self, forKey: .age) ?? d.age
+        restingHeartRate = try c.decodeIfPresent(Int.self, forKey: .restingHeartRate) ?? d.restingHeartRate
         smoothingSeconds = try c.decodeIfPresent(Double.self, forKey: .smoothingSeconds) ?? d.smoothingSeconds
         halfTimeClick = try c.decodeIfPresent(Bool.self, forKey: .halfTimeClick) ?? d.halfTimeClick
         clickVolume = try c.decodeIfPresent(Double.self, forKey: .clickVolume) ?? d.clickVolume
@@ -168,6 +182,9 @@ struct RegulatorSettings: Codable, Equatable {
         copy.ascentFactor = min(1, max(0.1, copy.ascentFactor))
         copy.armSeconds = min(300, max(0, copy.armSeconds))
         copy.predictSeconds = min(120, max(0, copy.predictSeconds))
+        copy.warmupSeconds = min(1800, max(0, copy.warmupSeconds))
+        copy.age = min(100, max(10, copy.age))
+        copy.restingHeartRate = min(120, max(30, copy.restingHeartRate))
         copy.adjustInterval = max(1, copy.adjustInterval)
         copy.smoothingSeconds = max(0, copy.smoothingSeconds)
         copy.clickVolume = min(1, max(0, copy.clickVolume))

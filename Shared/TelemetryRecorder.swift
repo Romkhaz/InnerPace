@@ -1,5 +1,16 @@
 import Foundation
 
+/// Фаза тренировки в секунду записи.
+enum RunPhase: String, Codable {
+    /// Разминка: ритм на нижней границе, регулятор ждёт её окончания.
+    case warmup
+    /// Разминка прошла, регулятор ждёт пульса в зоне подхода.
+    case waiting
+    case run
+    case probe
+    case cooldown
+}
+
 /// Посекундная телеметрия тренировки для режима разработчика. Пишется в CSV.
 struct TelemetryRow {
     var time: Date
@@ -22,6 +33,7 @@ struct TelemetryRow {
     var warmup: Bool
     var overLimit: Bool = false
     var probe: Bool = false
+    var phase: RunPhase = .run
     var decision: String?
 }
 
@@ -29,7 +41,7 @@ struct TelemetryRecorder {
     private(set) var rows: [TelemetryRow] = []
     private(set) var settingsLine: String = ""
 
-    static let header = "time,elapsed_s,hr,hr_smoothed,hr_trend_bpm_min,hr_decision,metronome_bpm,cadence_spm,steps,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,over_limit,probe,decision"
+    static let header = "time,elapsed_s,hr,hr_smoothed,hr_trend_bpm_min,hr_decision,metronome_bpm,cadence_spm,steps,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,over_limit,probe,phase,decision"
 
     mutating func start(settings: RegulatorSettings) {
         rows.removeAll()
@@ -69,6 +81,7 @@ struct TelemetryRecorder {
                 r.warmup ? "1" : "0",
                 r.overLimit ? "1" : "0",
                 r.probe ? "1" : "0",
+                r.phase.rawValue,
                 (r.decision ?? "").replacingOccurrences(of: ",", with: ";"),
             ]
             lines.append(fields.joined(separator: ","))

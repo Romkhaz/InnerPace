@@ -64,8 +64,14 @@ final class RunSession {
     private var demo: DemoHeartRateSource?
 #endif
 
+    let health = HealthProfile()
+
     init(settingsStore: SettingsStore) {
         self.settingsStore = settingsStore
+        Task { [health, settingsStore] in
+            await health.refresh()
+            await health.apply(to: settingsStore)
+        }
         let initialEngine = RegulatorEngine(settings: settingsStore.settings)
         engine = initialEngine
         cadence = initialEngine.cadence
@@ -206,7 +212,8 @@ final class RunSession {
             averageVerticalOscillationCm: nil,
             source: .phone,
             assessment: RunAnalyzer.assessEffort(rows: telemetry.rows, settings: settings, response: response),
-            response: response
+            response: response,
+            economy: RunAnalyzer.economy(rows: telemetry.rows, restingHeartRate: settings.restingHeartRate)
         )
         if elapsed > 60 {
             store.add(summary)
@@ -216,6 +223,17 @@ final class RunSession {
         }
         report = summary
     }
+
+    /// Заминка: регулятор выключается, ритм плавно снижается. Стоп по-прежнему вручную.
+    func beginCooldown() {
+        guard state != .idle, let adjustment = engine.beginCooldown(at: Date()) else { return }
+        cadence = adjustment.cadence
+        metronome.bpm = Double(cadence)
+        metronome.warning = false
+        if let line = adjustment.logLine { log(line) }
+    }
+
+    var isCoolingDown: Bool { engine.isCoolingDown }
 
     func toggleStartPause() {
         switch state {
@@ -299,7 +317,8 @@ final class RunSession {
                 metronome: cadence, actualCadence: actualCadence, steps: pedometer.steps,
                 distanceMeters: distanceMeters, speedMetersPerSecond: paceSecondsPerKm.map { 1000 / $0 },
                 groundContactMs: nil, verticalOscillationCm: nil, strideLengthMeters: nil, powerWatts: nil,
-                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, probe: engine.isProbing, decision: decision
+                efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, probe: engine.isProbing,
+                phase: engine.phase(at: now), decision: decision
             ))
         }
     }

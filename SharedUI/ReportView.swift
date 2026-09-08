@@ -33,6 +33,9 @@ struct ReportView: View {
                     row("Верт. колебания", oscillation.formatted(.number.precision(.fractionLength(1))), unit: "см")
                 }
             }
+            if let economy = summary.economy {
+                economySection(economy)
+            }
             if let assessment = summary.assessment {
                 effortSection(assessment)
             }
@@ -61,6 +64,24 @@ struct ReportView: View {
     private var profile: ProfileRecommendation? {
         let estimates = history.sorted { $0.date > $1.date }.compactMap(\.response)
         return ProfileRecommendation.make(from: estimates, settings: settings)
+    }
+
+    @ViewBuilder
+    private func economySection(_ e: EconomyReport) -> some View {
+        Section("Экономичность") {
+            row("Метров на удар сверх покоя", e.metersPerBeatAboveRest.map { $0.formatted(.number.precision(.fractionLength(2))) } ?? "—",
+                unit: "покой \(e.restingHeartRate)")
+            if let d = e.decouplingPercent {
+                row("Расхождение половин", (d >= 0 ? "+" : "") + d.formatted(.number.precision(.fractionLength(1))), unit: "%")
+            }
+            if let drift = e.driftBeatsPerHour {
+                row("Дрейф пульса", (drift >= 0 ? "+" : "") + drift.formatted(.number.precision(.fractionLength(0))), unit: "уд/ч")
+            }
+            Text(RecommendationText.economy(e))
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .listRowBackground(palette.card)
+        }
     }
 
     @ViewBuilder
@@ -131,6 +152,8 @@ struct ReportView: View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
                 .foregroundStyle(palette.ink)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
             Spacer()
             Text(value)
                 .font(.body.weight(.semibold).monospacedDigit())

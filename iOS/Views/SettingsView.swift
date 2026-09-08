@@ -32,6 +32,29 @@ struct SettingsView: View {
                         .font(.footnote).foregroundStyle(palette.deepCoral)
                 }
             }
+            Section("Зоны и разминка") {
+                AdjustRow(title: "Возраст", value: $store.settings.age, range: 10...100)
+                AdjustRow(title: "Пульс покоя", value: $store.settings.restingHeartRate, range: 30...120)
+                let zones = HeartRateZones.karvonen(age: settings.age, restingHeartRate: settings.restingHeartRate)
+                Text(RecommendationText.zones(zones, settings: settings))
+                    .font(.footnote).foregroundStyle(.secondary)
+                if zones.target != settings.heartRateMax {
+                    Button {
+                        store.applyRecommendation { s in
+                            s.heartRateMax = zones.target
+                            s.heartRateMin = zones.lower
+                        }
+                    } label: {
+                        Label("Поставить цель \(zones.target)", systemImage: "target")
+                    }
+                }
+                AdjustRow(title: "Разминка", value: Binding(
+                    get: { store.settings.warmupSeconds / 60 },
+                    set: { store.settings.warmupSeconds = $0 * 60 }
+                ), range: 0...30, unit: "мин")
+                Text("Возраст и пульс покоя берутся из Здоровья, если там есть. На разминке ритм стоит на нижней границе, а «сбавь» звучит, если пульс выше цели минус \(RegulatorSettings.warmupMargin). Кнопка «Заминка» на бегу плавно снижает ритм.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
             RevertSettingsSection(store: store)
             Section("Оформление") {
                 Picker("Тема", selection: $store.settings.theme) {

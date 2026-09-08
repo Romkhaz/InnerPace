@@ -29,6 +29,23 @@ enum RecommendationText {
         }
     }
 
+    static func economy(_ e: EconomyReport) -> String {
+        guard let d = e.decouplingPercent else {
+            return String(localized: "Метры на удар сверх пульса покоя: чем больше, тем экономичнее бег. Сравнивайте между пробежками на одном пульсе.")
+        }
+        if d <= EconomyReport.aerobicDecoupling {
+            return String(localized: "Темп и пульс во второй половине держались, как в первой: нагрузка аэробная, в самый раз.")
+        }
+        if d <= EconomyReport.hardDecoupling {
+            return String(localized: "Во второй половине пульс подрос при том же темпе: нагрузка на грани аэробной, либо жара или обезвоживание.")
+        }
+        return String(localized: "Во второй половине пульс заметно выше при том же темпе: нагрузка выше аэробной для этой дистанции, стоит бежать медленнее или короче.")
+    }
+
+    static func zones(_ suggestion: HeartRateZones.Suggestion, settings: RegulatorSettings) -> String {
+        String(localized: "По Карвонену для возраста \(settings.age) и пульса покоя \(settings.restingHeartRate): максимум \(suggestion.maxHeartRate), вторая зона \(suggestion.zone2Low)–\(suggestion.zone2High). Для регулятора подходит цель \(suggestion.target).")
+    }
+
     /// Предупреждение под настройкой цели, если она похожа на ошибку.
     static func targetWarning(_ settings: RegulatorSettings) -> String? {
         if settings.isTargetSuspiciouslyLow {

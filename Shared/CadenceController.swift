@@ -35,6 +35,11 @@ struct CadenceController {
         cadence = clamp(value)
     }
 
+    /// Ставит ритм без зажима границами: для заминки ниже нижней границы.
+    mutating func forceCadence(_ value: Int) {
+        cadence = max(60, value)
+    }
+
     /// Вызывается раз в `adjustInterval` секунд.
     mutating func adjust(forHeartRate heartRate: Double) -> Action {
         let target = Double(settings.targetHeartRate)

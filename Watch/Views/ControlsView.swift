@@ -22,6 +22,13 @@ struct ControlsView: View {
                     }
                 }
                 Button {
+                    model.beginCooldown()
+                } label: {
+                    Label(model.isCoolingDown ? "Заминка идёт" : "Заминка", systemImage: "arrow.down.to.line")
+                        .frame(maxWidth: .infinity)
+                }
+                .disabled(model.isCoolingDown)
+                Button {
                     showsSettings = true
                 } label: {
                     Label("Настройки", systemImage: "slider.horizontal.3")

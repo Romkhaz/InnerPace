@@ -186,7 +186,7 @@ struct RunView: View {
     // MARK: - Кнопки
 
     private var controls: some View {
-        HStack(spacing: 44) {
+        HStack(spacing: 28) {
             RoundButton(
                 icon: session.state == .running ? "pause.fill" : "play.fill",
                 title: startTitle,
@@ -194,6 +194,14 @@ struct RunView: View {
                 enabled: true
             ) {
                 session.toggleStartPause()
+            }
+            RoundButton(
+                icon: "arrow.down.to.line",
+                title: session.isCoolingDown ? "Заминка идёт" : "Заминка",
+                color: palette.peach,
+                enabled: session.state != .idle && !session.isCoolingDown
+            ) {
+                session.beginCooldown()
             }
             RoundButton(
                 icon: "stop.fill",
