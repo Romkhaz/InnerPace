@@ -87,6 +87,12 @@ struct QuickSettingsView: View {
                 .foregroundStyle(palette.inkSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+            if let warning = RecommendationText.targetWarning(store.settings) {
+                Text(warning)
+                    .font(.caption2)
+                    .foregroundStyle(palette.deepCoral)
+                    .multilineTextAlignment(.center)
+            }
         }
     }
 }

@@ -642,6 +642,16 @@
         }
       }
     },
+    "Остановка: ритм %lld, регулятор ждёт пульса": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped: beat %lld, regulator waiting for heart rate"
+          }
+        }
+      }
+    },
     "Отключить": {
       "localizations": {
         "en": {
@@ -892,6 +902,16 @@
         }
       }
     },
+    "Проба отменена: пауза": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probe cancelled: paused"
+          }
+        }
+      }
+    },
     "Проба прервана, пульс %lld: ритм %lld": {
       "localizations": {
         "en": {
@@ -1082,6 +1102,16 @@
         }
       }
     },
+    "Регулятор так и не включился: пульс не дошёл до зоны подхода (%lld). Цель слишком высока для этого темпа: снизьте её или бегите быстрее.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The regulator never armed: heart rate did not reach the approach zone (%lld). The target is too high for this pace: lower it or run faster."
+          }
+        }
+      }
+    },
     "Ритм": {
       "localizations": {
         "en": {
@@ -1118,6 +1148,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cadence barely moved your heart rate; pace drives it: run slower or raise the allowed heart rate."
+          }
+        }
+      }
+    },
+    "Ритм не по силам: вы бежали около %lld шагов в минуту при метрономе от %lld. Пульс здесь ни при чём, начните с ритма, который получается держать.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The beat is beyond reach: you ran about %1$lld steps per minute against a metronome from %2$lld. Heart rate is not the issue; start from a beat you can hold."
           }
         }
       }
@@ -1472,6 +1512,26 @@
         }
       }
     },
+    "Цель выше %lld: пульс вряд ли дойдёт до зоны подхода, и регулятор не включится.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target above %lld: heart rate is unlikely to reach the approach zone, and the regulator will not arm."
+          }
+        }
+      }
+    },
+    "Цель ниже %lld: регулятор будет всё время в пределе и просить сбавить.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target below %lld: the regulator will sit at the limit and keep asking you to ease off."
+          }
+        }
+      }
+    },
     "Шаг": {
       "localizations": {
         "en": {
@@ -1668,6 +1728,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "beat up to %1$lld back to %2$lld"
+          }
+        }
+      }
+    },
+    "ритм до %lld на %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "beat up to %1$lld to %2$lld"
           }
         }
       }

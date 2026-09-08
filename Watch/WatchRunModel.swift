@@ -48,7 +48,7 @@ final class WatchRunModel {
     var smoothedHeartRate: Double? { engine.smoothedHeartRate }
     var distanceMeters: Double { workout.distanceMeters }
     var paceSecondsPerKm: Double? { workout.paceSecondsPerKm }
-    var actualCadence: Int? { pedometer.cadence }
+    var actualCadence: Int? { pedometer.currentCadence() }
     var groundContactMs: Double? { workout.groundContactMs }
     var verticalOscillationCm: Double? { workout.verticalOscillationCm }
     var recentEfficiency: Double? { efficiency.recent }
@@ -118,7 +118,10 @@ final class WatchRunModel {
         guard phase == .running else { return }
         workout.pause()
         metronome.stop()
-        engine.markPaused(at: Date())
+        if engine.markPaused(at: Date()) {
+            cadence = engine.cadence
+            lastDecision = String(localized: "Проба отменена: пауза")
+        }
         phase = .paused
     }
 
@@ -133,6 +136,8 @@ final class WatchRunModel {
         applySettings()
         workout.resume()
         engine.markResumed(at: Date())
+        cadence = engine.cadence
+        metronome.bpm = Double(cadence)
         phase = .running
     }
 
@@ -235,6 +240,7 @@ final class WatchRunModel {
         metronomeSum += cadence
         metronomeCount += 1
         var decision: String?
+        engine.noteActualCadence(actualCadence, at: now)
         if let adjustment = engine.tick(at: now) {
             cadence = adjustment.cadence
             metronome.bpm = Double(cadence)
@@ -254,7 +260,7 @@ final class WatchRunModel {
             telemetry.append(TelemetryRow(
                 time: now, elapsed: elapsed, heartRate: heartRate,
                 smoothedHeartRate: smoothedHeartRate, trendPerMinute: engine.trendPerMinute, decisionHeartRate: engine.decisionHeartRate,
-                metronome: cadence, actualCadence: actualCadence,
+                metronome: cadence, actualCadence: actualCadence, steps: pedometer.steps,
                 distanceMeters: workout.distanceMeters, speedMetersPerSecond: workout.speedMetersPerSecond,
                 groundContactMs: groundContactMs, verticalOscillationCm: verticalOscillationCm,
                 strideLengthMeters: workout.strideLengthMeters, powerWatts: workout.powerWatts,

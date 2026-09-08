@@ -29,6 +29,19 @@ final class RegulatorSettingsTests: XCTestCase {
         XCTAssertEqual(try JSONDecoder().decode(RegulatorSettings.self, from: Data(other.utf8)).holdBand, 5)
     }
 
+    func testLegacyVoiceRepeatMigratesToMinute() throws {
+        let legacy = #"{"voiceRepeatSeconds":0,"schemaVersion":2}"#
+        XCTAssertEqual(try JSONDecoder().decode(RegulatorSettings.self, from: Data(legacy.utf8)).voiceRepeatSeconds, 60)
+        let deliberate = #"{"voiceRepeatSeconds":0,"schemaVersion":3}"#
+        XCTAssertEqual(try JSONDecoder().decode(RegulatorSettings.self, from: Data(deliberate.utf8)).voiceRepeatSeconds, 0)
+        var s = RegulatorSettings.default
+        XCTAssertNil(s.isTargetSuspiciouslyLow ? "low" : nil)
+        s.heartRateMax = 95
+        XCTAssertTrue(s.isTargetSuspiciouslyLow)
+        s.heartRateMax = 195
+        XCTAssertTrue(s.isTargetSuspiciouslyHigh)
+    }
+
     func testRoundTrip() throws {
         var settings = RegulatorSettings.default
         settings.halfTimeClick = true

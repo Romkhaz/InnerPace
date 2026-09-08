@@ -52,7 +52,14 @@ struct RegulatorSettings: Codable, Equatable {
     static let telemetryForcedOn = true
     /// Потолок автоматически вычисляемой верхней границы ритма.
     static let cadenceMaxCap = 190
-    static let currentSchemaVersion = 2
+    static let currentSchemaVersion = 3
+    /// Повтор «сбавь» в настройках до версии 3: ноль, то есть только на переходах.
+    /// На долгом пределе один «сбавь» терялся.
+    static let legacyVoiceRepeat = 0
+    /// Цель ниже этого почти наверняка ошибка: регулятор будет всё время в пределе.
+    static let lowTargetWarning = 100
+    /// Цель выше этого почти наверняка ошибка: регулятор, скорее всего, не включится.
+    static let highTargetWarning = 190
     static let probeStep = 8
     static let probeSeconds: TimeInterval = 90
     /// Сколько секунд пульс должен ровно держаться в полосе удержания перед пробой.
@@ -65,7 +72,7 @@ struct RegulatorSettings: Codable, Equatable {
     /// Голосовые подсказки «сбавь» и «в норме».
     var voiceCues: Bool = true
     /// Повтор «сбавь», секунды. Ноль означает только на переходах.
-    var voiceRepeatSeconds: Int = 0
+    var voiceRepeatSeconds: Int = 60
     /// Громкость голоса, от 0 до 1.
     var voiceVolume: Double = 1
 
@@ -110,11 +117,14 @@ struct RegulatorSettings: Codable, Equatable {
             : (try c.decodeIfPresent(Bool.self, forKey: .developerMode) ?? d.developerMode)
         theme = try c.decodeIfPresent(AppTheme.self, forKey: .theme) ?? d.theme
         voiceCues = try c.decodeIfPresent(Bool.self, forKey: .voiceCues) ?? d.voiceCues
-        voiceRepeatSeconds = try c.decodeIfPresent(Int.self, forKey: .voiceRepeatSeconds) ?? d.voiceRepeatSeconds
+        let storedRepeat = try c.decodeIfPresent(Int.self, forKey: .voiceRepeatSeconds) ?? d.voiceRepeatSeconds
+        voiceRepeatSeconds = storedVersion < 3 && storedRepeat == RegulatorSettings.legacyVoiceRepeat ? d.voiceRepeatSeconds : storedRepeat
         voiceVolume = try c.decodeIfPresent(Double.self, forKey: .voiceVolume) ?? d.voiceVolume
     }
 
     var targetHeartRate: Int { heartRateMax }
+    var isTargetSuspiciouslyLow: Bool { heartRateMax < RegulatorSettings.lowTargetWarning }
+    var isTargetSuspiciouslyHigh: Bool { heartRateMax > RegulatorSettings.highTargetWarning }
     var isValid: Bool { cadenceMin < cadenceMax && heartRateMin < heartRateMax }
 
     /// Пульс, с которого рост ритма замедляется.

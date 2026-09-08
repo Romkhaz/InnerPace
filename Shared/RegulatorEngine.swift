@@ -30,6 +30,8 @@ struct RegulatorEngine {
         let action: CadenceController.Action
         /// Если решение относится к пробе отклика, её фаза.
         var probe: ProbePhase? = nil
+        /// Остановка: регулятор начал заново, как в начале тренировки.
+        var restarted = false
     }
 
     var settings: RegulatorSettings {
@@ -45,6 +47,9 @@ struct RegulatorEngine {
     private var trend = HeartRateTrend()
     private(set) var smoothedHeartRate: Double?
     private(set) var latestHeartRate: Double?
+    private var previousHeartRate: Double?
+    private var stoppedSince: Date?
+    private var pendingRestart = false
     private(set) var lastHeartRateAt: Date?
     private(set) var isRegulating = false
     private(set) var isOverLimit = false
@@ -61,6 +66,10 @@ struct RegulatorEngine {
 
     /// Сколько секунд без свежего пульса, после чего ритм замораживаем.
     var staleAfter: TimeInterval = 15
+    /// Фактический каденс ниже этого считается остановкой или ходьбой.
+    var stopCadence = 120
+    /// Сколько секунд такого каденса, чтобы регулятор начал заново, как в начале тренировки.
+    var stopAfter: TimeInterval = 10
     /// Сколько секунд пульс должен держаться выше цели при ритме на нижней границе,
     /// прежде чем объявить предел. Отсекает секундные всплески.
     var overLimitDelay: TimeInterval = 10
@@ -89,6 +98,9 @@ struct RegulatorEngine {
         trend.reset()
         smoothedHeartRate = nil
         latestHeartRate = nil
+        previousHeartRate = nil
+        stoppedSince = nil
+        pendingRestart = false
         lastAdjust = nil
         isRegulating = false
         isOverLimit = false
@@ -102,6 +114,7 @@ struct RegulatorEngine {
 
     mutating func ingest(bpm: Int, at time: Date) {
         lastHeartRateAt = time
+        previousHeartRate = latestHeartRate
         latestHeartRate = Double(bpm)
         let smoothed = smoother.add(Double(bpm), at: time)
         smoothedHeartRate = smoothed
@@ -124,16 +137,63 @@ struct RegulatorEngine {
     }
 
     /// Пульс, по которому принимается решение: прогноз по тренду. Как только сырой
-    /// пульс выше цели, берём его, если он выше прогноза, без задержки сглаживания,
-    /// чтобы спуск ритма начинался сразу, а не когда фильтр догонит.
+    /// пульс два отсчёта подряд выше цели, берём его, если он выше прогноза, без задержки
+    /// сглаживания, чтобы спуск ритма начинался сразу. Один отсчёт не считается:
+    /// оптический датчик даёт одиночные выбросы.
     var decisionHeartRate: Double? {
         guard let predicted = predictedHeartRate else { return latestHeartRate }
         guard let latest = latestHeartRate else { return predicted }
         let target = Double(settings.targetHeartRate)
-        return latest > target ? max(predicted, latest) : predicted
+        let confirmedAbove = latest > target && (previousHeartRate ?? 0) > target
+        return confirmedAbove ? max(predicted, latest) : predicted
     }
 
-    mutating func markPaused(at now: Date) {}
+    /// Фактический каденс с шагомера. Ниже `stopCadence` дольше `stopAfter` секунд
+    /// значит остановка: на следующем такте регулятор начнёт заново.
+    mutating func noteActualCadence(_ spm: Int?, at now: Date) {
+        guard let spm, spm < stopCadence else {
+            stoppedSince = nil
+            return
+        }
+        if stoppedSince == nil { stoppedSince = now }
+        if let since = stoppedSince, now.timeIntervalSince(since) >= stopAfter,
+           isRegulating || controller.cadence > settings.cadenceMin {
+            pendingRestart = true
+        }
+    }
+
+    /// Начать заново после остановки: ритм на нижнюю границу, ждать включения, как на старте.
+    private mutating func restart(at now: Date) -> Adjustment {
+        let before = controller.cadence
+        if isProbing { cancelProbe() }
+        controller.reset()
+        isRegulating = false
+        armingSince = nil
+        isOverLimit = false
+        overLimitSince = nil
+        pendingRestart = false
+        stoppedSince = now
+        lastAdjust = now
+        let decided = decisionHeartRate ?? 0
+        let delta = before - controller.cadence
+        return Adjustment(heartRate: decided, measuredHeartRate: smoothedHeartRate ?? decided, cadence: controller.cadence,
+                          action: delta > 0 ? .slowDown(delta) : .hold, restarted: true)
+    }
+
+    private mutating func cancelProbe() {
+        controller.setCadence(probeRestoreCadence)
+        isProbing = false
+        probeStartedAt = nil
+        probeDone = false
+    }
+
+    /// Пауза отменяет пробу: её окно уже испорчено. Возвращает true, если проба была отменена.
+    @discardableResult
+    mutating func markPaused(at now: Date) -> Bool {
+        guard isProbing else { return false }
+        cancelProbe()
+        return true
+    }
 
     /// После паузы первая подстройка случится не сразу, а через полный интервал.
     mutating func markResumed(at now: Date) {
@@ -145,6 +205,7 @@ struct RegulatorEngine {
         updateArming(at: now)
         updateOverLimit(at: now)
         if lastAdjust == nil { lastAdjust = now }
+        if pendingRestart { return restart(at: now) }
         if let probe = updateProbe(at: now) { return probe }
         if isProbing { return nil }
         guard let lastAdjust, now.timeIntervalSince(lastAdjust) >= settings.adjustInterval else { return nil }
@@ -247,6 +308,7 @@ extension RegulatorEngine.Adjustment {
     var logLine: String? {
         let measured = Int(measuredHeartRate.rounded())
         let decided = Int(heartRate.rounded())
+        if restarted { return String(localized: "Остановка: ритм \(cadence), регулятор ждёт пульса") }
         switch probe {
         case .started: return String(localized: "Проба отклика: ритм \(cadence) на \(Int(RegulatorSettings.probeSeconds)) с")
         case .finished: return String(localized: "Проба окончена: ритм \(cadence)")

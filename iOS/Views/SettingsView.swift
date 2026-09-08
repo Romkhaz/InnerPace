@@ -27,6 +27,10 @@ struct SettingsView: View {
                 AdjustRow(title: "Целевой пульс", value: heartRateMax, range: 80...210)
                 Text("Регулятор ведёт пульс к этой цели. Рост ритма замедляется с \(Int(settings.approachHeartRate)) и останавливается с \(Int(settings.holdHeartRate)).")
                     .font(.footnote).foregroundStyle(.secondary)
+                if let warning = RecommendationText.targetWarning(settings) {
+                    Label(warning, systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote).foregroundStyle(palette.deepCoral)
+                }
             }
             RevertSettingsSection(store: store)
             Section("Оформление") {

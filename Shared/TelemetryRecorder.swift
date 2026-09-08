@@ -10,6 +10,8 @@ struct TelemetryRow {
     var decisionHeartRate: Double?
     var metronome: Int
     var actualCadence: Int?
+    /// Шагов с начала тренировки по шагомеру: по приросту видно, как часто он обновляется.
+    var steps: Int? = nil
     var distanceMeters: Double
     var speedMetersPerSecond: Double?
     var groundContactMs: Double?
@@ -27,7 +29,7 @@ struct TelemetryRecorder {
     private(set) var rows: [TelemetryRow] = []
     private(set) var settingsLine: String = ""
 
-    static let header = "time,elapsed_s,hr,hr_smoothed,hr_trend_bpm_min,hr_decision,metronome_bpm,cadence_spm,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,over_limit,probe,decision"
+    static let header = "time,elapsed_s,hr,hr_smoothed,hr_trend_bpm_min,hr_decision,metronome_bpm,cadence_spm,steps,distance_m,speed_mps,gct_ms,vo_cm,stride_m,power_w,efficiency_m_per_beat,waiting,over_limit,probe,decision"
 
     mutating func start(settings: RegulatorSettings) {
         rows.removeAll()
@@ -56,6 +58,7 @@ struct TelemetryRecorder {
                 r.decisionHeartRate.map { String(format: "%.1f", $0) } ?? "",
                 String(r.metronome),
                 r.actualCadence.map(String.init) ?? "",
+                r.steps.map(String.init) ?? "",
                 String(format: "%.1f", r.distanceMeters),
                 r.speedMetersPerSecond.map { String(format: "%.2f", $0) } ?? "",
                 r.groundContactMs.map { String(format: "%.0f", $0) } ?? "",

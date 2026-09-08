@@ -12,6 +12,10 @@ struct EffortAssessment: Codable, Equatable {
         case reserve
         /// Пределы подобраны нормально.
         case balanced
+        /// Пульс за всю пробежку не дошёл до зоны подхода: цель слишком высока для этого темпа.
+        case belowApproach
+        /// Фактический каденс заметно ниже метронома: ритм не по силам.
+        case cadenceTooHigh
     }
 
     var verdict: Verdict
@@ -27,15 +31,34 @@ struct EffortAssessment: Codable, Equatable {
     var heartRateAtCeiling: Double?
     /// Сколько ударов пульса даёт один шаг ритма, из модели отклика. Меньше 0,3 значит ритм не рычаг.
     var cadenceLever: Double?
+    /// Медиана фактического каденса с шагомера.
+    var actualCadence: Double?
     var suggestedCadenceMin: Int?
+    var suggestedCadenceMax: Int?
     var suggestedTargetHeartRate: Int?
 
     /// Сколько секунд регулятор должен проработать, чтобы оценка что-то значила.
     static let minimumSeconds = 1200
     /// Слабее этого ритм на пульс почти не влияет.
     static let weakLever = 0.3
+    /// Фактический каденс ниже метронома на столько и больше значит ритм не по силам.
+    static let cadenceShortfall = 8.0
+    /// Выше этого цель за один раз не поднимаем: дальше совет только бежать медленнее.
+    static let maxTargetRaise = 10
+    static let cadenceMaxLimit = 220
 
-    var hasSuggestion: Bool { suggestedCadenceMin != nil || suggestedTargetHeartRate != nil }
+    var hasSuggestion: Bool { suggestedCadenceMin != nil || suggestedCadenceMax != nil || suggestedTargetHeartRate != nil }
+
+    /// Применяет предложение к настройкам. Верхняя граница ритма не опускается:
+    /// если она была выставлена выше автоматической, так и остаётся.
+    func apply(to settings: inout RegulatorSettings) {
+        if let c = suggestedCadenceMin {
+            settings.cadenceMin = c
+            settings.cadenceMax = max(settings.cadenceMax, RegulatorSettings.derivedCadenceMax(from: c, spanPercent: settings.cadenceSpanPercent))
+        }
+        if let m = suggestedCadenceMax { settings.cadenceMax = max(m, settings.cadenceMin + 1) }
+        if let t = suggestedTargetHeartRate { settings.setTargetHeartRateKeepingZoneWidth(t) }
+    }
 }
 
 /// Оценка отклика пульса на ритм по одной пробежке. Пульс моделируется как инерционное
@@ -86,27 +109,51 @@ enum RunAnalyzer {
         // Рычаг ритма берём из модели отклика: прямое сравнение пульса на разном ритме
         // в замкнутом контуре обманывает, регулятор сам поднимает ритм при низком пульсе.
         let lever = response?.gainPerStep
+        let actualSamples = reg.compactMap { $0.actualCadence.map(Double.init) }
+        let actual = actualSamples.count >= max(60, n * 6 / 10) ? median(actualSamples) : nil
 
         var assessment = EffortAssessment(
             verdict: .insufficient, regulatedSeconds: n, shareAtFloor: atFloor, shareAtCeiling: atCeiling,
             shareAboveTarget: above, shareInBand: inBand, overLimitSeconds: overLimit,
-            heartRateAtFloor: floorHR, heartRateAtCeiling: ceilingHR, cadenceLever: lever
+            heartRateAtFloor: floorHR, heartRateAtCeiling: ceilingHR, cadenceLever: lever, actualCadence: actual
         )
-        guard n >= EffortAssessment.minimumSeconds else { return assessment }
+        guard n >= EffortAssessment.minimumSeconds else {
+            // Регулятор так и не включился, а бежали долго: пульс не дошёл до зоны подхода.
+            let withHR = rows.filter { $0.heartRate != nil }
+            if withHR.count >= EffortAssessment.minimumSeconds,
+               let recent = median(withHR.suffix(600).compactMap { $0.smoothedHeartRate ?? $0.heartRate.map(Double.init) }),
+               recent < settings.approachHeartRate {
+                assessment.verdict = .belowApproach
+                let proposed = Int(((recent + 5) / 5).rounded(.up)) * 5
+                if proposed < settings.targetHeartRate { assessment.suggestedTargetHeartRate = proposed }
+            }
+            return assessment
+        }
 
-        if atFloor >= 0.4, above >= 0.3 || Double(overLimit) >= 0.2 * Double(n) {
+        if let actual, let metro = median(reg.map { Double($0.metronome) }),
+           actual <= metro - EffortAssessment.cadenceShortfall {
+            assessment.verdict = .cadenceTooHigh
+            let proposed = max(120, Int((actual / 5).rounded()) * 5)
+            if proposed < settings.cadenceMin { assessment.suggestedCadenceMin = proposed }
+        } else if atFloor >= 0.4, above >= 0.3 || Double(overLimit) >= 0.2 * Double(n) {
             assessment.verdict = .onLimit
             if let floorHR {
                 let proposed = Int(((floorHR + 2) / 5).rounded(.up)) * 5
-                if proposed > settings.targetHeartRate { assessment.suggestedTargetHeartRate = proposed }
+                if proposed > settings.targetHeartRate, proposed <= settings.targetHeartRate + EffortAssessment.maxTargetRaise {
+                    assessment.suggestedTargetHeartRate = proposed
+                }
             }
             if (lever ?? 1) >= EffortAssessment.weakLever, settings.cadenceMin - 5 >= 120 {
                 assessment.suggestedCadenceMin = settings.cadenceMin - 5
             }
         } else if above <= 0.1, (atCeiling >= 0.3 && (ceilingHR ?? target) < hold) || share({ Double($0.heartRate ?? 0) < hold }) >= 0.6 {
             assessment.verdict = .reserve
-            if settings.cadenceMin + 5 < RegulatorSettings.cadenceMaxCap {
+            if settings.cadenceMin + 5 < settings.cadenceMax {
                 assessment.suggestedCadenceMin = settings.cadenceMin + 5
+            }
+            // Упёрлись в потолок ритма, а пульс всё ещё ниже полосы: потолок тоже можно поднять.
+            if atCeiling >= 0.3, settings.cadenceMax + 5 <= EffortAssessment.cadenceMaxLimit {
+                assessment.suggestedCadenceMax = settings.cadenceMax + 5
             }
         } else {
             assessment.verdict = .balanced

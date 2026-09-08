@@ -97,7 +97,7 @@ final class RunSession {
 
     var settings: RegulatorSettings { settingsStore.settings }
     var smoothedHeartRate: Double? { engine.smoothedHeartRate }
-    var actualCadence: Int? { pedometer.cadence }
+    var actualCadence: Int? { pedometer.currentCadence() }
     var distanceMeters: Double { pedometer.distanceMeters ?? 0 }
     var paceSecondsPerKm: Double? { pedometer.paceSecondsPerKm }
     var recentEfficiency: Double? { efficiency.recent }
@@ -156,7 +156,10 @@ final class RunSession {
         metronome.stop()
         if let segmentStart { accumulated += Date().timeIntervalSince(segmentStart) }
         segmentStart = nil
-        engine.markPaused(at: Date())
+        if engine.markPaused(at: Date()) {
+            cadence = engine.cadence
+            log(String(localized: "Проба отменена: пауза"))
+        }
         state = .paused
         log(String(localized: "Пауза"))
     }
@@ -167,6 +170,8 @@ final class RunSession {
         applySettings()
         segmentStart = Date()
         engine.markResumed(at: Date())
+        cadence = engine.cadence
+        metronome.bpm = Double(cadence)
         state = .running
         log(String(localized: "Продолжаем"))
     }
@@ -268,6 +273,7 @@ final class RunSession {
         if let segmentStart { elapsed = accumulated + now.timeIntervalSince(segmentStart) }
         efficiency.update(time: now, distance: distanceMeters, heartRate: smoothedHeartRate)
         var decision: String?
+        engine.noteActualCadence(actualCadence, at: now)
         if let adjustment = engine.tick(at: now) {
             cadence = adjustment.cadence
             metronome.bpm = Double(cadence)
@@ -290,7 +296,7 @@ final class RunSession {
             telemetry.append(TelemetryRow(
                 time: now, elapsed: elapsed, heartRate: heartRateSource == .polar ? heartRate : nil,
                 smoothedHeartRate: smoothedHeartRate, trendPerMinute: engine.trendPerMinute, decisionHeartRate: engine.decisionHeartRate,
-                metronome: cadence, actualCadence: actualCadence,
+                metronome: cadence, actualCadence: actualCadence, steps: pedometer.steps,
                 distanceMeters: distanceMeters, speedMetersPerSecond: paceSecondsPerKm.map { 1000 / $0 },
                 groundContactMs: nil, verticalOscillationCm: nil, strideLengthMeters: nil, powerWatts: nil,
                 efficiencyRecent: efficiency.recent, warmup: !engine.isRegulating, overLimit: engine.isOverLimit, probe: engine.isProbing, decision: decision

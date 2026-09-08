@@ -76,10 +76,7 @@ struct ReportView: View {
                     .foregroundStyle(palette.inkSecondary)
                     .listRowBackground(palette.card)
                 applyButton(applied: appliedLimits) {
-                    store.applyRecommendation { s in
-                        if let c = a.suggestedCadenceMin { s.setCadenceMinDerivingMax(c) }
-                        if let t = a.suggestedTargetHeartRate { s.setTargetHeartRateKeepingZoneWidth(t) }
-                    }
+                    store.applyRecommendation { s in a.apply(to: &s) }
                     appliedLimits = true
                 }
             }

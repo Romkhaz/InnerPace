@@ -21,12 +21,29 @@ enum RecommendationText {
             return String(localized: "Есть запас: пульс \(band) % времени в полосе удержания и почти не поднимался выше цели. Можно бежать быстрее, оставаясь в зоне: поднимите минимальный ритм.")
         case .balanced:
             return String(localized: "Пределы подобраны нормально: пульс \(band) % времени в полосе удержания, выше цели \(above) %, ритм на нижней границе \(floor) %.")
+        case .belowApproach:
+            return String(localized: "Регулятор так и не включился: пульс не дошёл до зоны подхода (\(Int(settings.approachHeartRate))). Цель слишком высока для этого темпа: снизьте её или бегите быстрее.")
+        case .cadenceTooHigh:
+            let actual = Int((a.actualCadence ?? 0).rounded())
+            return String(localized: "Ритм не по силам: вы бежали около \(actual) шагов в минуту при метрономе от \(settings.cadenceMin). Пульс здесь ни при чём, начните с ритма, который получается держать.")
         }
+    }
+
+    /// Предупреждение под настройкой цели, если она похожа на ошибку.
+    static func targetWarning(_ settings: RegulatorSettings) -> String? {
+        if settings.isTargetSuspiciouslyLow {
+            return String(localized: "Цель ниже \(RegulatorSettings.lowTargetWarning): регулятор будет всё время в пределе и просить сбавить.")
+        }
+        if settings.isTargetSuspiciouslyHigh {
+            return String(localized: "Цель выше \(RegulatorSettings.highTargetWarning): пульс вряд ли дойдёт до зоны подхода, и регулятор не включится.")
+        }
+        return nil
     }
 
     static func effortSuggestion(_ a: EffortAssessment, settings: RegulatorSettings) -> String? {
         var parts: [String] = []
         if let c = a.suggestedCadenceMin { parts.append(String(localized: "ритм от \(settings.cadenceMin) на \(c)")) }
+        if let m = a.suggestedCadenceMax { parts.append(String(localized: "ритм до \(settings.cadenceMax) на \(m)")) }
         if let t = a.suggestedTargetHeartRate { parts.append(String(localized: "пульс до \(settings.targetHeartRate) на \(t)")) }
         guard !parts.isEmpty else { return nil }
         return String(localized: "На следующую пробежку: ") + parts.joined(separator: ", ")

@@ -15,6 +15,11 @@ final class CadenceSensor {
     /// Текущий темп по шагомеру, секунд на километр.
     private(set) var paceSecondsPerKm: Double?
     private(set) var isRunning = false
+    /// Когда шагомер последний раз что-то присылал. На остановке обновления прекращаются,
+    /// и последний каденс не должен считаться текущим.
+    private(set) var lastUpdateAt: Date?
+    /// На часах обновления приходят примерно раз в 10 с, поэтому порог с запасом.
+    static let staleAfter: TimeInterval = 30
 
     private let pedometer = CMPedometer()
 
@@ -26,6 +31,7 @@ final class CadenceSensor {
         guard CadenceSensor.isAvailable else { return }
         stop()
         cadence = nil
+        lastUpdateAt = nil
         steps = 0
         distanceMeters = nil
         paceSecondsPerKm = nil
@@ -33,6 +39,7 @@ final class CadenceSensor {
         pedometer.startUpdates(from: date) { [weak self] data, _ in
             guard let self, let data else { return }
             DispatchQueue.main.async {
+                self.lastUpdateAt = Date()
                 self.steps = data.numberOfSteps.intValue
                 if let distance = data.distance { self.distanceMeters = distance.doubleValue }
                 if let current = data.currentCadence {
@@ -43,6 +50,14 @@ final class CadenceSensor {
                 }
             }
         }
+    }
+
+    /// Каденс для регулятора: ноль, если шагомер замолчал, то есть человек стоит.
+    /// nil, пока шагомер ещё ничего не присылал.
+    func currentCadence(at now: Date = Date()) -> Int? {
+        guard let lastUpdateAt else { return nil }
+        if now.timeIntervalSince(lastUpdateAt) > CadenceSensor.staleAfter { return 0 }
+        return cadence
     }
 
     func stop() {

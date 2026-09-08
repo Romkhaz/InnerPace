@@ -221,9 +221,12 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertNil(engine.tick(at: t0))
         for second in 1...5 { _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second))) }
         XCTAssertEqual(engine.cadence, 181)
-        // Пульс прыгнул выше цели: сглаженный ещё около 136, решение принимается по сырому 160.
+        // Пульс прыгнул выше цели. Один отсчёт не считается: может быть выброс датчика.
         engine.ingest(bpm: 160, at: t0.addingTimeInterval(6))
-        XCTAssertLessThan(engine.smoothedHeartRate ?? 0, 140)
+        XCTAssertLessThan(engine.decisionHeartRate ?? 0, 150, "первый отсчёт выше цели ещё не подтверждён")
+        // Второй подряд: сглаженный ещё около 137, решение принимается по сырому 160.
+        engine.ingest(bpm: 160, at: t0.addingTimeInterval(7))
+        XCTAssertLessThan(engine.smoothedHeartRate ?? 0, 142)
         XCTAssertEqual(engine.decisionHeartRate ?? 0, 160, accuracy: 0.001)
         let adjustment = engine.tick(at: t0.addingTimeInterval(10))
         XCTAssertEqual(adjustment?.action, .slowDown(1), "с 181 до нижней границы 180 только один шаг")
@@ -349,6 +352,83 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertLessThan(engine.cadence, before, "выше цели регулятор снова снижает ритм")
     }
 
+    func testStopRestartsRegulationLikeAtStart() {
+        var s = settings
+        s.holdBand = 8
+        s.armSeconds = 30
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        feed(&engine, from: 0, through: 40, bpm: { _ in 136 }, t0: t0)
+        XCTAssertTrue(engine.isRegulating)
+        XCTAssertGreaterThan(engine.cadence, 180)
+        // Бег: каденс 178, остановки нет.
+        for second in 41...50 {
+            engine.noteActualCadence(178, at: t0.addingTimeInterval(TimeInterval(second)))
+            engine.ingest(bpm: 136, at: t0.addingTimeInterval(TimeInterval(second)))
+            _ = engine.tick(at: t0.addingTimeInterval(TimeInterval(second)))
+        }
+        XCTAssertTrue(engine.isRegulating)
+        // Светофор: шагомер показывает ноль. Девять секунд терпим, на десятой начинаем заново.
+        var restarted: RegulatorEngine.Adjustment?
+        for second in 51...61 {
+            let t = t0.addingTimeInterval(TimeInterval(second))
+            engine.noteActualCadence(0, at: t)
+            engine.ingest(bpm: 130, at: t)
+            if let a = engine.tick(at: t), a.restarted { restarted = a }
+            if second < 60 { XCTAssertTrue(engine.isRegulating, "секунда \(second)") }
+        }
+        XCTAssertNotNil(restarted)
+        XCTAssertEqual(restarted?.cadence, 180)
+        XCTAssertEqual(restarted?.logLine, "Остановка: ритм 180, регулятор ждёт пульса")
+        XCTAssertFalse(engine.isRegulating)
+        XCTAssertFalse(engine.isOverLimit)
+        // Снова побежали: включение только после 30 секунд в зоне подхода, как на старте.
+        for second in 62...100 {
+            let t = t0.addingTimeInterval(TimeInterval(second))
+            engine.noteActualCadence(178, at: t)
+            engine.ingest(bpm: 136, at: t)
+            _ = engine.tick(at: t)
+            if second < 91 { XCTAssertFalse(engine.isRegulating, "секунда \(second)") }
+        }
+        XCTAssertTrue(engine.isRegulating)
+    }
+
+    func testWalkingWithoutRegulationDoesNotRestart() {
+        var engine = RegulatorEngine(settings: settings)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        // До включения регулятора остановка ничего не меняет и не пишет в журнал.
+        for second in 0...30 {
+            let t = t0.addingTimeInterval(TimeInterval(second))
+            engine.noteActualCadence(0, at: t)
+            engine.ingest(bpm: 110, at: t)
+            XCTAssertNil(engine.tick(at: t)?.restarted == true ? engine.tick(at: t) : nil)
+        }
+        XCTAssertEqual(engine.cadence, 180)
+    }
+
+    func testPauseCancelsProbeAndAllowsRetry() {
+        var s = settings
+        s.holdBand = 8
+        var engine = RegulatorEngine(settings: s)
+        engine.probeEnabled = true
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        feed(&engine, from: 0, through: 30, bpm: { _ in 136 }, t0: t0)
+        let before = engine.cadence
+        feed(&engine, from: 31, through: 120, bpm: { _ in 145 }, t0: t0)
+        XCTAssertTrue(engine.isProbing)
+        XCTAssertTrue(engine.markPaused(at: t0.addingTimeInterval(121)), "пауза отменяет пробу")
+        XCTAssertFalse(engine.isProbing)
+        XCTAssertEqual(engine.cadence, before, "ритм вернулся")
+        engine.markResumed(at: t0.addingTimeInterval(200))
+        XCTAssertFalse(engine.markPaused(at: t0.addingTimeInterval(201)), "без пробы пауза ничего не отменяет")
+        // После возобновления проба может состояться снова.
+        feed(&engine, from: 202, through: 300, bpm: { _ in 145 }, t0: t0)
+        XCTAssertTrue(engine.isProbing)
+    }
+
     func testProbeDisabledByDefault() {
         var s = settings
         s.holdBand = 8
@@ -387,6 +467,6 @@ final class RegulatorEngineTests: XCTestCase {
         let csv = recorder.csv()
         XCTAssertTrue(csv.hasPrefix("# settings {"))
         XCTAssertTrue(csv.contains(TelemetryRecorder.header))
-        XCTAssertTrue(csv.contains(",140,139.5,-1.2,139.5,182,178,3.2,3.10,240,8.4,1.05,250,,1,0,0,a; b"))
+        XCTAssertTrue(csv.contains(",140,139.5,-1.2,139.5,182,178,,3.2,3.10,240,8.4,1.05,250,,1,0,0,a; b"))
     }
 }
