@@ -43,6 +43,21 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertEqual(engine.predictedHeartRate ?? 0, 128, accuracy: 2, "через минуту ожидаем около 128")
     }
 
+    func testForecastClampsSteepTrend() {
+        var s = settings
+        s.predictSeconds = 60
+        var engine = RegulatorEngine(settings: s)
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        // Подъём в гору: 120 → 140 за 20 секунд, наклон 60 в минуту.
+        feed(&engine, from: 0, through: 20, bpm: { 120 + $0 }, t0: t0)
+        XCTAssertGreaterThan(engine.trendPerMinute, 50, "в телеметрии тренд как есть")
+        XCTAssertEqual(engine.predictedHeartRate ?? 0, 140 + 15, accuracy: 0.5, "в прогноз идёт не больше 15 в минуту")
+        let adjustment = engine.tick(at: t0.addingTimeInterval(25))
+        XCTAssertEqual(adjustment?.measuredHeartRate ?? 0, 140, accuracy: 0.5)
+        XCTAssertEqual(adjustment?.heartRate ?? 0, 155, accuracy: 0.5)
+    }
+
     func testRisingHeartRateStopsAscentEarly() {
         var s = settings
         s.holdBand = 8            // удержание со 142
@@ -269,9 +284,11 @@ final class RegulatorEngineTests: XCTestCase {
     }
 
     func testLogLine() {
-        let up = RegulatorEngine.Adjustment(heartRate: 140.4, cadence: 186, action: .speedUp(2))
+        let up = RegulatorEngine.Adjustment(heartRate: 140.4, measuredHeartRate: 140.2, cadence: 186, action: .speedUp(2))
         XCTAssertEqual(up.logLine, "Пульс 140 → ритм 186 (+2)")
-        let hold = RegulatorEngine.Adjustment(heartRate: 150, cadence: 186, action: .hold)
+        let forecast = RegulatorEngine.Adjustment(heartRate: 151, measuredHeartRate: 143.6, cadence: 183, action: .slowDown(3))
+        XCTAssertEqual(forecast.logLine, "Пульс 144, прогноз 151 → ритм 183 (−3)")
+        let hold = RegulatorEngine.Adjustment(heartRate: 150, measuredHeartRate: 150, cadence: 186, action: .hold)
         XCTAssertNil(hold.logLine)
     }
 

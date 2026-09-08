@@ -27,6 +27,26 @@
         }
       }
     },
+    "%@ → ритм %lld (+%lld)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ → beat %2$lld (+%3$lld)"
+          }
+        }
+      }
+    },
+    "%@ → ритм %lld (−%lld)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ → beat %2$lld (−%3$lld)"
+          }
+        }
+      }
+    },
     "%lld": {
       "shouldTranslate": false
     },
@@ -732,22 +752,22 @@
         }
       }
     },
-    "Пульс %lld → ритм %lld (+%lld)": {
+    "Пульс %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "HR %1$lld → beat %2$lld (+%3$lld)"
+            "value": "HR %lld"
           }
         }
       }
     },
-    "Пульс %lld → ритм %lld (−%lld)": {
+    "Пульс %lld, прогноз %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "HR %1$lld → beat %2$lld (−%3$lld)"
+            "value": "HR %1$lld, forecast %2$lld"
           }
         }
       }

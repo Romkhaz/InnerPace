@@ -18,7 +18,10 @@ import Foundation
 /// вернулся под цель.
 struct RegulatorEngine {
     struct Adjustment: Equatable {
+        /// Пульс, по которому принято решение: прогноз или сырой выше цели.
         let heartRate: Double
+        /// Сглаженный измеренный пульс на момент решения.
+        let measuredHeartRate: Double
         let cadence: Int
         let action: CadenceController.Action
     }
@@ -50,6 +53,10 @@ struct RegulatorEngine {
     var overLimitDelay: TimeInterval = 10
     /// На сколько ударов пульс должен опуститься ниже цели, чтобы предел снялся.
     var overLimitHysteresis: Double = 2
+    /// Быстрее этого (ударов в минуту за минуту) тренд в прогноз не берём: за 20 с окна
+    /// подъём в гору даёт наклон 40–50, и экстраполяция на минуту вперёд выносила решение
+    /// далеко за реальный пульс. Сам тренд в телеметрии остаётся неограниченным.
+    var maxTrendPerMinute: Double = 15
     /// Если пульс падает быстрее этого (ударов в минуту за минуту), предел не объявляем:
     /// он сам уйдёт под цель, подсказка «сбавь» только сбила бы с толку.
     var overLimitFallingSlope: Double = -2
@@ -87,10 +94,11 @@ struct RegulatorEngine {
     /// Тренд сглаженного пульса, ударов в минуту за минуту.
     var trendPerMinute: Double { trend.slopePerMinute }
 
-    /// Сглаженный пульс плюс тренд на `predictSeconds` вперёд.
+    /// Сглаженный пульс плюс ограниченный тренд на `predictSeconds` вперёд.
     var predictedHeartRate: Double? {
         guard let smoothed = smoothedHeartRate else { return nil }
-        return smoothed + trendPerMinute * Double(settings.predictSeconds) / 60
+        let slope = min(maxTrendPerMinute, max(-maxTrendPerMinute, trendPerMinute))
+        return smoothed + slope * Double(settings.predictSeconds) / 60
     }
 
     func isHeartRateFresh(at now: Date) -> Bool {
@@ -123,12 +131,13 @@ struct RegulatorEngine {
         guard let lastAdjust, now.timeIntervalSince(lastAdjust) >= settings.adjustInterval else { return nil }
         self.lastAdjust = now
         guard let heartRate = decisionHeartRate, isHeartRateFresh(at: now) else { return nil }
+        let measured = smoothedHeartRate ?? heartRate
         guard isRegulating else {
-            return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: .hold)
+            return Adjustment(heartRate: heartRate, measuredHeartRate: measured, cadence: controller.cadence, action: .hold)
         }
         let action = controller.adjust(forHeartRate: heartRate)
         updateOverLimit(at: now)
-        return Adjustment(heartRate: heartRate, cadence: controller.cadence, action: action)
+        return Adjustment(heartRate: heartRate, measuredHeartRate: measured, cadence: controller.cadence, action: action)
     }
 
     /// Регулятор включается, когда сглаженный пульс продержался в зоне подхода
@@ -176,12 +185,17 @@ struct RegulatorEngine {
 }
 
 extension RegulatorEngine.Adjustment {
-    /// Строка для журнала, nil если ритм не менялся.
+    /// Строка для журнала, nil если ритм не менялся. Показывает измеренный пульс и,
+    /// если решение принято по другому значению (прогноз или сырой), его тоже.
     var logLine: String? {
-        let hr = Int(heartRate.rounded())
+        let measured = Int(measuredHeartRate.rounded())
+        let decided = Int(heartRate.rounded())
+        let pulse = decided == measured
+            ? String(localized: "Пульс \(measured)")
+            : String(localized: "Пульс \(measured), прогноз \(decided)")
         switch action {
-        case .speedUp(let delta): return String(localized: "Пульс \(hr) → ритм \(cadence) (+\(delta))")
-        case .slowDown(let delta): return String(localized: "Пульс \(hr) → ритм \(cadence) (−\(delta))")
+        case .speedUp(let delta): return String(localized: "\(pulse) → ритм \(cadence) (+\(delta))")
+        case .slowDown(let delta): return String(localized: "\(pulse) → ритм \(cadence) (−\(delta))")
         case .hold: return nil
         }
     }
