@@ -15,7 +15,7 @@ struct HistoryView: View {
                 }
                 ForEach(session.store.workouts) { workout in
                     NavigationLink {
-                        ReportView(summary: workout)
+                        ReportView(summary: workout, settingsStore: session.settingsStore, history: session.store.workouts)
                     } label: {
                         workoutRow(workout)
                     }

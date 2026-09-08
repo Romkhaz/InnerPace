@@ -162,8 +162,10 @@ final class WatchRunModel {
 
         await workout.end()
 
+        let date = startDate ?? Date()
+        let response = RunAnalyzer.estimateResponse(rows: telemetry.rows, settings: settings, date: date)
         let summary = WorkoutSummary(
-            date: startDate ?? Date(),
+            date: date,
             duration: finalElapsed,
             distanceMeters: finalDistance,
             averageHeartRate: averageHeartRate,
@@ -172,7 +174,9 @@ final class WatchRunModel {
             efficiencyMetersPerBeat: efficiency.total,
             averageGroundContactMs: averageContact,
             averageVerticalOscillationCm: averageOscillation,
-            source: .watch
+            source: .watch,
+            assessment: RunAnalyzer.assessEffort(rows: telemetry.rows, settings: settings, response: response),
+            response: response
         )
         store.add(summary)
         sync.send(summary)
@@ -238,7 +242,9 @@ final class WatchRunModel {
             lastDecision = cue
             decision = cue
         }
-        if settings.developerMode {
+        // Строки копятся всегда: по ним после пробежки считаются рекомендации.
+        // В файл они уходят только в режиме разработчика.
+        do {
             telemetry.append(TelemetryRow(
                 time: now, elapsed: elapsed, heartRate: heartRate,
                 smoothedHeartRate: smoothedHeartRate, trendPerMinute: engine.trendPerMinute, decisionHeartRate: engine.decisionHeartRate,

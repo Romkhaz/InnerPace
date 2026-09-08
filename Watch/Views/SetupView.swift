@@ -10,7 +10,7 @@ struct SetupView: View {
             VStack(spacing: 8) {
                 if let last = model.store.workouts.first {
                     NavigationLink {
-                        ReportView(summary: last)
+                        ReportView(summary: last, settingsStore: model.settingsStore, history: model.store.workouts)
                     } label: {
                         HStack {
                             Text("Последняя")
@@ -110,6 +110,21 @@ struct AdvancedSettingsView: View {
         let settings = store.settings
         ScrollView {
             VStack(spacing: 6) {
+                if let previous = store.previousSettings, let date = store.previousSavedAt {
+                    Button {
+                        store.revertToPrevious()
+                    } label: {
+                        Label("Вернуть прежние", systemImage: "arrow.uturn.backward")
+                            .frame(maxWidth: .infinity)
+                    }
+                    let diff = RecommendationText.differences(from: previous, to: store.settings)
+                    Text(diff.isEmpty
+                         ? String(localized: "Настройки совпадают с прежними.")
+                         : String(localized: "Изменены \(date.formatted(.dateTime.day().month())): ") + diff.joined(separator: ", ") + ".")
+                        .font(.caption2)
+                        .foregroundStyle(palette.inkSecondary)
+                        .multilineTextAlignment(.center)
+                }
                 sectionTitle("Ритм")
                 HStack(spacing: 6) {
                     CrownNumberField(title: "Ритм до", value: $store.settings.cadenceMax,

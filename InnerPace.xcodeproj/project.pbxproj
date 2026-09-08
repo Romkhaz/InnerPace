@@ -17,8 +17,11 @@
 		18D989D72E8F140E4D947CFE /* WatchWorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50837DB0BB65557BDBBC4AB /* WatchWorkoutManager.swift */; };
 		19713A6C1BAC0CBFE6B63029 /* CadenceSensor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC2271C10B4CDED5D8EE16A6 /* CadenceSensor.swift */; };
 		19B603AA5B0C3A0077F013B1 /* ControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86776A16EF41D86561742AB /* ControlsView.swift */; };
+		1ECB4C68948A690E5D88921E /* RunAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB3082980A7B73B5645798D6 /* RunAnalysis.swift */; };
 		208BBE95A92A93D88A6C2C6C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 752FF15D945DEFC8C4282C40 /* Localizable.xcstrings */; };
+		28C26BD050CAC75774114AD8 /* RunAnalysisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7940C6A13FA4C8A7FCBF2C1A /* RunAnalysisTests.swift */; };
 		330B62A1EF616315FD3BB01F /* DetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B19473978148670142164142 /* DetailsView.swift */; };
+		351349B5765AC41B736AA5F5 /* RunAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB3082980A7B73B5645798D6 /* RunAnalysis.swift */; };
 		3A90D03F917CDE50F5914817 /* WorkoutSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010138CDB5BFE92B9D48146 /* WorkoutSummary.swift */; };
 		3DBE056F59AF1C22F6A04E76 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B09AD8AA9A479809C95F398A /* Assets.xcassets */; };
 		3E90D14BDA2D45FF0B456584 /* VoiceCues.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C313DB20789C546EB040D1 /* VoiceCues.swift */; };
@@ -42,6 +45,7 @@
 		5EEB108EA5FBDEB7C11C06E0 /* HeartRateZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BA5177444CB4306DEFAD45 /* HeartRateZone.swift */; };
 		5F7CA04D991BAFE9EE2C517B /* RegulatorEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5916193FA3CD86DE025A0B7A /* RegulatorEngine.swift */; };
 		6258E1C0AC032695C08FA6CB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 133117C3CB947E58447C297B /* PrivacyInfo.xcprivacy */; };
+		635DFD03CFC946ACC6BE8515 /* RunAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB3082980A7B73B5645798D6 /* RunAnalysis.swift */; };
 		651869869ED486C4623A2E59 /* PhoneSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D38AEB37DCCFCEA4992FCBA /* PhoneSync.swift */; };
 		67CA3FB251D7EF0E81F95B48 /* WorkoutSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010138CDB5BFE92B9D48146 /* WorkoutSummary.swift */; };
 		6BE11148A2324DE6188F150C /* RegulatorEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E702542FE1C3D77605A484E /* RegulatorEngineTests.swift */; };
@@ -66,6 +70,7 @@
 		94D7764D9C8CDE68AE603B59 /* InnerPaceWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6CE2437603846860437854C /* InnerPaceWatchApp.swift */; };
 		983064E1F2150C5DF0290480 /* ZoneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */; };
 		9BBA08859B8C9D4D8468CDC0 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0E10B747FFC0957437346F /* AppTheme.swift */; };
+		9E1AC8D58C7FA529E8317CC6 /* RecommendationViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68A5820136E196DE85BC0B8E /* RecommendationViews.swift */; };
 		9F18833800B2F22495206133 /* HeartRateTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFA43F78D3ADF364FE2B530 /* HeartRateTrend.swift */; };
 		A3426938B37F76E48EA834AE /* ZoneStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */; };
 		A4197E4BAF54A73A82B4DE5A /* EfficiencyTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA1D82FDAB65342DC0E25C7 /* EfficiencyTracker.swift */; };
@@ -82,6 +87,7 @@
 		C780992500ECBA467098B657 /* CadenceControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD16BB303CA78329890DCCA /* CadenceControllerTests.swift */; };
 		CE7C611333E9A93E6E9FB879 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D7F5E428FF9010220C36461A /* PrivacyInfo.xcprivacy */; };
 		CE7D75DAF0EE4DB1EF1C56A1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EB70B33AB441474D5DA114 /* SettingsView.swift */; };
+		D0C03D8A77EF728294E1C2EB /* RecommendationViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68A5820136E196DE85BC0B8E /* RecommendationViews.swift */; };
 		D15A35BA6ECC5185B0F24566 /* EfficiencyTrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E904EB0C61367EDFC02966 /* EfficiencyTrackerTests.swift */; };
 		D72FBCA0AA5DAB286B9A99CB /* RegulatorSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF82682B8521B4251015BBA /* RegulatorSettingsTests.swift */; };
 		DCF9D8E6CAF72D029291359F /* Metronome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B697B2F9D7DA392940B8DFB /* Metronome.swift */; };
@@ -139,11 +145,13 @@
 		5A007BE01FD045C55F432548 /* SharedLogicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SharedLogicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5FAA78E3FC087F45A57C0993 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		6557067E5327923D1583C4A1 /* InnerPaceWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = InnerPaceWatch.entitlements; sourceTree = "<group>"; };
+		68A5820136E196DE85BC0B8E /* RecommendationViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationViews.swift; sourceTree = "<group>"; };
 		6B697B2F9D7DA392940B8DFB /* Metronome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metronome.swift; sourceTree = "<group>"; };
 		6E702542FE1C3D77605A484E /* RegulatorEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegulatorEngineTests.swift; sourceTree = "<group>"; };
 		71A0675CC2979F5014427916 /* CadenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadenceController.swift; sourceTree = "<group>"; };
 		71DAC4B68B8A547451D31468 /* WatchRunModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchRunModel.swift; sourceTree = "<group>"; };
 		752FF15D945DEFC8C4282C40 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		7940C6A13FA4C8A7FCBF2C1A /* RunAnalysisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunAnalysisTests.swift; sourceTree = "<group>"; };
 		7A1C983A9DB90E1C1EBB5067 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7D38AEB37DCCFCEA4992FCBA /* PhoneSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSync.swift; sourceTree = "<group>"; };
 		7E6BBEE3B6CE65272FA3B89A /* WatchSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSync.swift; sourceTree = "<group>"; };
@@ -164,6 +172,7 @@
 		B50837DB0BB65557BDBBC4AB /* WatchWorkoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWorkoutManager.swift; sourceTree = "<group>"; };
 		B6CE2437603846860437854C /* InnerPaceWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerPaceWatchApp.swift; sourceTree = "<group>"; };
 		B6E904EB0C61367EDFC02966 /* EfficiencyTrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EfficiencyTrackerTests.swift; sourceTree = "<group>"; };
+		BB3082980A7B73B5645798D6 /* RunAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunAnalysis.swift; sourceTree = "<group>"; };
 		BC2271C10B4CDED5D8EE16A6 /* CadenceSensor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadenceSensor.swift; sourceTree = "<group>"; };
 		CA361D0D0E55C804D0E39ED1 /* InnerPaceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InnerPaceApp.swift; sourceTree = "<group>"; };
 		CAFA43F78D3ADF364FE2B530 /* HeartRateTrend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateTrend.swift; sourceTree = "<group>"; };
@@ -207,6 +216,7 @@
 		2FBD69DD5F589F83DA0F48D4 /* SharedUI */ = {
 			isa = PBXGroup;
 			children = (
+				68A5820136E196DE85BC0B8E /* RecommendationViews.swift */,
 				A3E1A8F58DF25AD2FFEAC71D /* ReportView.swift */,
 				B3E82056788F69268F67BE66 /* ZoneBar.swift */,
 				3ED98C980789DB3AF73B3132 /* ZoneStyle.swift */,
@@ -222,6 +232,7 @@
 				B35CA200ABE0595C3ECC4602 /* HeartRateSmootherTests.swift */,
 				6E702542FE1C3D77605A484E /* RegulatorEngineTests.swift */,
 				4FF82682B8521B4251015BBA /* RegulatorSettingsTests.swift */,
+				7940C6A13FA4C8A7FCBF2C1A /* RunAnalysisTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -319,6 +330,7 @@
 				752FF15D945DEFC8C4282C40 /* Localizable.xcstrings */,
 				5916193FA3CD86DE025A0B7A /* RegulatorEngine.swift */,
 				048CE161612AE5CDE43A51F8 /* RegulatorSettings.swift */,
+				BB3082980A7B73B5645798D6 /* RunAnalysis.swift */,
 				8BC1341BA00535751DB5A6A4 /* RunFormatting.swift */,
 				FAF700CD0D1E003336FDD846 /* SettingsStore.swift */,
 				AD92463C2585A2AE393B9F2A /* TelemetryRecorder.swift */,
@@ -495,9 +507,11 @@
 				DCF9D8E6CAF72D029291359F /* Metronome.swift in Sources */,
 				651869869ED486C4623A2E59 /* PhoneSync.swift in Sources */,
 				F87D877F59BBB334CF4C72D2 /* PolarHeartRateMonitor.swift in Sources */,
+				9E1AC8D58C7FA529E8317CC6 /* RecommendationViews.swift in Sources */,
 				5F7CA04D991BAFE9EE2C517B /* RegulatorEngine.swift in Sources */,
 				B167F70FD5FB1ECE35B453A8 /* RegulatorSettings.swift in Sources */,
 				47556EAD98EA2F4F73784792 /* ReportView.swift in Sources */,
+				635DFD03CFC946ACC6BE8515 /* RunAnalysis.swift in Sources */,
 				5091DE77F44183518474077E /* RunFormatting.swift in Sources */,
 				0D88BA2A20C7B805D4BE6DDF /* RunSession.swift in Sources */,
 				DFB306077FF6D30C5A63447B /* RunView.swift in Sources */,
@@ -529,9 +543,11 @@
 				94D7764D9C8CDE68AE603B59 /* InnerPaceWatchApp.swift in Sources */,
 				765347ABAEBB21B2F9775B26 /* MetricsView.swift in Sources */,
 				BBB4DCFF92EBE0CE5BC24078 /* Metronome.swift in Sources */,
+				D0C03D8A77EF728294E1C2EB /* RecommendationViews.swift in Sources */,
 				5A81D81DC4BC4BED34C70701 /* RegulatorEngine.swift in Sources */,
 				78394EDBB4C0CCA87D083398 /* RegulatorSettings.swift in Sources */,
 				8F5D161CDD489CAA1221A1BA /* ReportView.swift in Sources */,
+				1ECB4C68948A690E5D88921E /* RunAnalysis.swift in Sources */,
 				ECA7B214967B947CB9DFBCF7 /* RunFormatting.swift in Sources */,
 				B7F860C58CD68C28D2C6298D /* SettingsStore.swift in Sources */,
 				47E14FAEA5BB15CB20706E74 /* SetupView.swift in Sources */,
@@ -565,6 +581,8 @@
 				6BE11148A2324DE6188F150C /* RegulatorEngineTests.swift in Sources */,
 				09B5228D5B94F968D373BD9F /* RegulatorSettings.swift in Sources */,
 				D72FBCA0AA5DAB286B9A99CB /* RegulatorSettingsTests.swift in Sources */,
+				351349B5765AC41B736AA5F5 /* RunAnalysis.swift in Sources */,
+				28C26BD050CAC75774114AD8 /* RunAnalysisTests.swift in Sources */,
 				72BF615B439DFD1E0E87A132 /* RunFormatting.swift in Sources */,
 				43B7D60B893CC119A59AC4E6 /* SettingsStore.swift in Sources */,
 				0A804D759A352A58D869CD4A /* TelemetryRecorder.swift in Sources */,

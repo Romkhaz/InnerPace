@@ -181,8 +181,10 @@ final class RunSession {
         log(String(localized: "Стоп. Итого \(formatElapsed(elapsed))"))
 
         let heartRates = samples.compactMap(\.heartRate)
+        let date = startDate ?? Date()
+        let response = RunAnalyzer.estimateResponse(rows: telemetry.rows, settings: settings, date: date)
         let summary = WorkoutSummary(
-            date: startDate ?? Date(),
+            date: date,
             duration: elapsed,
             distanceMeters: distanceMeters,
             averageHeartRate: heartRates.isEmpty ? nil : Double(heartRates.reduce(0, +)) / Double(heartRates.count),
@@ -191,7 +193,9 @@ final class RunSession {
             efficiencyMetersPerBeat: efficiency.total,
             averageGroundContactMs: nil,
             averageVerticalOscillationCm: nil,
-            source: .phone
+            source: .phone,
+            assessment: RunAnalyzer.assessEffort(rows: telemetry.rows, settings: settings, response: response),
+            response: response
         )
         if elapsed > 60 {
             store.add(summary)
@@ -274,7 +278,9 @@ final class RunSession {
         samples.append(Sample(time: now, heartRate: heartRateSource == .polar ? heartRate : nil,
                               smoothedHeartRate: smoothedHeartRate, cadence: cadence))
         if samples.count > maxSamples { samples.removeFirst(samples.count - maxSamples) }
-        if settings.developerMode {
+        // Строки копятся всегда: по ним после пробежки считаются рекомендации.
+        // В файл они уходят только в режиме разработчика.
+        do {
             telemetry.append(TelemetryRow(
                 time: now, elapsed: elapsed, heartRate: heartRateSource == .polar ? heartRate : nil,
                 smoothedHeartRate: smoothedHeartRate, trendPerMinute: engine.trendPerMinute, decisionHeartRate: engine.decisionHeartRate,

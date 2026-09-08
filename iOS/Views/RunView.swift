@@ -41,7 +41,7 @@ struct RunView: View {
             set: { session.report = $0 }
         )) { summary in
             NavigationStack {
-                ReportView(summary: summary) {
+                ReportView(summary: summary, settingsStore: session.settingsStore, history: session.store.workouts) {
                     session.report = nil
                 }
             }

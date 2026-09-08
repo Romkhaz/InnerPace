@@ -28,6 +28,7 @@ struct SettingsView: View {
                 Text("Регулятор ведёт пульс к этой цели. Рост ритма замедляется с \(Int(settings.approachHeartRate)) и останавливается с \(Int(settings.holdHeartRate)).")
                     .font(.footnote).foregroundStyle(.secondary)
             }
+            RevertSettingsSection(store: store)
             Section("Оформление") {
                 Picker("Тема", selection: $store.settings.theme) {
                     Text("Авто").tag(AppTheme.auto)

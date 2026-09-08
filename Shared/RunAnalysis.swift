@@ -1,0 +1,236 @@
+import Foundation
+
+/// Оценка усилия по одной пробежке: хватало ли регулятору диапазона ритма,
+/// чтобы держать пульс у цели, и что предложить на следующий раз.
+struct EffortAssessment: Codable, Equatable {
+    enum Verdict: String, Codable {
+        /// Регулятор работал меньше `minimumSeconds`, выводов нет.
+        case insufficient
+        /// Ритм упирался в нижнюю границу, пульс выше цели: бежать медленнее или поднять цель.
+        case onLimit
+        /// Ритм у верхней границы, пульс ниже полосы удержания: есть запас.
+        case reserve
+        /// Пределы подобраны нормально.
+        case balanced
+    }
+
+    var verdict: Verdict
+    var regulatedSeconds: Int
+    var shareAtFloor: Double
+    var shareAtCeiling: Double
+    var shareAboveTarget: Double
+    var shareInBand: Double
+    var overLimitSeconds: Int
+    /// Медиана пульса, пока ритм стоял на нижней границе.
+    var heartRateAtFloor: Double?
+    /// Медиана пульса, пока ритм стоял на верхней границе.
+    var heartRateAtCeiling: Double?
+    /// Сколько ударов пульса даёт один шаг ритма, из модели отклика. Меньше 0,3 значит ритм не рычаг.
+    var cadenceLever: Double?
+    var suggestedCadenceMin: Int?
+    var suggestedTargetHeartRate: Int?
+
+    /// Сколько секунд регулятор должен проработать, чтобы оценка что-то значила.
+    static let minimumSeconds = 1200
+    /// Слабее этого ритм на пульс почти не влияет.
+    static let weakLever = 0.3
+
+    var hasSuggestion: Bool { suggestedCadenceMin != nil || suggestedTargetHeartRate != nil }
+}
+
+/// Оценка отклика пульса на ритм по одной пробежке. Пульс моделируется как инерционное
+/// звено с чистой задержкой: через `delaySeconds` после смены ритма пульс начинает
+/// стремиться к новому уровню с постоянной времени `timeConstant`, по `gainPerStep`
+/// ударов на шаг ритма. Параметры подбираются перебором по всей записи.
+struct ResponseEstimate: Codable, Equatable {
+    var date: Date
+    /// Чистая задержка, секунды.
+    var delaySeconds: Double
+    /// Постоянная времени, секунды.
+    var timeConstant: Double
+    /// Ударов пульса на шаг ритма.
+    var gainPerStep: Double
+    /// Доля разброса пульса, которую объясняет модель, от 0 до 1.
+    var fit: Double
+    /// Разброс сырого пульса вокруг сглаженного.
+    var noise: Double
+
+    /// Время до половины отклика: то, на сколько вперёд имеет смысл прогноз.
+    var lagSeconds: Double { delaySeconds + timeConstant * 0.69 }
+
+    static let minimumSeconds = 900
+    static let minimumCadenceSpread = 1.5
+    static let minimumFit = 0.1
+}
+
+enum RunAnalyzer {
+    static func assessEffort(rows: [TelemetryRow], settings: RegulatorSettings, response: ResponseEstimate? = nil) -> EffortAssessment {
+        let reg = rows.filter { !$0.warmup && $0.heartRate != nil }
+        let n = reg.count
+        let target = Double(settings.targetHeartRate)
+        let hold = settings.holdHeartRate
+        func share(_ predicate: (TelemetryRow) -> Bool) -> Double {
+            n == 0 ? 0 : Double(reg.filter(predicate).count) / Double(n)
+        }
+        let atFloor = share { $0.metronome <= settings.cadenceMin }
+        let atCeiling = share { $0.metronome >= settings.cadenceMax }
+        let above = share { Double($0.heartRate ?? 0) > target }
+        let inBand = share { let h = Double($0.heartRate ?? 0); return h >= hold && h <= target }
+        let overLimit = reg.filter(\.overLimit).count
+        let floorHR = median(reg.filter { $0.metronome <= settings.cadenceMin }.compactMap { $0.heartRate.map(Double.init) }, minimum: 120)
+        let ceilingHR = median(reg.filter { $0.metronome >= settings.cadenceMax }.compactMap { $0.heartRate.map(Double.init) }, minimum: 120)
+        // Рычаг ритма берём из модели отклика: прямое сравнение пульса на разном ритме
+        // в замкнутом контуре обманывает, регулятор сам поднимает ритм при низком пульсе.
+        let lever = response?.gainPerStep
+
+        var assessment = EffortAssessment(
+            verdict: .insufficient, regulatedSeconds: n, shareAtFloor: atFloor, shareAtCeiling: atCeiling,
+            shareAboveTarget: above, shareInBand: inBand, overLimitSeconds: overLimit,
+            heartRateAtFloor: floorHR, heartRateAtCeiling: ceilingHR, cadenceLever: lever
+        )
+        guard n >= EffortAssessment.minimumSeconds else { return assessment }
+
+        if atFloor >= 0.4, above >= 0.3 || Double(overLimit) >= 0.2 * Double(n) {
+            assessment.verdict = .onLimit
+            if let floorHR {
+                let proposed = Int(((floorHR + 2) / 5).rounded(.up)) * 5
+                if proposed > settings.targetHeartRate { assessment.suggestedTargetHeartRate = proposed }
+            }
+            if (lever ?? 1) >= EffortAssessment.weakLever, settings.cadenceMin - 5 >= 120 {
+                assessment.suggestedCadenceMin = settings.cadenceMin - 5
+            }
+        } else if above <= 0.1, (atCeiling >= 0.3 && (ceilingHR ?? target) < hold) || share({ Double($0.heartRate ?? 0) < hold }) >= 0.6 {
+            assessment.verdict = .reserve
+            if settings.cadenceMin + 5 < RegulatorSettings.cadenceMaxCap {
+                assessment.suggestedCadenceMin = settings.cadenceMin + 5
+            }
+        } else {
+            assessment.verdict = .balanced
+        }
+        return assessment
+    }
+
+    /// Подбор модели отклика перебором. Нужна вариация ритма: если он весь забег стоял
+    /// на границе, оценить отклик не по чему. На часах перебор занимает доли секунды.
+    static func estimateResponse(rows: [TelemetryRow], settings: RegulatorSettings, date: Date) -> ResponseEstimate? {
+        let reg = rows.filter { !$0.warmup && $0.heartRate != nil }
+        guard reg.count >= ResponseEstimate.minimumSeconds else { return nil }
+        let cad = reg.map { Double($0.metronome) }
+        let hr = reg.map { Double($0.heartRate ?? 0) }
+        guard standardDeviation(cad) >= ResponseEstimate.minimumCadenceSpread else { return nil }
+        let variance = standardDeviation(hr) * standardDeviation(hr)
+        guard variance > 0 else { return nil }
+
+        let meanCad = mean(cad)
+        var best: (error: Double, delay: Int, tau: Double, gain: Double)? = nil
+        for delay in stride(from: 10, through: 90, by: 10) {
+            for tau in [10.0, 20, 30, 45, 60, 90] {
+                for gain in stride(from: 0.2, through: 1.4, by: 0.15) {
+                    // Отклик на отклонение ритма от среднего; уровень подбирается по среднему остатку.
+                    var h = 0.0
+                    var response = [Double](repeating: 0, count: cad.count)
+                    for t in 0..<cad.count {
+                        let input = gain * (cad[max(0, t - delay)] - meanCad)
+                        h += (input - h) / tau
+                        response[t] = h
+                    }
+                    var offset = 0.0
+                    for t in 0..<cad.count { offset += hr[t] - response[t] }
+                    offset /= Double(cad.count)
+                    var error = 0.0
+                    for t in 0..<cad.count {
+                        let e = hr[t] - response[t] - offset
+                        error += e * e
+                    }
+                    error /= Double(cad.count)
+                    if best == nil || error < best!.error { best = (error, delay, tau, gain) }
+                }
+            }
+        }
+        guard let best else { return nil }
+        let fit = 1 - best.error / variance
+        guard fit >= ResponseEstimate.minimumFit else { return nil }
+        let noise = standardDeviation(reg.compactMap { r -> Double? in
+            guard let hr = r.heartRate, let s = r.smoothedHeartRate else { return nil }
+            return Double(hr) - s
+        })
+        return ResponseEstimate(date: date, delaySeconds: Double(best.delay), timeConstant: best.tau,
+                                gainPerStep: best.gain, fit: fit, noise: noise)
+    }
+
+    // MARK: - Статистика
+
+    static func mean(_ xs: [Double]) -> Double {
+        xs.isEmpty ? 0 : xs.reduce(0, +) / Double(xs.count)
+    }
+
+    static func median(_ xs: [Double], minimum: Int = 1) -> Double? {
+        guard xs.count >= max(1, minimum) else { return nil }
+        let s = xs.sorted()
+        return s.count % 2 == 1 ? s[s.count / 2] : (s[s.count / 2 - 1] + s[s.count / 2]) / 2
+    }
+
+    static func standardDeviation(_ xs: [Double]) -> Double {
+        guard xs.count > 1 else { return 0 }
+        let m = mean(xs)
+        return (xs.reduce(0) { $0 + ($1 - m) * ($1 - m) } / Double(xs.count)).squareRoot()
+    }
+
+    static func correlation(_ xs: [Double], _ ys: [Double]) -> Double {
+        let n = min(xs.count, ys.count)
+        guard n > 1 else { return 0 }
+        let mx = mean(Array(xs[0..<n])), my = mean(Array(ys[0..<n]))
+        var num = 0.0, dx = 0.0, dy = 0.0
+        for i in 0..<n {
+            num += (xs[i] - mx) * (ys[i] - my)
+            dx += (xs[i] - mx) * (xs[i] - mx)
+            dy += (ys[i] - my) * (ys[i] - my)
+        }
+        guard dx > 0, dy > 0 else { return 0 }
+        return num / (dx * dy).squareRoot()
+    }
+
+    static func slope(_ xs: [Double], _ ys: [Double]) -> Double {
+        let n = min(xs.count, ys.count)
+        guard n > 1 else { return 0 }
+        let mx = mean(Array(xs[0..<n])), my = mean(Array(ys[0..<n]))
+        var num = 0.0, den = 0.0
+        for i in 0..<n {
+            num += (xs[i] - mx) * (ys[i] - my)
+            den += (xs[i] - mx) * (xs[i] - mx)
+        }
+        return den > 0 ? num / den : 0
+    }
+}
+
+/// Профиль бегуна: медиана оценок отклика по последним пробежкам и что из неё
+/// следует для параметров расчёта. Предлагает только заметные изменения.
+struct ProfileRecommendation: Equatable {
+    var runsUsed: Int
+    var lagSeconds: Double
+    var gainPerStep: Double
+    var noise: Double
+    /// nil значит менять не нужно.
+    var predictSeconds: Int?
+    var smoothingSeconds: Double?
+
+    static let minimumRuns = 3
+    static let window = 8
+
+    var hasSuggestion: Bool { predictSeconds != nil || smoothingSeconds != nil }
+
+    /// Оценки должны быть отсортированы от новых к старым.
+    static func make(from estimates: [ResponseEstimate], settings: RegulatorSettings) -> ProfileRecommendation? {
+        let recent = Array(estimates.prefix(window))
+        guard recent.count >= minimumRuns,
+              let lag = RunAnalyzer.median(recent.map(\.lagSeconds)),
+              let gain = RunAnalyzer.median(recent.map(\.gainPerStep)),
+              let noise = RunAnalyzer.median(recent.map(\.noise)) else { return nil }
+        var rec = ProfileRecommendation(runsUsed: recent.count, lagSeconds: lag, gainPerStep: gain, noise: noise)
+        let predict = min(120, max(20, Int((lag / 5).rounded()) * 5))
+        if abs(predict - settings.predictSeconds) >= 10 { rec.predictSeconds = predict }
+        let smoothing: Double = noise >= 3 ? 8 : (noise <= 1.5 ? 3 : 5)
+        if abs(smoothing - settings.smoothingSeconds) >= 2 { rec.smoothingSeconds = smoothing }
+        return rec
+    }
+}

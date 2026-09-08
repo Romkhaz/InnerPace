@@ -152,6 +152,16 @@
         }
       }
     },
+    "Бегите медленнее, снизьте минимальный ритм или поднимите допустимый пульс.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run slower, lower the minimum beat or raise the allowed heart rate."
+          }
+        }
+      }
+    },
     "В зоне подхода ритм растёт по одному удару за интервал, в полосе удержания не растёт. Выше цели ритм падает быстрее, чем рос.": {
       "localizations": {
         "en": {
@@ -168,6 +178,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Back in range"
+          }
+        }
+      }
+    },
+    "В этой пробежке отклик не виден: чем ровнее регулятор держит пульс, тем меньше в записи связи ритма с пульсом.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No response is visible in this run: the steadier the regulator holds heart rate, the less the record links cadence to heart rate."
+          }
+        }
+      }
+    },
+    "Вернуть прежние": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore previous"
+          }
+        }
+      }
+    },
+    "Вернуть прежние настройки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore previous settings"
           }
         }
       }
@@ -228,6 +268,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Time, min"
+          }
+        }
+      }
+    },
+    "Вы бежали на пределе: ритм %lld % времени стоял на нижней границе, пульс %lld % времени выше цели.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You ran at the limit: the beat sat on its floor %1$lld %% of the time and heart rate was above target %2$lld %% of the time."
           }
         }
       }
@@ -298,6 +348,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Advanced"
+          }
+        }
+      }
+    },
+    "Есть запас: пульс %lld % времени в полосе удержания и почти не поднимался выше цели. Можно бежать быстрее, оставаясь в зоне: поднимите минимальный ритм.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have reserve: heart rate stayed in the hold band %lld %% of the time and hardly rose above target. You can run faster while staying in the zone: raise the minimum beat."
           }
         }
       }
@@ -392,6 +452,16 @@
         }
       }
     },
+    "Изменены %@: ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changed on %@: "
+          }
+        }
+      }
+    },
     "Интервал": {
       "localizations": {
         "en": {
@@ -472,12 +542,32 @@
         }
       }
     },
+    "На следующую пробежку: ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the next run: "
+          }
+        }
+      }
+    },
     "Настройки": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Settings"
+          }
+        }
+      }
+    },
+    "Настройки совпадают с прежними.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings match the previous ones."
           }
         }
       }
@@ -562,12 +652,32 @@
         }
       }
     },
+    "Параметры расчёта менять не нужно.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No change to the calculation parameters is needed."
+          }
+        }
+      }
+    },
     "Пауза": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Pause"
+          }
+        }
+      }
+    },
+    "По %lld пробежкам: половина отклика пульса на ритм приходит через %lld с, около %@ удара на шаг, разброс датчика %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Over %1$lld runs: half of the heart-rate response to cadence arrives after %2$lld s, about %3$@ beats per step, sensor scatter %4$@."
           }
         }
       }
@@ -702,6 +812,46 @@
         }
       }
     },
+    "Пределы подобраны нормально: пульс %lld % времени в полосе удержания, выше цели %lld %, ритм на нижней границе %lld %.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limits fit well: heart rate in the hold band %1$lld %%, above target %2$lld %%, beat on its floor %3$lld %%."
+          }
+        }
+      }
+    },
+    "Предлагаю: ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggested: "
+          }
+        }
+      }
+    },
+    "Применено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applied"
+          }
+        }
+      }
+    },
+    "Применить к следующей пробежке": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apply to the next run"
+          }
+        }
+      }
+    },
     "Проверить звук": {
       "localizations": {
         "en": {
@@ -738,6 +888,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Resumed"
+          }
+        }
+      }
+    },
+    "Профиль": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile"
+          }
+        }
+      }
+    },
+    "Профиль появится после %lld пробежек, где удалось оценить отклик пульса на ритм, пока %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The profile appears after %1$lld runs where the heart-rate response to cadence could be estimated; so far %2$lld."
           }
         }
       }
@@ -842,6 +1012,16 @@
         }
       }
     },
+    "Регулятор работал %lld мин, для выводов нужно хотя бы %lld.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The regulator ran for %1$lld min; at least %2$lld are needed to conclude anything."
+          }
+        }
+      }
+    },
     "Ритм": {
       "localizations": {
         "en": {
@@ -868,6 +1048,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Beat to %1$lld · HR from %2$lld"
+          }
+        }
+      }
+    },
+    "Ритм на пульс почти не влиял, его задаёт темп: бегите медленнее или поднимите допустимый пульс.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cadence barely moved your heart rate; pace drives it: run slower or raise the allowed heart rate."
           }
         }
       }
@@ -1192,6 +1382,16 @@
         }
       }
     },
+    "Усилие": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effort"
+          }
+        }
+      }
+    },
     "Целевая зона": {
       "localizations": {
         "en": {
@@ -1342,12 +1542,92 @@
         }
       }
     },
+    "прогноз %lld вернётся на %lld с": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forecast %1$lld back to %2$lld s"
+          }
+        }
+      }
+    },
+    "прогноз %lld на %lld с": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "forecast %1$lld to %2$lld s"
+          }
+        }
+      }
+    },
     "пульс · %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "HR · %@"
+          }
+        }
+      }
+    },
+    "пульс до %lld вернётся на %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "heart rate up to %1$lld back to %2$lld"
+          }
+        }
+      }
+    },
+    "пульс до %lld на %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "heart rate up to %1$lld to %2$lld"
+          }
+        }
+      }
+    },
+    "пульс от %lld вернётся на %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "heart rate from %1$lld back to %2$lld"
+          }
+        }
+      }
+    },
+    "ритм до %lld вернётся на %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "beat up to %1$lld back to %2$lld"
+          }
+        }
+      }
+    },
+    "ритм от %lld вернётся на %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "beat from %1$lld back to %2$lld"
+          }
+        }
+      }
+    },
+    "ритм от %lld на %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "beat from %1$lld to %2$lld"
           }
         }
       }
@@ -1368,6 +1648,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "smoothed"
+          }
+        }
+      }
+    },
+    "сглаживание %lld вернётся на %lld с": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "smoothing %1$lld back to %2$lld s"
+          }
+        }
+      }
+    },
+    "сглаживание %lld на %lld с": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "smoothing %1$lld to %2$lld s"
           }
         }
       }

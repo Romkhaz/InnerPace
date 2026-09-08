@@ -24,7 +24,7 @@ struct WatchRootView: View {
             case .report:
                 NavigationStack {
                     if let summary = model.report {
-                        ReportView(summary: summary) {
+                        ReportView(summary: summary, settingsStore: model.settingsStore, history: model.store.workouts) {
                             model.dismissReport()
                         }
                         .containerBackground(palette.background.gradient, for: .navigation)

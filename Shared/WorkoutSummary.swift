@@ -20,6 +20,10 @@ struct WorkoutSummary: Codable, Identifiable, Equatable {
     var averageGroundContactMs: Double?
     var averageVerticalOscillationCm: Double?
     var source: Source
+    /// Оценка усилия по телеметрии этой пробежки.
+    var assessment: EffortAssessment? = nil
+    /// Оценка отклика пульса на ритм, идёт в профиль бегуна.
+    var response: ResponseEstimate? = nil
 
     var averagePaceSecondsPerKm: Double? {
         guard distanceMeters > 50, duration > 0 else { return nil }
