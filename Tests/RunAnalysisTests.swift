@@ -67,7 +67,7 @@ final class RunAnalysisTests: XCTestCase {
         XCTAssertEqual(a.verdict, .onLimit)
         XCTAssertEqual(a.shareAtFloor, 1, accuracy: 0.001)
         XCTAssertEqual(a.suggestedTargetHeartRate, 150, "медиана 147 плюс 2, вверх до пяти")
-        XCTAssertEqual(a.suggestedCadenceMin, 170, "рычаг неизвестен, ритм не менялся, но предложить снизить можно")
+        XCTAssertNil(a.suggestedCadenceMin, "сначала пульс: пока цель можно поднять, ритм не трогаем")
         XCTAssertNil(a.cadenceLever)
 
         let weak = ResponseEstimate(date: Date(), delaySeconds: 30, timeConstant: 30, gainPerStep: 0.1, fit: 0.3, noise: 2)
@@ -76,13 +76,25 @@ final class RunAnalysisTests: XCTestCase {
         XCTAssertEqual(b.cadenceLever ?? 0, 0.1, accuracy: 0.001)
     }
 
-    func testOnLimitWithStrongLeverSuggestsLowerCadence() {
-        var rows = (0..<2000).map { row($0, hr: 150, metronome: 175, overLimit: true) }
-        rows += (2000..<2400).map { row($0, hr: 142, metronome: 185) }
+    func testOnLimitLowersCadenceOnlyWhenTargetCannotRiseAndAboveFloor() {
+        // Пульс 165 при цели 140: цель поднять на 10 нельзя, тогда ритм на 5 вниз, но не ниже порога.
+        var rows = (0..<2000).map { row($0, hr: 165, metronome: 175, overLimit: true) }
+        rows += (2000..<2400).map { row($0, hr: 160, metronome: 185) }
         let strong = ResponseEstimate(date: Date(), delaySeconds: 30, timeConstant: 30, gainPerStep: 0.8, fit: 0.4, noise: 2)
-        let a = RunAnalyzer.assessEffort(rows: rows, settings: settings, response: strong)
+        var s = settings
+        s.cadenceFloor = 165
+        let a = RunAnalyzer.assessEffort(rows: rows, settings: s, response: strong)
         XCTAssertEqual(a.verdict, .onLimit)
+        XCTAssertNil(a.suggestedTargetHeartRate)
         XCTAssertEqual(a.suggestedCadenceMin, 170)
+        s.cadenceFloor = 175
+        let b = RunAnalyzer.assessEffort(rows: rows, settings: s, response: strong)
+        XCTAssertNil(b.suggestedCadenceMin, "ниже порога 175 не предлагаем")
+        var applied = s
+        var withMin = a
+        withMin.suggestedCadenceMin = 170
+        withMin.apply(to: &applied)
+        XCTAssertGreaterThanOrEqual(applied.cadenceMax, 187, "верхняя граница хотя бы плюс 10 %")
     }
 
     func testReserveSuggestsHigherCadenceMin() {
@@ -98,11 +110,14 @@ final class RunAnalysisTests: XCTestCase {
         // Метроном 180, шаги 160, пульс 180: диагноз «ритм не по силам», цель не трогаем.
         var rows = (0..<60).map { row($0, hr: 120, metronome: 180, warmup: true, actual: 160) }
         rows += (60..<2400).map { row($0, hr: 180, metronome: 180, overLimit: true, actual: 158 + $0 % 4) }
-        let a = RunAnalyzer.assessEffort(rows: rows, settings: settings)
+        var s = settings
+        s.cadenceFloor = 150
+        let a = RunAnalyzer.assessEffort(rows: rows, settings: s)
         XCTAssertEqual(a.verdict, .cadenceTooHigh)
         XCTAssertEqual(a.suggestedCadenceMin, 160)
+        let floored = RunAnalyzer.assessEffort(rows: rows, settings: settings)
+        XCTAssertEqual(floored.suggestedCadenceMin, 170, "не ниже порога 170")
         XCTAssertNil(a.suggestedTargetHeartRate, "поднимать цель до 185 нельзя")
-        var s = settings
         a.apply(to: &s)
         XCTAssertEqual(s.cadenceMin, 160)
         XCTAssertEqual(s.cadenceMax, 190, "верхняя граница не опускается")

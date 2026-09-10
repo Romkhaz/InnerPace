@@ -20,7 +20,12 @@ struct SettingsView: View {
         Form {
             Section("Ритм, ударов в минуту") {
                 AdjustRow(title: "Ритм от", value: cadenceMin, range: 100...220)
-                Text("Верхняя граница считается автоматически: \(settings.cadenceMax) BPM, это плюс \(settings.cadenceSpanPercent) %.")
+                Text("Верхняя граница считается автоматически: \(settings.cadenceMax) BPM, это плюс \(settings.cadenceSpanPercent) %, но не меньше плюс \(RegulatorSettings.cadenceMinSpanPercent) %.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            }
+            Section("На бегу") {
+                Toggle("Автопауза", isOn: $store.settings.autoPause)
+                Text("Стоите дольше 10 секунд, тренировка сама встаёт на паузу и сама продолжается, когда пошли. После паузы дольше минуты регулятор начинает заново, как на старте.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Пульс") {
@@ -101,6 +106,9 @@ struct AdvancedSettingsView: View {
             Section("Ритм") {
                 AdjustRow(title: "Ритм до", value: $store.settings.cadenceMax,
                           range: (settings.cadenceMin + 1)...240)
+                AdjustRow(title: "Ритм не ниже", value: $store.settings.cadenceFloor, range: 100...220)
+                Text("Ниже этого ритма рекомендации нижнюю границу не опускают: низкий каденс травмоопасен.")
+                    .font(.footnote).foregroundStyle(.secondary)
                 AdjustRow(title: "Запас над нижней границей", value: $store.settings.cadenceSpanPercent,
                           range: 1...50, unit: "%")
                 Text("Запас используется, когда меняете нижнюю границу на главном экране настроек.")

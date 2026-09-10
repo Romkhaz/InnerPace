@@ -121,11 +121,13 @@ final class CadenceControllerTests: XCTestCase {
     func testDerivedCadenceMaxAndZoneWidth() {
         var s = RegulatorSettings.default
         s.setCadenceMinDerivingMax(180)
-        XCTAssertEqual(s.cadenceMax, 190, "207 по проценту, но потолок 190")
+        XCTAssertEqual(s.cadenceMax, 198, "207 по проценту, потолок 190, но не меньше плюс 10 %")
         s.setCadenceMinDerivingMax(160)
         XCTAssertEqual(s.cadenceMax, 184)
+        s.setCadenceMinDerivingMax(170)
+        XCTAssertEqual(s.cadenceMax, 190, "196 по проценту, потолок 190, и это больше плюс 10 %")
         s.setCadenceMinDerivingMax(195)
-        XCTAssertEqual(s.cadenceMax, 196, "выше потолка верхняя граница хотя бы на единицу больше нижней")
+        XCTAssertEqual(s.cadenceMax, 215, "плюс 10 % поверх потолка")
         s.setTargetHeartRateKeepingZoneWidth(160)
         XCTAssertEqual(s.heartRateMax, 160)
         XCTAssertEqual(s.heartRateMin, 140)

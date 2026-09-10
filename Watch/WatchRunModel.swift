@@ -147,6 +147,7 @@ final class WatchRunModel {
     }
 
     func togglePause() async {
+        autoPausedAt = nil
         if phase == .running {
             pause()
         } else {
@@ -205,6 +206,24 @@ final class WatchRunModel {
         phase = .report
     }
 
+    /// Автопауза: стоим дольше 10 с, тренировка встаёт на паузу; пошли, продолжается сама.
+    /// После паузы дольше минуты регулятор начинает заново, как на старте.
+    private var autoPausedAt: Date?
+    static let restartAfterPause: TimeInterval = 60
+
+    private func updateAutoPause(at now: Date) {
+        guard settings.autoPause else { return }
+        if phase == .running, pedometer.isStopped(at: now) {
+            pause()
+            autoPausedAt = now
+            lastDecision = String(localized: "Автопауза")
+        } else if phase == .paused, let since = autoPausedAt, pedometer.isMoving(at: now) {
+            autoPausedAt = nil
+            if now.timeIntervalSince(since) >= WatchRunModel.restartAfterPause { engine.requestRestart() }
+            Task { await resume() }
+        }
+    }
+
     /// Заминка: регулятор выключается, ритм плавно снижается. Стоп по-прежнему вручную.
     func beginCooldown() {
         guard phase == .running || phase == .paused, let adjustment = engine.beginCooldown(at: Date()) else { return }
@@ -249,6 +268,7 @@ final class WatchRunModel {
     private func tick() {
         let now = Date()
         elapsed = workout.elapsed
+        updateAutoPause(at: now)
         guard phase == .running else { return }
         applySettings()
         efficiency.update(time: now, distance: workout.distanceMeters,

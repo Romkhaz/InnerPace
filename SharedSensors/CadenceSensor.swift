@@ -18,8 +18,13 @@ final class CadenceSensor {
     /// Когда шагомер последний раз что-то присылал. На остановке обновления прекращаются,
     /// и последний каденс не должен считаться текущим.
     private(set) var lastUpdateAt: Date?
-    /// На часах обновления приходят примерно раз в 10 с, поэтому порог с запасом.
-    static let staleAfter: TimeInterval = 30
+    /// Когда число шагов последний раз выросло: по телеметрии часов раз в 3 с, не реже 8.
+    private(set) var lastStepAt: Date?
+    static let staleAfter: TimeInterval = 10
+    /// Без новых шагов дольше этого считаем, что человек стоит.
+    static let stoppedAfter: TimeInterval = 10
+    /// Шаги снова пошли: последний прирост не старше этого.
+    static let movingWithin: TimeInterval = 4
 
     private let pedometer = CMPedometer()
 
@@ -32,6 +37,7 @@ final class CadenceSensor {
         stop()
         cadence = nil
         lastUpdateAt = nil
+        lastStepAt = nil
         steps = 0
         distanceMeters = nil
         paceSecondsPerKm = nil
@@ -40,7 +46,9 @@ final class CadenceSensor {
             guard let self, let data else { return }
             DispatchQueue.main.async {
                 self.lastUpdateAt = Date()
-                self.steps = data.numberOfSteps.intValue
+                let count = data.numberOfSteps.intValue
+                if count > self.steps { self.lastStepAt = Date() }
+                self.steps = count
                 if let distance = data.distance { self.distanceMeters = distance.doubleValue }
                 if let current = data.currentCadence {
                     self.cadence = Int((current.doubleValue * 60).rounded())
@@ -58,6 +66,17 @@ final class CadenceSensor {
         guard let lastUpdateAt else { return nil }
         if now.timeIntervalSince(lastUpdateAt) > CadenceSensor.staleAfter { return 0 }
         return cadence
+    }
+
+    /// Стоит: шаги не растут дольше `stoppedAfter`. nil, пока шагомер ещё ничего не присылал.
+    func isStopped(at now: Date = Date()) -> Bool {
+        guard let lastStepAt else { return false }
+        return now.timeIntervalSince(lastStepAt) > CadenceSensor.stoppedAfter
+    }
+
+    func isMoving(at now: Date = Date()) -> Bool {
+        guard let lastStepAt else { return false }
+        return now.timeIntervalSince(lastStepAt) <= CadenceSensor.movingWithin
     }
 
     func stop() {

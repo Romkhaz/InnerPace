@@ -215,6 +215,11 @@ struct RegulatorEngine {
         }
     }
 
+    /// Попросить начать заново на следующем такте: после долгой автопаузы.
+    mutating func requestRestart() {
+        pendingRestart = true
+    }
+
     /// Начать заново после остановки: ритм на нижнюю границу, ждать включения, как на старте.
     private mutating func restart(at now: Date) -> Adjustment {
         let before = controller.cadence
@@ -315,7 +320,7 @@ struct RegulatorEngine {
         }
         guard probeEnabled, !probeDone, isRegulating, !isOverLimit, isHeartRateFresh(at: now),
               let smoothed = smoothedHeartRate, smoothed >= settings.holdHeartRate, smoothed <= target,
-              abs(trendPerMinute) < 3 else {
+              abs(trendPerMinute) < 4 else {
             inBandSince = nil
             return nil
         }

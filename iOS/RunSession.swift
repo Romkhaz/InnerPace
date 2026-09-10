@@ -224,6 +224,24 @@ final class RunSession {
         report = summary
     }
 
+    /// Автопауза: стоим дольше 10 с, тренировка встаёт на паузу; пошли, продолжается сама.
+    /// После паузы дольше минуты регулятор начинает заново, как на старте.
+    private var autoPausedAt: Date?
+    static let restartAfterPause: TimeInterval = 60
+
+    private func updateAutoPause(at now: Date) {
+        guard settings.autoPause else { return }
+        if state == .running, pedometer.isStopped(at: now) {
+            pause()
+            autoPausedAt = now
+            log(String(localized: "Автопауза"))
+        } else if state == .paused, let since = autoPausedAt, pedometer.isMoving(at: now) {
+            autoPausedAt = nil
+            if now.timeIntervalSince(since) >= RunSession.restartAfterPause { engine.requestRestart() }
+            resume()
+        }
+    }
+
     /// Заминка: регулятор выключается, ритм плавно снижается. Стоп по-прежнему вручную.
     func beginCooldown() {
         guard state != .idle, let adjustment = engine.beginCooldown(at: Date()) else { return }
@@ -236,6 +254,7 @@ final class RunSession {
     var isCoolingDown: Bool { engine.isCoolingDown }
 
     func toggleStartPause() {
+        autoPausedAt = nil
         switch state {
         case .idle: start()
         case .running: pause()
@@ -283,6 +302,7 @@ final class RunSession {
 
     private func tick() {
         let now = Date()
+        updateAutoPause(at: now)
         applySettings()
         if !engine.isHeartRateFresh(at: now) {
             heartRateSource = .none

@@ -85,8 +85,9 @@ struct ResponseEstimate: Codable, Equatable {
 
     static let minimumSeconds = 900
     static let minimumCadenceSpread = 1.5
-    static let minimumFit = 0.1
-    /// В окне пробы ступенька чистая, поэтому и требование к модели строже.
+    /// Порог качества модели. По всей записи связь ритма с пульсом слабая, и модель
+    /// с качеством 0,1 давала задержку 130 с и чувствительность 1,25: мусор в профиле.
+    static let minimumFit = 0.3
     static let minimumProbeFit = 0.3
 }
 
@@ -133,17 +134,20 @@ enum RunAnalyzer {
         if let actual, let metro = median(reg.map { Double($0.metronome) }),
            actual <= metro - EffortAssessment.cadenceShortfall {
             assessment.verdict = .cadenceTooHigh
-            let proposed = max(120, Int((actual / 5).rounded()) * 5)
+            let proposed = max(settings.cadenceFloor, Int((actual / 5).rounded()) * 5)
             if proposed < settings.cadenceMin { assessment.suggestedCadenceMin = proposed }
         } else if atFloor >= 0.4, above >= 0.3 || Double(overLimit) >= 0.2 * Double(n) {
             assessment.verdict = .onLimit
+            // Сначала пульс: поднять цель. Ритм снижаем только если цель поднять уже нельзя,
+            // и никогда ниже `cadenceFloor`: низкий каденс травмоопасен.
             if let floorHR {
                 let proposed = Int(((floorHR + 2) / 5).rounded(.up)) * 5
                 if proposed > settings.targetHeartRate, proposed <= settings.targetHeartRate + EffortAssessment.maxTargetRaise {
                     assessment.suggestedTargetHeartRate = proposed
                 }
             }
-            if (lever ?? 1) >= EffortAssessment.weakLever, settings.cadenceMin - 5 >= 120 {
+            if assessment.suggestedTargetHeartRate == nil, (lever ?? 1) >= EffortAssessment.weakLever,
+               settings.cadenceMin - 5 >= settings.cadenceFloor {
                 assessment.suggestedCadenceMin = settings.cadenceMin - 5
             }
         } else if above <= 0.1, (atCeiling >= 0.3 && (ceilingHR ?? target) < hold) || share({ Double($0.heartRate ?? 0) < hold }) >= 0.6 {

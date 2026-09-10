@@ -142,6 +142,16 @@
         }
       }
     },
+    "Автопауза": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-pause"
+          }
+        }
+      }
+    },
     "Батарея": {
       "localizations": {
         "en": {
@@ -238,6 +248,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The upper bound is derived automatically: %lld BPM, that is plus %lld %%."
+          }
+        }
+      }
+    },
+    "Верхняя граница считается автоматически: %lld BPM, это плюс %lld %, но не меньше плюс %lld %.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The upper bound is derived automatically: %1$lld BPM, that is plus %2$lld %%, but never less than plus %3$lld %%."
           }
         }
       }
@@ -672,6 +692,16 @@
         }
       }
     },
+    "На бегу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "While running"
+          }
+        }
+      }
+    },
     "На следующую пробежку: ": {
       "localizations": {
         "en": {
@@ -698,6 +728,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Settings match the previous ones."
+          }
+        }
+      }
+    },
+    "Не ниже": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No lower"
           }
         }
       }
@@ -748,6 +788,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "No Bluetooth access"
+          }
+        }
+      }
+    },
+    "Ниже этого ритма рекомендации нижнюю границу не опускают: низкий каденс травмоопасен.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommendations never lower the beat floor below this: a low cadence invites injury."
           }
         }
       }
@@ -1342,6 +1392,16 @@
         }
       }
     },
+    "Ритм не ниже": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beat no lower than"
+          }
+        }
+      }
+    },
     "Ритм не по силам: вы бежали около %lld шагов в минуту при метрономе от %lld. Пульс здесь ни при чём, начните с ритма, который получается держать.": {
       "localizations": {
         "en": {
@@ -1528,6 +1588,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Start. Beat %lld"
+          }
+        }
+      }
+    },
+    "Стоите дольше 10 секунд, тренировка сама встаёт на паузу и сама продолжается, когда пошли. После паузы дольше минуты регулятор начинает заново, как на старте.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand still for more than 10 seconds and the workout pauses itself, resuming when you move again. After a pause longer than a minute the regulator starts over as at the beginning."
           }
         }
       }

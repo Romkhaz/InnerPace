@@ -310,7 +310,7 @@ final class RegulatorEngineTests: XCTestCase {
                 XCTAssertEqual(a.action, .speedUp(8))
             }
         }
-        XCTAssertEqual(started ?? 0, 111, accuracy: 3, "20 с окна тренда плюс минута в полосе")
+        XCTAssertEqual(started ?? 0, 91, accuracy: 3, "20 с окна тренда плюс 40 с в полосе")
         XCTAssertTrue(engine.isProbing)
         XCTAssertEqual(engine.cadence, before + 8)
         XCTAssertEqual(startLine, "Проба отклика: ритм \(before + 8) на 90 с")

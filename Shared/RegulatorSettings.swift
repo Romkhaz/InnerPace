@@ -34,6 +34,10 @@ struct RegulatorSettings: Codable, Equatable {
     /// Проба отклика: раз за пробежку ритм на `probeSeconds` поднимается на `probeStep`,
     /// чтобы измерить задержку и чувствительность пульса. Отключается сама, когда профиль набран.
     var responseProbe: Bool = true
+    /// Ниже этого ритма рекомендации не опускают нижнюю границу: низкий каденс травмоопасен.
+    var cadenceFloor: Int = 170
+    /// Автопауза: остановился, тренировка сама встаёт на паузу и сама продолжается.
+    var autoPause: Bool = true
     /// Разминка, секунды: ритм стоит на нижней границе, регулятор не включается,
     /// а предел считается от цели минус `warmupMargin`. Ноль отключает.
     var warmupSeconds: Int = 480
@@ -58,6 +62,8 @@ struct RegulatorSettings: Codable, Equatable {
     static let telemetryForcedOn = true
     /// Потолок автоматически вычисляемой верхней границы ритма.
     static let cadenceMaxCap = 190
+    /// Верхняя граница ритма всегда хотя бы на столько процентов выше нижней, даже поверх потолка.
+    static let cadenceMinSpanPercent = 10
     static let currentSchemaVersion = 3
     /// Повтор «сбавь» в настройках до версии 3: ноль, то есть только на переходах.
     /// На долгом пределе один «сбавь» терялся.
@@ -74,7 +80,7 @@ struct RegulatorSettings: Codable, Equatable {
     static let probeStep = 8
     static let probeSeconds: TimeInterval = 90
     /// Сколько секунд пульс должен ровно держаться в полосе удержания перед пробой.
-    static let probeReadySeconds: TimeInterval = 60
+    static let probeReadySeconds: TimeInterval = 40
     /// Полоса удержания в настройках до версии 2. Оказалась слишком узкой: ритм рос,
     /// пока пульс не подходил к цели вплотную, и инерция выносила его выше.
     static let legacyHoldBand = 3
@@ -121,6 +127,8 @@ struct RegulatorSettings: Codable, Equatable {
         predictSeconds = try c.decodeIfPresent(Int.self, forKey: .predictSeconds) ?? d.predictSeconds
         responseProbe = try c.decodeIfPresent(Bool.self, forKey: .responseProbe) ?? d.responseProbe
         warmupSeconds = try c.decodeIfPresent(Int.self, forKey: .warmupSeconds) ?? d.warmupSeconds
+        cadenceFloor = try c.decodeIfPresent(Int.self, forKey: .cadenceFloor) ?? d.cadenceFloor
+        autoPause = try c.decodeIfPresent(Bool.self, forKey: .autoPause) ?? d.autoPause
         age = try c.decodeIfPresent(Int.self, forKey: .age) ?? d.age
         restingHeartRate = try c.decodeIfPresent(Int.self, forKey: .restingHeartRate) ?? d.restingHeartRate
         smoothingSeconds = try c.decodeIfPresent(Double.self, forKey: .smoothingSeconds) ?? d.smoothingSeconds
@@ -151,9 +159,11 @@ struct RegulatorSettings: Codable, Equatable {
         Double(heartRateMax - holdBand)
     }
 
+    /// Нижняя плюс `spanPercent`, но не выше потолка; при этом никогда меньше нижней плюс 10 %.
     static func derivedCadenceMax(from cadenceMin: Int, spanPercent: Int) -> Int {
         let uncapped = Int((Double(cadenceMin) * (1 + Double(spanPercent) / 100)).rounded())
-        return max(cadenceMin + 1, min(uncapped, cadenceMaxCap))
+        let minimal = Int((Double(cadenceMin) * (1 + Double(cadenceMinSpanPercent) / 100)).rounded())
+        return max(cadenceMin + 1, minimal, min(uncapped, cadenceMaxCap))
     }
 
     /// Меняет нижнюю границу ритма и пересчитывает верхнюю по проценту.
@@ -183,6 +193,7 @@ struct RegulatorSettings: Codable, Equatable {
         copy.armSeconds = min(300, max(0, copy.armSeconds))
         copy.predictSeconds = min(120, max(0, copy.predictSeconds))
         copy.warmupSeconds = min(1800, max(0, copy.warmupSeconds))
+        copy.cadenceFloor = min(220, max(100, copy.cadenceFloor))
         copy.age = min(100, max(10, copy.age))
         copy.restingHeartRate = min(120, max(30, copy.restingHeartRate))
         copy.adjustInterval = max(1, copy.adjustInterval)

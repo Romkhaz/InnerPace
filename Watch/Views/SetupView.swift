@@ -101,7 +101,7 @@ struct QuickSettingsView: View {
 struct AdvancedSettingsView: View {
     @Environment(\.palette) private var palette
     enum Field: Hashable {
-        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep, voiceRepeat, arm, ascent, predict, age, resting, warmup
+        case cadenceMax, span, heartRateMin, approach, holdBand, slowdown, smoothing, interval, maxStep, voiceRepeat, arm, ascent, predict, age, resting, warmup, floor
     }
 
     @Environment(WatchRunModel.self) private var model
@@ -183,6 +183,13 @@ struct AdvancedSettingsView: View {
                              range: (settings.cadenceMin + 1)...240, field: .cadenceMax, focused: $focused)
             CrownNumberField(title: "Запас", value: $store.settings.cadenceSpanPercent,
                              range: 1...50, field: .span, focused: $focused, unit: "%")
+        }
+        HStack(spacing: 6) {
+            CrownNumberField(title: "Не ниже", value: $store.settings.cadenceFloor,
+                             range: 100...220, field: .floor, focused: $focused)
+            Toggle("Автопауза", isOn: $store.settings.autoPause)
+                .font(.caption2)
+                .foregroundStyle(palette.ink)
         }
     }
 
