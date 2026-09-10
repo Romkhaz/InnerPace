@@ -115,8 +115,11 @@ final class RunAnalysisTests: XCTestCase {
         let a = RunAnalyzer.assessEffort(rows: rows, settings: s)
         XCTAssertEqual(a.verdict, .cadenceTooHigh)
         XCTAssertEqual(a.suggestedCadenceMin, 160)
-        let floored = RunAnalyzer.assessEffort(rows: rows, settings: settings)
+        var withFloor = settings
+        withFloor.cadenceFloor = 170
+        let floored = RunAnalyzer.assessEffort(rows: rows, settings: withFloor)
         XCTAssertEqual(floored.suggestedCadenceMin, 170, "не ниже порога 170")
+        XCTAssertEqual(floored.cadenceMin, 175, "предложение помнит, с какими пределами бежали")
         XCTAssertNil(a.suggestedTargetHeartRate, "поднимать цель до 185 нельзя")
         a.apply(to: &s)
         XCTAssertEqual(s.cadenceMin, 160)

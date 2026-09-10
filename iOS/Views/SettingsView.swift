@@ -107,7 +107,7 @@ struct AdvancedSettingsView: View {
                 AdjustRow(title: "Ритм до", value: $store.settings.cadenceMax,
                           range: (settings.cadenceMin + 1)...240)
                 AdjustRow(title: "Ритм не ниже", value: $store.settings.cadenceFloor, range: 100...220)
-                Text("Ниже этого ритма рекомендации нижнюю границу не опускают: низкий каденс травмоопасен.")
+                Text("Ниже этого ритма рекомендации нижнюю границу не опускают. По умолчанию порога нет, поставьте свой: низкий каденс травмоопасен.")
                     .font(.footnote).foregroundStyle(.secondary)
                 AdjustRow(title: "Запас над нижней границей", value: $store.settings.cadenceSpanPercent,
                           range: 1...50, unit: "%")

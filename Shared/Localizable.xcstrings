@@ -242,22 +242,22 @@
         }
       }
     },
+    "Верхняя граница считается автоматически: %lld BPM, это плюс %lld %%, но не меньше плюс %lld %%.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The upper bound is derived automatically: %1$lld BPM, that is plus %2$lld %%, but never less than plus %3$lld %%."
+          }
+        }
+      }
+    },
     "Верхняя граница считается автоматически: %lld BPM, это плюс %lld %%.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The upper bound is derived automatically: %lld BPM, that is plus %lld %%."
-          }
-        }
-      }
-    },
-    "Верхняя граница считается автоматически: %lld BPM, это плюс %lld %, но не меньше плюс %lld %.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The upper bound is derived automatically: %1$lld BPM, that is plus %2$lld %%, but never less than plus %3$lld %%."
           }
         }
       }
@@ -342,7 +342,7 @@
         }
       }
     },
-    "Вы бежали на пределе: ритм %lld % времени стоял на нижней границе, пульс %lld % времени выше цели.": {
+    "Вы бежали на пределе: ритм %lld %% времени стоял на нижней границе, пульс %lld %% времени выше цели.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -432,7 +432,7 @@
         }
       }
     },
-    "Есть запас: пульс %lld % времени в полосе удержания и почти не поднимался выше цели. Можно бежать быстрее, оставаясь в зоне: поднимите минимальный ритм.": {
+    "Есть запас: пульс %lld %% времени в полосе удержания и почти не поднимался выше цели. Можно бежать быстрее, оставаясь в зоне: поднимите минимальный ритм.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -792,12 +792,12 @@
         }
       }
     },
-    "Ниже этого ритма рекомендации нижнюю границу не опускают: низкий каденс травмоопасен.": {
+    "Ниже этого ритма рекомендации нижнюю границу не опускают. По умолчанию порога нет, поставьте свой: низкий каденс травмоопасен.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Recommendations never lower the beat floor below this: a low cadence invites injury."
+            "value": "Recommendations never lower the beat floor below this. There is no threshold by default; set your own: a low cadence invites injury."
           }
         }
       }
@@ -1032,7 +1032,7 @@
         }
       }
     },
-    "Пределы подобраны нормально: пульс %lld % времени в полосе удержания, выше цели %lld %, ритм на нижней границе %lld %.": {
+    "Пределы подобраны нормально: пульс %lld %% времени в полосе удержания, выше цели %lld %%, ритм на нижней границе %lld %%.": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -2012,12 +2012,12 @@
         }
       }
     },
-    "пульс до %lld на %lld": {
+    "пульс до: %lld → %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "heart rate up to %1$lld to %2$lld"
+            "value": "heart rate up to: %1$lld → %2$lld"
           }
         }
       }
@@ -2042,12 +2042,12 @@
         }
       }
     },
-    "ритм до %lld на %lld": {
+    "ритм до: %lld → %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "beat up to %1$lld to %2$lld"
+            "value": "beat ceiling: %1$lld → %2$lld"
           }
         }
       }
@@ -2062,12 +2062,12 @@
         }
       }
     },
-    "ритм от %lld на %lld": {
+    "ритм от: %lld → %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "beat from %1$lld to %2$lld"
+            "value": "beat floor: %1$lld → %2$lld"
           }
         }
       }

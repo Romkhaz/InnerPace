@@ -19,6 +19,11 @@ struct EffortAssessment: Codable, Equatable {
     }
 
     var verdict: Verdict
+    /// Пределы, при которых бежали: предложение показывается относительно них,
+    /// а не текущих настроек устройства, где смотрят отчёт.
+    var cadenceMin: Int = 0
+    var cadenceMax: Int = 0
+    var targetHeartRate: Int = 0
     var regulatedSeconds: Int
     var shareAtFloor: Double
     var shareAtCeiling: Double
@@ -114,7 +119,8 @@ enum RunAnalyzer {
         let actual = actualSamples.count >= max(60, n * 6 / 10) ? median(actualSamples) : nil
 
         var assessment = EffortAssessment(
-            verdict: .insufficient, regulatedSeconds: n, shareAtFloor: atFloor, shareAtCeiling: atCeiling,
+            verdict: .insufficient, cadenceMin: settings.cadenceMin, cadenceMax: settings.cadenceMax,
+            targetHeartRate: settings.targetHeartRate, regulatedSeconds: n, shareAtFloor: atFloor, shareAtCeiling: atCeiling,
             shareAboveTarget: above, shareInBand: inBand, overLimitSeconds: overLimit,
             heartRateAtFloor: floorHR, heartRateAtCeiling: ceilingHR, cadenceLever: lever, actualCadence: actual
         )

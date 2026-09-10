@@ -59,9 +59,9 @@ enum RecommendationText {
 
     static func effortSuggestion(_ a: EffortAssessment, settings: RegulatorSettings) -> String? {
         var parts: [String] = []
-        if let c = a.suggestedCadenceMin { parts.append(String(localized: "ритм от \(settings.cadenceMin) на \(c)")) }
-        if let m = a.suggestedCadenceMax { parts.append(String(localized: "ритм до \(settings.cadenceMax) на \(m)")) }
-        if let t = a.suggestedTargetHeartRate { parts.append(String(localized: "пульс до \(settings.targetHeartRate) на \(t)")) }
+        if let c = a.suggestedCadenceMin { parts.append(String(localized: "ритм от: \(a.cadenceMin) → \(c)")) }
+        if let m = a.suggestedCadenceMax { parts.append(String(localized: "ритм до: \(a.cadenceMax) → \(m)")) }
+        if let t = a.suggestedTargetHeartRate { parts.append(String(localized: "пульс до: \(a.targetHeartRate) → \(t)")) }
         guard !parts.isEmpty else { return nil }
         return String(localized: "На следующую пробежку: ") + parts.joined(separator: ", ")
     }
