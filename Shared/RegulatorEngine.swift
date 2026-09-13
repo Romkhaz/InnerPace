@@ -301,7 +301,8 @@ struct RegulatorEngine {
                           action: .slowDown(1), event: .cooldownStep)
     }
 
-    /// Проба отклика: когда пульс минуту ровно держится в полосе удержания, ритм поднимается
+    /// Проба отклика: когда пульс 40 с держится в полосе удержания без резкого тренда
+    /// (по реальным записям тренд 20-секундного окна на ровном беге ходит до ±10), ритм поднимается
     /// на `probeStep` на `probeSeconds`, регулятор на это время замирает, потом ритм возвращается.
     /// Один раз за тренировку. Прерывается, если сырой пульс ушёл выше цели больше чем на 5.
     private mutating func updateProbe(at now: Date) -> Adjustment? {
@@ -320,7 +321,7 @@ struct RegulatorEngine {
         }
         guard probeEnabled, !probeDone, isRegulating, !isOverLimit, isHeartRateFresh(at: now),
               let smoothed = smoothedHeartRate, smoothed >= settings.holdHeartRate, smoothed <= target,
-              abs(trendPerMinute) < 4 else {
+              abs(trendPerMinute) < 10 else {
             inBandSince = nil
             return nil
         }
