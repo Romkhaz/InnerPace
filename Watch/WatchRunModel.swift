@@ -113,6 +113,8 @@ final class WatchRunModel {
             return
         }
         pedometer.start(from: now)
+        stepsWritten = 0
+        stepsWrittenAt = now
         startDate = now
         elapsed = 0
         phase = .running
@@ -121,6 +123,7 @@ final class WatchRunModel {
 
     func pause() {
         guard phase == .running else { return }
+        flushSteps(at: Date(), force: true)
         workout.pause()
         metronome.stop()
         if engine.markPaused(at: Date()) {
@@ -140,6 +143,8 @@ final class WatchRunModel {
         }
         applySettings()
         workout.resume()
+        stepsWritten = pedometer.steps
+        stepsWrittenAt = Date()
         engine.markResumed(at: Date())
         cadence = engine.cadence
         metronome.bpm = Double(cadence)
@@ -162,6 +167,12 @@ final class WatchRunModel {
         metronome.stop()
         ticker?.invalidate()
         ticker = nil
+        if phase == .finishing, stepsWrittenAt != nil {
+            let now = Date()
+            let delta = pedometer.steps - stepsWritten
+            if delta > 0, let since = stepsWrittenAt { await workout.addSteps(delta, from: since, to: now) }
+            stepsWrittenAt = nil
+        }
         pedometer.stop()
 
         let finalElapsed = workout.elapsed
@@ -210,6 +221,22 @@ final class WatchRunModel {
     /// После паузы дольше минуты регулятор начинает заново, как на старте.
     private var autoPausedAt: Date?
     static let restartAfterPause: TimeInterval = 60
+
+    /// Шаги, уже записанные в тренировку, и конец последнего отрезка.
+    private var stepsWritten = 0
+    private var stepsWrittenAt: Date?
+    static let stepSampleSeconds: TimeInterval = 30
+
+    /// Пишет в тренировку шаги, набежавшие с прошлого отрезка.
+    private func flushSteps(at now: Date, force: Bool = false) {
+        guard let since = stepsWrittenAt else { stepsWrittenAt = now; return }
+        guard force || now.timeIntervalSince(since) >= WatchRunModel.stepSampleSeconds else { return }
+        let delta = pedometer.steps - stepsWritten
+        stepsWritten = pedometer.steps
+        stepsWrittenAt = now
+        guard delta > 0 else { return }
+        Task { await workout.addSteps(delta, from: since, to: now) }
+    }
 
     private func updateAutoPause(at now: Date) {
         guard settings.autoPause else { return }
@@ -275,6 +302,7 @@ final class WatchRunModel {
                           heartRate: smoothedHeartRate ?? heartRate.map(Double.init))
         metronomeSum += cadence
         metronomeCount += 1
+        flushSteps(at: now)
         var decision: String?
         engine.noteActualCadence(actualCadence, at: now)
         if let adjustment = engine.tick(at: now) {

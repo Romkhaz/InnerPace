@@ -103,7 +103,9 @@ final class WatchWorkoutManager: NSObject {
         let session = try HKWorkoutSession(healthStore: store, configuration: configuration)
         let builder = session.associatedWorkoutBuilder()
         let dataSource = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: configuration)
-        for id in WatchWorkoutManager.quantityIdentifiers where id != .heartRate {
+        // Шаги пишем сами из шагомера: системный сбор оставлял дыры, и Fitness делил
+        // все шаги на всё время, получая средний каденс 122 при реальных 183.
+        for id in WatchWorkoutManager.quantityIdentifiers where id != .heartRate && id != .stepCount {
             dataSource.enableCollection(for: HKQuantityType(id), predicate: nil)
         }
         builder.dataSource = dataSource
@@ -135,6 +137,19 @@ final class WatchWorkoutManager: NSObject {
             routePointCount = 0
             isActive = true
             lastError = nil
+        }
+    }
+
+    /// Добавляет в тренировку шаги за интервал. Сумма таких отрезков даёт честный средний каденс.
+    func addSteps(_ count: Int, from start: Date, to end: Date) async {
+        guard let builder, count > 0, end > start else { return }
+        let sample = HKQuantitySample(type: HKQuantityType(.stepCount),
+                                      quantity: HKQuantity(unit: .count(), doubleValue: Double(count)),
+                                      start: start, end: end)
+        do {
+            try await builder.addSamples([sample])
+        } catch {
+            await MainActor.run { lastError = error.localizedDescription }
         }
     }
 
