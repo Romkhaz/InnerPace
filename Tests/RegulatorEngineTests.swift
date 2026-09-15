@@ -307,13 +307,13 @@ final class RegulatorEngineTests: XCTestCase {
             if let a = engine.tick(at: t), a.probe == .started {
                 started = second
                 startLine = a.logLine
-                XCTAssertEqual(a.action, .speedUp(8))
+                XCTAssertEqual(a.action, .speedUp(6))
             }
         }
         XCTAssertEqual(started ?? 0, 91, accuracy: 3, "20 с окна тренда плюс 40 с в полосе")
         XCTAssertTrue(engine.isProbing)
-        XCTAssertEqual(engine.cadence, before + 8)
-        XCTAssertEqual(startLine, "Проба отклика: ритм \(before + 8) на 90 с")
+        XCTAssertEqual(engine.cadence, before + 6)
+        XCTAssertEqual(startLine, "Проба отклика: ритм \(before + 6) на 90 с")
         // Во время пробы регулятор молчит, даже если пульс низкий.
         var finished: Int?
         for second in 131...230 where finished == nil {
@@ -427,6 +427,22 @@ final class RegulatorEngineTests: XCTestCase {
         XCTAssertFalse(engine.markPaused(at: t0.addingTimeInterval(201)), "без пробы пауза ничего не отменяет")
         // После возобновления проба может состояться снова.
         feed(&engine, from: 202, through: 300, bpm: { _ in 145 }, t0: t0)
+        XCTAssertTrue(engine.isProbing)
+    }
+
+    func testProbeNeedsHeadroomBelowTarget() {
+        var s = settings
+        s.holdBand = 8
+        var engine = RegulatorEngine(settings: s)
+        engine.probeEnabled = true
+        let t0 = Date(timeIntervalSince1970: 1_000)
+        engine.reset(at: t0)
+        feed(&engine, from: 0, through: 30, bpm: { _ in 136 }, t0: t0)
+        // Пульс 148 при цели 150: в полосе, но запаса нет, проба не стартует.
+        feed(&engine, from: 31, through: 200, bpm: { _ in 148 }, t0: t0)
+        XCTAssertFalse(engine.isProbing)
+        // Пульс 145: запас 5, проба идёт.
+        feed(&engine, from: 201, through: 300, bpm: { _ in 145 }, t0: t0)
         XCTAssertTrue(engine.isProbing)
     }
 

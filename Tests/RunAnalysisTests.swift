@@ -27,7 +27,7 @@ final class RunAnalysisTests: XCTestCase {
         var cadences: [Int] = []
         for s in 0..<2400 {
             let probe = (600..<690).contains(s)
-            let cad = probe ? 188 : 180
+            let cad = probe ? 186 : 180
             cadences.append(cad)
             let steady = 14 + 0.7 * Double(cadences[max(0, s - 40)])
             hr += (steady - hr) / 20

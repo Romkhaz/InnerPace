@@ -78,7 +78,10 @@ struct RegulatorSettings: Codable, Equatable {
     /// Заминка: ритм снижается на единицу раз в столько секунд до нижней границы минус `cooldownDrop`.
     static let cooldownStepSeconds: TimeInterval = 10
     static let cooldownDrop = 15
-    static let probeStep = 8
+    static let probeStep = 6
+    /// Проба стартует, только если до цели остаётся хотя бы столько ударов: шаг ритма
+    /// даёт примерно столько же ударов, и проба не должна выносить пульс за цель.
+    static let probeHeadroom = 4
     static let probeSeconds: TimeInterval = 90
     /// Сколько секунд пульс должен ровно держаться в полосе удержания перед пробой.
     static let probeReadySeconds: TimeInterval = 40

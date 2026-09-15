@@ -209,7 +209,7 @@ enum RunAnalyzer {
         var best: (error: Double, delay: Int, tau: Double, gain: Double)? = nil
         for delay in stride(from: 10, through: 90, by: 10) {
             for tau in [10.0, 20, 30, 45, 60, 90] {
-                for gain in stride(from: 0.2, through: 1.4, by: 0.15) {
+                for gain in stride(from: 0.2, through: 2.0, by: 0.15) {
                     var h = gain * (cad[0] - meanCad)
                     var response = [Double](repeating: 0, count: n)
                     for t in 0..<n {
